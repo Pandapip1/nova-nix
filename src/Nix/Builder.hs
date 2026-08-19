@@ -68,7 +68,7 @@ import Nix.Builder.Unpack (UnpackLimits, builtinUnpackBuilder, defaultUnpackLimi
 import Nix.DependencyGraph (DepGraph, TopoResult (..), buildDepGraph, topoSort)
 import qualified Nix.DependencyGraph
 import Nix.Derivation (Derivation (..), DerivationOutput (..), fromATerm)
-import Nix.Hash (IncrementalHash, bytesToHexText, hashFinalizeBytes, hashInitWithAlgo, hashUpdateChunk, hexToBytes, rawHashWithAlgo)
+import Nix.Hash (IncrementalHash, bytesToHexText, hashFinalizeBytes, hashInitWithAlgo, hashPlaceholder, hashUpdateChunk, hexToBytes, rawHashWithAlgo)
 import Nix.Store (PathLock, PathRegistration, Store (..), isValid, placeInStore, registerPaths, releasePathLock, scanReferences, scanTempReferences)
 import Nix.Store.Path (StoreDir (..), StorePath (spHash, spName), storePathToFilePath)
 import Nix.Substituter (CacheConfig, SubstResult (..), catchSync, trySubstitute)
@@ -236,9 +236,17 @@ buildDerivationInner config store drv = do
           _ -> case decodeBuilderStrings drv of
             Left errMsg -> pure (Left (1, errMsg))
             Right (builderText, argTexts, decodedEnv) ->
-              let builderPath = T.unpack builderText
-                  environ = buildEnvironment config decodedEnv builderPath buildDir outputDirs
-                  builderArgs = map T.unpack argTexts
+              let -- 'builtins.placeholder "out"' evaluates to a sentinel
+                  -- because a derivation cannot name its own output path
+                  -- without a cycle.  Substitute it here, at the same point
+                  -- and to the same value $out gets, so a builder that takes
+                  -- its destination as an ARGUMENT rather than reading the
+                  -- environment (stage0's hex0: 'hex0 input output') can be
+                  -- driven directly.
+                  rewrite = rewritePlaceholders outputDirs
+                  builderPath = T.unpack builderText
+                  environ = buildEnvironment config (Map.map rewrite decodedEnv) builderPath buildDir outputDirs
+                  builderArgs = map (T.unpack . rewrite) argTexts
                in -- 5. Run the builder
                   runBuilder builderPath builderArgs environ buildDir
         case exitResult of
@@ -347,6 +355,32 @@ cleanupBuildDir dir = do
 -- ---------------------------------------------------------------------------
 -- Environment
 -- ---------------------------------------------------------------------------
+
+-- | Replace each output's @builtins.placeholder@ sentinel with that
+-- output's build-time path.
+--
+-- @builtins.placeholder \"out\"@ is Nix's answer to a chicken-and-egg
+-- problem: an input-addressed derivation's output path is derived from a
+-- hash of the derivation itself, so the expression cannot mention the path
+-- it is about to produce.  Instead the evaluator emits a fixed sentinel
+-- (@hashPlaceholder@) and the builder swaps it for the real path.
+--
+-- The substituted value is the same one @$out@ carries - the per-output
+-- directory under the build directory, which 'registerOutputs' later moves
+-- into the store - so argument-passing and environment-passing builders
+-- agree on where to write.
+--
+-- Only arguments and environment values are rewritten; a placeholder in the
+-- builder path itself would name a program that does not exist yet.
+-- ('foldr', not 'Data.List.foldl'': the latter is in Prelude only from
+-- base 4.20, and importing it explicitly is redundant on newer GHCs.  Each
+-- output has a distinct placeholder, so the order of substitution is
+-- immaterial.)
+rewritePlaceholders :: [(Text, FilePath)] -> Text -> Text
+rewritePlaceholders outputDirs value =
+  foldr substitute value outputDirs
+  where
+    substitute (name, path) acc = T.replace (hashPlaceholder name) (T.pack path) acc
 
 -- | Build the process environment from the derivation env + standard vars.
 -- The builder path is used to derive PATH entries - the builder's own
