@@ -31,4 +31,26 @@ rec {
       f allArgs
     else
       throw "callPackage: ${toString fn} called without required argument(s): ${builtins.concatStringsSep ", " required}";
+
+  # makeScope newScope f
+  #
+  # A package set layered over an enclosing one.  `f` receives the scope being
+  # defined, so a package in it may name a sibling -- hex1 is built by hex0 --
+  # without that name reaching the enclosing set.  `newScope` is the enclosing
+  # set's own scope constructor, which is what makes the layering work: the
+  # inner set sees everything the outer one has, plus itself.
+  #
+  # Modelled on nixpkgs' lib.customisation.makeScope, minus overrideScope and
+  # the package-set metadata.
+  makeScope =
+    newScope: f:
+    let
+      self =
+        f self
+        // {
+          newScope = scope: newScope (self // scope);
+          callPackage = self.newScope { };
+        };
+    in
+    self;
 }
