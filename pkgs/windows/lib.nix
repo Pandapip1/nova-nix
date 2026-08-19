@@ -32,60 +32,25 @@ rec {
     else
       throw "callPackage: ${toString fn} called without required argument(s): ${builtins.concatStringsSep ", " required}";
 
-  # packagesFromDirectoryRecursive { callPackage, directory }
+  # makeScope newScope f
   #
-  # A directory holding a package.nix IS a package; any other directory is a
-  # namespace of them.  Adding a package is adding a directory -- nothing
-  # enumerates them.  Modelled on nixpkgs'
-  # lib.filesystem.packagesFromDirectoryRecursive.
-  packagesFromDirectoryRecursive =
-    {
-      callPackage,
-      directory,
-    }:
+  # A package set layered over an enclosing one.  `f` receives the scope being
+  # defined, so a package in it may name a sibling -- hex1 is built by hex0 --
+  # without that name reaching the enclosing set.  `newScope` is the enclosing
+  # set's own scope constructor, which is what makes the layering work: the
+  # inner set sees everything the outer one has, plus itself.
+  #
+  # Modelled on nixpkgs' lib.customisation.makeScope, minus overrideScope and
+  # the package-set metadata.
+  makeScope =
+    newScope: f:
     let
-      entries = builtins.readDir directory;
-
-      entryFor =
-        name:
-        let
-          path = directory + "/${name}";
-          type = entries.${name};
-        in
-        if type == "directory" then
-          [
-            {
-              inherit name;
-              value = packagesFromDirectoryRecursive {
-                inherit callPackage;
-                directory = path;
-              };
-            }
-          ]
-        else if type == "regular" && hasSuffix ".nix" name then
-          [
-            {
-              name = removeSuffix ".nix" name;
-              value = callPackage path { };
-            }
-          ]
-        else
-          [ ];
+      self =
+        f self
+        // {
+          newScope = scope: newScope (self // scope);
+          callPackage = self.newScope { };
+        };
     in
-    if builtins.pathExists (directory + "/package.nix") then
-      callPackage (directory + "/package.nix") { }
-    else
-      builtins.listToAttrs (builtins.concatMap entryFor (builtins.attrNames entries));
-
-  hasSuffix =
-    suffix: s:
-    let
-      ls = builtins.stringLength s;
-      lf = builtins.stringLength suffix;
-    in
-    ls >= lf && builtins.substring (ls - lf) lf s == suffix;
-
-  removeSuffix =
-    suffix: s:
-    if hasSuffix suffix s then builtins.substring 0 (builtins.stringLength s - builtins.stringLength suffix) s else s;
+    self;
 }
