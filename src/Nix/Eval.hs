@@ -3554,6 +3554,11 @@ fetchGit rawUrl name mRef mRev submodules shallow =
       _ <- git ["checkout", "--quiet", checkoutTarget]
       when submodules $
         void (git ["submodule", "update", "--init", "--recursive"])
+      -- Git records a file's executability in its index (100755 vs 100644),
+      -- and on Unix the checkout restores it as a mode bit.  Windows has no
+      -- such bit for git to restore, so the tree would hash differently
+      -- there; take the modes from the index instead, before .git goes away.
+      markExecutablesFromIndex ctx cloneDir
       rev <- git ["rev-parse", "HEAD"]
       revCountText <- git ["rev-list", "--count", "HEAD"]
       lastModifiedText <- git ["show", "-s", "--format=%ct", "HEAD"]
@@ -3580,6 +3585,29 @@ fetchGit rawUrl name mRef mRev submodules shallow =
                   ]
             )
         )
+
+-- | Mark every file git records as executable (mode 100755) as such in the
+-- checked-out tree.  Submodules are included: their contents are part of the
+-- fetch, and their modes live in their own indexes.
+--
+-- A checkout on Unix already has these bits, so this is a no-op there in
+-- effect; it is Windows, where the mode has nowhere to live on disk, that
+-- needs the index consulted.  Run before the @.git@ metadata is stripped,
+-- since that is what carries the index.
+markExecutablesFromIndex :: (MonadEval m) => Text -> Text -> m ()
+markExecutablesFromIndex ctx cloneDir = do
+  listing <- gitRun ctx cloneDir ["ls-files", "--recurse-submodules", "--stage", "-z"]
+  mapM_ markOne (T.split (== '\0') listing)
+  where
+    -- "<mode> <object> <stage>\t<path>", NUL-separated so a path containing
+    -- a newline (git allows it) does not split into two entries.
+    markOne row
+      | Just rest <- T.stripPrefix "100755 " row,
+        (_, tabbed) <- T.breakOn "\t" rest,
+        Just relPath <- T.stripPrefix "\t" tabbed,
+        not (T.null relPath) =
+          setExecutableFile (cloneDir <> "/" <> relPath)
+      | otherwise = pure ()
 
 -- | Run one git subcommand against a working directory under the same
 -- transport allowlist 'builtinFetchGit' validated the URL against - a

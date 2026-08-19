@@ -68,6 +68,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import Nix.Derivation (Derivation (..))
+import qualified Nix.Store.ExecBit as ExecBit
 import Nix.Store.Path (StoreDir, defaultStoreDir, parseStorePath, storePathToFilePath)
 import System.Directory
   ( copyFile,
@@ -76,13 +77,9 @@ import System.Directory
     doesFileExist,
     doesPathExist,
     getFileSize,
-    getPermissions,
     listDirectory,
-    setOwnerExecutable,
-    setPermissions,
   )
 import System.FilePath (isAbsolute, isPathSeparator, joinPath, splitDirectories, takeDirectory, (</>))
-import qualified System.Info
 
 -- ---------------------------------------------------------------------------
 -- Named constants
@@ -147,11 +144,6 @@ ownerExecuteMode = 0o100
 paxPerFileCode, paxGlobalCode :: Char
 paxPerFileCode = 'x'
 paxGlobalCode = 'g'
-
--- | True on a Windows host.  NTFS has no executable bit (PATHEXT decides),
--- so tar mode bits are only materialized on Unix.
-isWindowsHost :: Bool
-isWindowsHost = System.Info.os == "mingw32"
 
 -- ---------------------------------------------------------------------------
 -- Entry types after long-name decoding
@@ -304,7 +296,7 @@ extractContent outDir budget comps entry =
             Right () -> do
               createDirectoryIfMissing True (takeDirectory dest)
               BL.writeFile dest bytes
-              when (executableEntry entry && not isWindowsHost) (markExecutable dest)
+              when (executableEntry entry) (ExecBit.markExecutable dest)
               pure (Right remaining)
     -- A symlink target is relative to the link's own directory.
     Tar.SymbolicLink target ->
@@ -443,12 +435,6 @@ freshDestination dest = do
 -- | True when the entry's tar mode has the owner-execute bit.
 executableEntry :: DecodedEntry -> Bool
 executableEntry entry = TarEntry.entryPermissions entry .&. ownerExecuteMode /= 0
-
--- | Materialize the executable bit on Unix hosts.
-markExecutable :: FilePath -> IO ()
-markExecutable path = do
-  perms <- getPermissions path
-  setPermissions path (setOwnerExecutable True perms)
 
 -- | Recursively copy a directory tree (used to materialize directory
 -- symlinks, which cannot be store-portable links on Windows), charging

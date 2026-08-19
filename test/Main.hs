@@ -8177,6 +8177,7 @@ instance MonadEval StubStoreEval where
   removeScratchDir _ = pure ()
   copyPathToStore _ _ _ = throwEvalError "builtins.path: not available in the stub evaluator"
   narHashOfPath _ = throwEvalError "builtins.fetchGit: not available in the stub evaluator"
+  setExecutableFile _ = throwEvalError "builtins.fetchGit: not available in the stub evaluator"
   isExecutableFile _ = throwEvalError "builtins.path: not available in the stub evaluator"
   readSymlinkTarget _ = throwEvalError "builtins.path: not available in the stub evaluator"
   addSourceNar _ _ = throwEvalError "builtins.path: not available in the stub evaluator"

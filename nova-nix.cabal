@@ -80,6 +80,7 @@ library
     Nix.Store.DB
     Nix.Store.Lock
     Nix.Store.CaseSensitive
+    Nix.Store.ExecBit
     Nix.DependencyGraph
     Nix.Derivation
     Nix.Builder
