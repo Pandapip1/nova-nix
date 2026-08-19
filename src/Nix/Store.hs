@@ -51,6 +51,7 @@ module Nix.Store
     placeInStore,
     registrationFor,
     materializeEvalSources,
+    materializeEvalTextPaths,
     scanReferences,
     scanTempReferences,
     setReadOnly,
@@ -1032,6 +1033,38 @@ materializeEvalSources store sourceCache = mapM_ adopt (Map.toList sourceCache)
               setReadOnly dest
             reg <- registrationFor store sp Nothing []
             registerPath (stDB store) reg
+
+-- | Register the text paths @builtins.toFile@ wrote during evaluation.  The
+-- contents are already at their final store location - 'writeToStore' writes
+-- them, because the path is the hash of the bytes and there is nothing to
+-- defer - so this only makes them read-only and records them in the DB, which
+-- eval has no handle on.  Without registration a derivation naming a toFile
+-- output fails as referencing an unregistered path.
+--
+-- Registered in ONE batch so a text path referring to another resolves: the
+-- DB inserts every path row in a batch before its reference rows.
+materializeEvalTextPaths :: Store -> Map Text [StorePath] -> IO ()
+materializeEvalTextPaths store textPaths = do
+  regs <- catMaybes <$> mapM prepare (Map.toList textPaths)
+  unless (null regs) (registerPaths (stDB store) regs)
+  where
+    prepare (spText, refs) =
+      case parseStorePath defaultStoreDir spText of
+        Nothing -> pure Nothing
+        Just sp -> do
+          valid <- isValid store sp
+          if valid
+            then pure Nothing
+            else do
+              let dest = storePathToFilePath (stDir store) sp
+              onDisk <- doesPathExist dest
+              -- Absent only if something removed it between eval and here;
+              -- the bytes are gone and cannot be recovered from the path.
+              if not onDisk
+                then pure Nothing
+                else do
+                  setReadOnly dest
+                  Just <$> registrationFor store sp Nothing refs
 
 -- | Whether an on-disk tree reproduces the source store path it is about to
 -- be registered under: its recursive NAR digest and the path's own name must
