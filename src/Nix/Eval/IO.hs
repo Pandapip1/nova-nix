@@ -56,6 +56,7 @@ import Nix.Expr.Types (AttrKey (..), Binding (..), Expr (..), Formal (..), Forma
 import Nix.Hash (bytesToHexText, makeFixedOutputPath, makeTextPath, sha256Digest)
 import Nix.Parser (parseNix, readFileAutoEncoding)
 import Nix.Store (copyPathInto, unpackNarEntry)
+import qualified Nix.Store.ExecBit as ExecBit
 import qualified Nix.Store.Path as SP
 import qualified NovaCache.NAR as NAR
 import qualified System.Directory as Dir
@@ -287,7 +288,7 @@ instance MonadEval EvalIO where
         case SP.checkStorePathName name of
           Left err -> throwEvalError (copyContext <> ": " <> SP.storePathNameErrorText err)
           Right () -> pure ()
-        entry <- wrapIO (NAR.serialiseFromPath (SP.storeTextToFilePath rawPath))
+        entry <- wrapIO (ExecBit.serialiseFromPath (SP.storeTextToFilePath rawPath))
         let narDigest = sha256Digest (NAR.serialise entry)
         sp <- storePathOrThrow copyContext (makeFixedOutputPath name "sha256" "recursive" narDigest)
         let spText = canonicalStorePathText sp
@@ -388,7 +389,7 @@ instance MonadEval EvalIO where
     -- existence check in copyToStoreIfMissing is sound - changed source
     -- content can never serve stale bytes from an earlier copy (the old
     -- scheme hashed the path STRING, so it did exactly that).
-    entry <- wrapIO (NAR.serialiseFromPath (SP.storeTextToFilePath srcPath))
+    entry <- wrapIO (ExecBit.serialiseFromPath (SP.storeTextToFilePath srcPath))
     let narDigest = sha256Digest (NAR.serialise entry)
     case expectedSha256 of
       Just (subject, expected)
@@ -408,9 +409,11 @@ instance MonadEval EvalIO where
     pure destPath
 
   narHashOfPath path =
-    wrapIO (sha256Digest . NAR.serialise <$> NAR.serialiseFromPath (SP.storeTextToFilePath path))
+    wrapIO (sha256Digest . NAR.serialise <$> ExecBit.serialiseFromPath (SP.storeTextToFilePath path))
 
-  isExecutableFile path = wrapIO (Dir.executable <$> Dir.getPermissions (SP.storeTextToFilePath path))
+  isExecutableFile path = wrapIO (ExecBit.isExecutable (SP.storeTextToFilePath path))
+
+  setExecutableFile path = wrapIO (ExecBit.markExecutable (SP.storeTextToFilePath path))
 
   readSymlinkTarget path = wrapIO (T.pack <$> Dir.getSymbolicLinkTarget (SP.storeTextToFilePath path))
 

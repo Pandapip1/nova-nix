@@ -101,6 +101,7 @@ import qualified Network.HTTP.Types.Status as HTTP
 import Nix.Compression (NarCompression (..), parseNarCompression)
 import Nix.Store (PathLock, Store (..), abortNarUnpack, acquirePathLock, finishNarUnpack, isValid, newNarUnpackSink, releasePathLock, setReadOnly, sinkNarEvent, unpackNarEntry)
 import Nix.Store.DB (PathRegistration (..))
+import qualified Nix.Store.ExecBit as ExecBit
 import Nix.Store.Path (StoreDir, StorePath (spHash), parseStorePathBaseName, storePathHashLen, storePathToFilePath)
 import qualified NovaCache.Bzip2 as Bzip2
 import qualified NovaCache.Hash as Hash
@@ -369,7 +370,7 @@ unpackAndVerify store sp narInfo rawNar =
               -- surface here, before the row exists.  A mismatching tree
               -- is removed - left in place it would be adopted by
               -- existence checks at this path.
-              onDisk <- NAR.serialiseFromPath destPath
+              onDisk <- ExecBit.serialiseFromPath destPath
               case verifyNarHash narInfo (NAR.serialise onDisk) of
                 Left _ -> do
                   Dir.removePathForcibly destPath

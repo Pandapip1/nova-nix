@@ -70,6 +70,7 @@ import qualified Nix.DependencyGraph
 import Nix.Derivation (Derivation (..), DerivationOutput (..), fromATerm)
 import Nix.Hash (IncrementalHash, bytesToHexText, hashFinalizeBytes, hashInitWithAlgo, hashPlaceholder, hashUpdateChunk, hexToBytes, rawHashWithAlgo)
 import Nix.Store (PathLock, PathRegistration, Store (..), isValid, placeInStore, registerPaths, releasePathLock, scanReferences, scanTempReferences)
+import qualified Nix.Store.ExecBit as ExecBit
 import Nix.Store.Path (StoreDir (..), StorePath (spHash, spName), storePathToFilePath)
 import Nix.Substituter (CacheConfig, SubstResult (..), catchSync, trySubstitute)
 import qualified NovaCache.NAR as NAR
@@ -765,7 +766,7 @@ verifyFixedOutput out placedPath
   | recursive = do
       -- Re-serialises the placed tree: the registration's NAR hash is
       -- always sha256, while the declared algorithm may be any.
-      entry <- NAR.serialiseFromPath placedPath
+      entry <- ExecBit.serialiseFromPath placedPath
       pure (finish (rawHashWithAlgo algo (NAR.serialise entry)))
   | otherwise = do
       isDir <- doesDirectoryExist placedPath
