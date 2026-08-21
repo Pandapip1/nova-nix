@@ -85,6 +85,13 @@ let
       tinycc = self.tinycc.boot;
       mesInclude = "${self.mes.src}/include";
     };
+
+    # The first package built by running its own ./configure.
+    gnutar = callPackage ./bootstrap/gnutar {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
   };
 in
 self
