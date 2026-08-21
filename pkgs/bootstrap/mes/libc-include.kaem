@@ -7,13 +7,15 @@
 # undefined, so Mes stands on its own C library rather than the host's.
 #
 # arch/, which is how the C library reaches the headers for the kernel and
-# architecture it is being built for: lib/linux/*.c says <arch/syscall.h>, and
-# configure copies include/${kernel}/${cpu}/*.h to include/arch/ to answer it.
-# There is no ./configure here, so the copy is made directly.
+# architecture it is being built for: include/sys/stat.h says
+# <arch/kernel-stat.h>, and configure copies include/${kernel}/${cpu}/*.h to
+# include/arch/ to answer it.  There is no ./configure here, so the copy is
+# made directly, from whichever kernel directory this build is for -- which is
+# what archInclude names.
 
 ${bin_mkdir} -p ${out}/mes
 ${bin_mkdir} -p ${out}/arch
 ${bin_cp} ${configH} ${out}/mes/config.h
-${bin_cp} ${src}/include/linux/${arch}/kernel-stat.h ${out}/arch/kernel-stat.h
-${bin_cp} ${src}/include/linux/${arch}/signal.h ${out}/arch/signal.h
-${bin_cp} ${src}/include/linux/${arch}/syscall.h ${out}/arch/syscall.h
+${bin_cp} ${archInclude}/kernel-stat.h ${out}/arch/kernel-stat.h
+${bin_cp} ${archInclude}/signal.h ${out}/arch/signal.h
+${bin_cp} ${archInclude}/syscall.h ${out}/arch/syscall.h
