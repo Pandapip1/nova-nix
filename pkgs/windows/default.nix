@@ -8,8 +8,9 @@
 #                                         its own scope
 #   bootstrap/                            the sha256-pinned MSYS2 seeds
 #   stdenv/                               mkDerivation, setup.sh, cc-wrapper.sh
-#   build-support/<name>/                 ways of building things
-#   lib.nix                               callPackage and friends
+#
+# What is not Windows-specific lives one level up and is shared with the other
+# package sets: ../lib.nix and ../build-support/.
 #
 # The set is a fixpoint: callPackage reads each package.nix's formal parameters
 # and supplies them from the set being defined, so a package names its
@@ -17,7 +18,7 @@
 # with a relative import.  Nothing enumerates by-name packages; adding one is
 # adding a directory.
 let
-  lib = import ./lib.nix;
+  lib = import ../lib.nix;
 
   # The scope constructor, as nixpkgs spells it: newScope layers extra
   # arguments over the set, and callPackage is that with nothing extra.  A
@@ -60,7 +61,7 @@ let
 
     # build-support entries are named here rather than discovered, as nixpkgs
     # does in all-packages.nix: they are ways of building things, not packages.
-    derivationWithMeta = callPackage ./build-support/derivation-with-meta/package.nix { };
+    derivationWithMeta = callPackage ../build-support/derivation-with-meta/package.nix { };
 
     fetchurl = import <nix/fetchurl.nix>;
 
