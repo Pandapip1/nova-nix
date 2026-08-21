@@ -50,6 +50,13 @@ let
       tinycc = self.tinycc.boot;
       mesInclude = "${self.mes.src}/include";
     };
+
+    # What everything above is built with: they ship Makefiles.
+    gnumake = callPackage ./bootstrap/gnumake {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
   };
 in
 self
