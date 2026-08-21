@@ -153,6 +153,15 @@ let
       gnutar = self.gnutar-musl;
     };
 
+    # The last link in the chain: a real C compiler.
+    gcc = callPackage ./bootstrap/gcc {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
+    };
+
     # find and xargs, which gcc's build runs.
     findutils = callPackage ./bootstrap/findutils {
       inherit (self.stage0) system platforms;
