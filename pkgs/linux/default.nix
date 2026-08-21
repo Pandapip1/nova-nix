@@ -135,6 +135,13 @@ let
       bootGawk = self.gawk-mes;
     };
 
+    # find and xargs, which gcc's build runs.
+    findutils = callPackage ./bootstrap/findutils {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+    };
+
     # The assembler and linker gcc needs.
     binutils = callPackage ./bootstrap/binutils {
       inherit (self.stage0) system platforms;
