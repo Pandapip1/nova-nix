@@ -27,6 +27,7 @@
   mes-m2,
   nyacc,
   stage0,
+  ldexplFile,
 }:
 let
   arch = "x86";
@@ -90,8 +91,12 @@ let
       name = "mes-${name}-${version}.c";
       inherit version system meta;
       builder = catm;
-      args = [ out ] ++ map (f: "${src}/${f}") files;
+      args = [ out ] ++ files;
     };
+
+  # A source list is written relative to the Mes tree; a file from anywhere
+  # else arrives already absolute.
+  inTree = map (f: "${src}/${f}");
 
   # MesCC, as a derivation: the interpreter is the builder, the driver and the
   # include path are arguments, and M1 and hex2 are named in the environment
@@ -158,8 +163,11 @@ let
   # once it exists, recompiles its own C library from these -- from the
   # gcc-variant sources, which are the fuller set MesCC could not manage.
   gnuSource = {
-    libc = bundle "libc+gnu" sources.libc_gnu_SOURCES;
-    libtcc1 = bundle "libtcc1" sources.libtcc1_SOURCES;
+    # ldexpl is appended: 0.27.1's list does not have it, and mainline TinyCC
+    # needs it to parse a floating-point constant.  See bootstrap-sources.nix
+    # for where the file comes from.
+    libc = bundle "libc+gnu" (inTree sources.libc_gnu_SOURCES ++ [ ldexplFile ]);
+    libtcc1 = bundle "libtcc1" (inTree sources.libtcc1_SOURCES);
     crt1 = "${src}/lib/linux/${arch}-mes-gcc/crt1.c";
     crti = "${src}/lib/linux/${arch}-mes-gcc/crti.c";
     crtn = "${src}/lib/linux/${arch}-mes-gcc/crtn.c";
@@ -169,10 +177,10 @@ let
   crt1-s = mescc-compile "crt1" ".s" "-S" "${src}/lib/linux/${arch}-mes-mescc/crt1.c";
   crt1 = mescc-compile "crt1" ".o" "-c" crt1-s;
 
-  libc-mini = compiled "libc-mini" (bundle "libc-mini" sources.libc_mini_SOURCES);
-  libmescc = compiled "libmescc" (bundle "libmescc" sources.libmescc_SOURCES);
-  libc = compiled "libc" (bundle "libc" sources.libc_SOURCES);
-  libc-tcc = compiled "libc+tcc" (bundle "libc+tcc" sources.libc_tcc_SOURCES);
+  libc-mini = compiled "libc-mini" (bundle "libc-mini" (inTree sources.libc_mini_SOURCES));
+  libmescc = compiled "libmescc" (bundle "libmescc" (inTree sources.libmescc_SOURCES));
+  libc = compiled "libc" (bundle "libc" (inTree sources.libc_SOURCES));
+  libc-tcc = compiled "libc+tcc" (bundle "libc+tcc" (inTree sources.libc_tcc_SOURCES));
 in
 derivationWithMeta {
   pname = "mes-libc";

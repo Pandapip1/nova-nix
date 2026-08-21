@@ -6,14 +6,28 @@
 # compiler is tcc rather than MesCC, which is the point -- these are the
 # gcc-variant sources, the fuller set MesCC could not manage.
 #
+# `tcc -ar` is given no flag cluster.  Mainline tcc scans every argument for
+# the operations it refuses -- habdiopN -- and "-ar" itself contains an 'a',
+# so `-ar cr lib.a obj` is rejected as a conflicting operation and prints its
+# usage.  With no cluster it creates the archive, which is what `cr` asked
+# for; the fork's tcc accepts that form too, so both rounds use it.
+#
 # Every flag is written out rather than expanded from one variable: kaem
 # substitutes a variable as a SINGLE argument, spaces and all, so a variable
 # holding "-I /a -I /b" arrives as one unreadable option rather than four.
 # Anything that has to be several arguments is several variables.
 #
-# The include paths are the ones MesCC was given: Mes's own headers, and the
-# directory holding what ./configure would have generated -- mes/config.h and
-# the arch/ headers that lib/linux/*.c reaches for as <arch/syscall.h>.
+# The include paths are the ones MesCC was given, and ONLY those: Mes's
+# headers, and the directory holding what ./configure would have generated --
+# mes/config.h and the arch/ headers that lib/linux/*.c reaches for as
+# <arch/syscall.h>.
+#
+# tcc's own headers are deliberately not on this path.  Putting them first
+# breaks the fork's rounds, whose stddef.h has no max_align_t where Mes's
+# does; mixing the two orders differently breaks on size_t, which Mes makes
+# unsigned long and tcc unsigned int.  The two header sets do not compose,
+# so the library is compiled against one of them: Mes's, which is the library
+# being compiled.
 
 ${bin_mkdir} -p ${out}/lib
 cd ${TMPDIR}
@@ -23,10 +37,10 @@ ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/c
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/crtn.o ${crtn_c}
 
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} -c -o libtcc1.o ${libtcc1_c}
-${tcc} -ar cr ${out}/lib/libtcc1.a libtcc1.o
+${tcc} -ar ${out}/lib/libtcc1.a libtcc1.o
 
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o libc.o ${libc_c}
-${tcc} -ar cr ${out}/lib/libc.a libc.o
+${tcc} -ar ${out}/lib/libc.a libc.o
 
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o libgetopt.o ${getopt_c}
-${tcc} -ar cr ${out}/lib/libgetopt.a libgetopt.o
+${tcc} -ar ${out}/lib/libgetopt.a libgetopt.o

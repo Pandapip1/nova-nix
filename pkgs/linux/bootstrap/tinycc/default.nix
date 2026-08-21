@@ -14,11 +14,15 @@ lib.makeScope newScope (
 
     inherit (callPackage ./bootstrap-sources.nix { }) version src;
 
+    mainline = callPackage ./mainline-sources.nix { };
+
     boot = callPackage ./boot.nix {
       inherit stage0 nyacc;
       inherit (mes) mes-m2;
       mes-libc = mes.libc;
       mesSrc = mes.src;
+      mainlineSrc = mainline.src;
+      mainlineVersion = mainline.version;
     };
   }
 )
