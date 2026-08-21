@@ -1,0 +1,59 @@
+# GNU patch 2.5.9, compiled by tcc.
+#
+# The flags are live-bootstrap's, by way of nixpkgs' minimal bootstrap: patch
+# ships a ./configure that nothing here can run, so what configure would have
+# discovered is asserted instead -- an empty config.h, and one -D per feature
+# the Mes C library does have.  2.5.9 rather than anything newer because 2.6
+# and later use gnulib pieces that library does not implement.
+#
+# error.c is compiled although patch's own Makefile.in does not list it: the
+# Mes C library has no error(), so patch's bundled copy stands in.
+#
+# The compile is one file at a time -- this is a real C compiler now, with
+# separate compilation, unlike everything below it -- and the objects land in
+# the build directory, which is why the sources are named absolutely and the
+# working directory is $TMPDIR rather than the read-only source.
+#
+# -static is not optional: CONFIG_TCC_ELFINTERP is the empty string in this
+# tcc, so a dynamically linked output names no interpreter and the kernel
+# refuses to run it.
+#
+# Mes's headers come ahead of tcc's, which is what ${mesinc} is for.  Both
+# define size_t and they disagree -- Mes makes it unsigned long, tcc unsigned
+# int -- so whichever is found second is a redefinition and the compile stops.
+# Mes's win because this is being compiled against Mes's C library.
+
+cd ${TMPDIR}
+
+# What ./configure would have written.  Empty: every answer is a -D below.
+${bin_catm} config.h
+
+alias CC="${tcc} -static -B ${libs}/lib -I. -I${srcdir} -I${mesinc} -DHAVE_DECL_GETENV -DHAVE_DECL_MALLOC -DHAVE_DIRENT_H -DHAVE_LIMITS_H -DHAVE_GETEUID -DHAVE_MKTEMP -DPACKAGE_BUGREPORT= -Ded_PROGRAM=\"/nullop\" -Dmbstate_t=int -DRETSIGTYPE=int -DHAVE_MKDIR -DHAVE_RMDIR -DHAVE_FCNTL_H -DPACKAGE_NAME=\"patch\" -DPACKAGE_VERSION=\"${version}\" -DHAVE_MALLOC -DHAVE_REALLOC -DSTDC_HEADERS -DHAVE_STRING_H -DHAVE_STDLIB_H -DHAVE_VPRINTF"
+
+CC -c ${srcdir}/addext.c
+CC -c ${srcdir}/argmatch.c
+CC -c ${srcdir}/backupfile.c
+CC -c ${srcdir}/basename.c
+CC -c ${srcdir}/dirname.c
+CC -c ${srcdir}/getopt.c
+CC -c ${srcdir}/getopt1.c
+CC -c ${srcdir}/inp.c
+CC -c ${srcdir}/maketime.c
+CC -c ${srcdir}/partime.c
+CC -c ${srcdir}/patch.c
+CC -c ${srcdir}/pch.c
+CC -c ${srcdir}/quote.c
+CC -c ${srcdir}/quotearg.c
+CC -c ${srcdir}/quotesys.c
+CC -c ${srcdir}/util.c
+CC -c ${srcdir}/version.c
+CC -c ${srcdir}/xmalloc.c
+CC -c ${srcdir}/error.c
+
+# Link, then check it runs before installing it.
+CC -o patch addext.o argmatch.o backupfile.o basename.o dirname.o getopt.o getopt1.o inp.o maketime.o partime.o patch.o pch.o quote.o quotearg.o quotesys.o util.o version.o xmalloc.o error.o
+./patch --version
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} ./patch ${out}/bin/patch
+${bin_chmod} 555 ${out}/bin/patch
