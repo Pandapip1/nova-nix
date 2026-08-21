@@ -1,0 +1,32 @@
+# Recompile the C library with the tcc that has just been built.
+#
+# Each round of tcc links against the library the round below it compiled, so
+# every round rebuilds it: the same sources, compiled by a compiler that
+# understands more of C than the one before.  For the first round that
+# compiler is tcc rather than MesCC, which is the point -- these are the
+# gcc-variant sources, the fuller set MesCC could not manage.
+#
+# Every flag is written out rather than expanded from one variable: kaem
+# substitutes a variable as a SINGLE argument, spaces and all, so a variable
+# holding "-I /a -I /b" arrives as one unreadable option rather than four.
+# Anything that has to be several arguments is several variables.
+#
+# The include paths are the ones MesCC was given: Mes's own headers, and the
+# directory holding what ./configure would have generated -- mes/config.h and
+# the arch/ headers that lib/linux/*.c reaches for as <arch/syscall.h>.
+
+${bin_mkdir} -p ${out}/lib
+cd ${TMPDIR}
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/crt1.o ${crt1_c}
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/crti.o ${crti_c}
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/crtn.o ${crtn_c}
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} -c -o libtcc1.o ${libtcc1_c}
+${tcc} -ar cr ${out}/lib/libtcc1.a libtcc1.o
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o libc.o ${libc_c}
+${tcc} -ar cr ${out}/lib/libc.a libc.o
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o libgetopt.o ${getopt_c}
+${tcc} -ar cr ${out}/lib/libgetopt.a libgetopt.o

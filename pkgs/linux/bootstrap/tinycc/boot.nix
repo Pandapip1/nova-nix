@@ -137,21 +137,165 @@ let
       "${src}/tcc.c"
     ];
   };
+  # Step two: link it against the Mes C library.  -L names the directory whose
+  # <arch>-mes subdirectory holds crt1.o and libc+tcc.s; the second -L is the
+  # Mes source tree, where the ELF header and footer MesCC links with live.
+  boot-mes = mescc {
+    pname = "tinycc-boot-mes";
+    args = [
+      "-L"
+      "${mes-libc}/lib"
+      "-L"
+      "${mesSrc}/lib"
+      "-l"
+      "c+tcc"
+      "-o"
+      out
+      assembly
+    ];
+  };
+
+  inherit (stage0.mescc-tools-extra) mkdir catm;
+
+  # The C library, recompiled by the tcc of this round.  Every round links
+  # against the library the round below it made, so every round makes one.
+  recompileLibc =
+    { name, tcc, libtccOptions }:
+    derivationWithMeta {
+      pname = "${name}-libs";
+      inherit version system meta;
+
+      bin_mkdir = mkdir;
+      inherit tcc;
+
+      # One variable per argument: kaem substitutes a variable as a single
+      # argument, so anything that has to be several cannot be one string.
+      incConfig = mes-libc.configInclude;
+      incMes = "${mesSrc}/include";
+      incMesArch = "${mesSrc}/include/linux/${arch}";
+      inherit tccTarget;
+
+      # The rounds differ only in how much of C the library may use, and
+      # never in more than two flags.
+      libtccOpt1 = if libtccOptions == [ ] then "-D BOOTSTRAP=1" else builtins.elemAt libtccOptions 0;
+      libtccOpt2 =
+        if builtins.length libtccOptions > 1 then builtins.elemAt libtccOptions 1 else "-D BOOTSTRAP=1";
+
+      crt1_c = mes-libc.gnuSource.crt1;
+      crti_c = mes-libc.gnuSource.crti;
+      crtn_c = mes-libc.gnuSource.crtn;
+      libtcc1_c = mes-libc.gnuSource.libtcc1;
+      libc_c = mes-libc.gnuSource.libc;
+      getopt_c = mes-libc.gnuSource.getopt;
+
+      builder = stage0.kaem;
+      args = [
+        "--verbose"
+        "--strict"
+        "--file"
+        ./libs.kaem
+      ];
+    };
+
+  # One round: tcc compiled by the round below, then that round's library.
+  #
+  # `prev` is named by its binary and its library rather than by a package,
+  # because the first round's tcc is a bare file -- MesCC links an executable,
+  # not a directory -- while every round after it is $out/bin/tcc.
+  round =
+    { name, prev, buildOptions, libtccOptions }:
+    rec {
+      compiler = derivationWithMeta {
+        pname = name;
+        inherit version system meta;
+
+        bin_mkdir = mkdir;
+        bin_catm = catm;
+        prevTcc = prev.tcc;
+        prevLibs = prev.libs;
+        inherit src tccTarget;
+
+        # Where tcc looks for headers at runtime: its own, then Mes's, then
+        # the generated ones -- mes/config.h and arch/.
+        # Plain quotes, not kaem's \" escape: a variable's VALUE is
+        # substituted verbatim, escapes and all, so the quotes this C string
+        # literal needs have to already be quotes.  The escape is only for
+        # quotes written in the script text itself.
+        sysIncludePaths = "\"${src}/include:${mesSrc}/include:${mes-libc.configInclude}\"";
+
+        # One variable per option; see the script.
+        opt1 = builtins.elemAt buildOptions 0;
+        opt2 = if builtins.length buildOptions > 1 then builtins.elemAt buildOptions 1 else "-D BOOTSTRAP=1";
+        opt3 = if builtins.length buildOptions > 2 then builtins.elemAt buildOptions 2 else "-D BOOTSTRAP=1";
+
+        builder = stage0.kaem;
+        args = [
+          "--verbose"
+          "--strict"
+          "--file"
+          ./boot-round.kaem
+        ];
+      };
+
+      # What the next round builds with.
+      tcc = "${compiler}/bin/tcc";
+
+      libs = recompileLibc {
+        inherit name libtccOptions tcc;
+      };
+    };
+
+  # The round below the first: the MesCC-compiled tcc, which is a bare binary,
+  # plus the library that tcc can compile.
+  bootMes = {
+    tcc = boot-mes;
+    compiler = boot-mes;
+    libs = recompileLibc {
+      name = "tinycc-boot-mes";
+      tcc = boot-mes;
+      libtccOptions = [ ];
+    };
+  };
+  # Upstream's rounds, from the fork's boot.sh: each one hands tcc more of
+  # the language than the last.
+  boot0 = round {
+    name = "tinycc-boot0";
+    prev = bootMes;
+    buildOptions = [ "-D HAVE_LONG_LONG=1" "-D HAVE_SETJMP=1" ];
+    libtccOptions = [ "-D HAVE_LONG_LONG=1" ];
+  };
+
+  boot1 = round {
+    name = "tinycc-boot1";
+    prev = boot0;
+    buildOptions = [ "-D HAVE_BITFIELD=1" "-D HAVE_LONG_LONG=1" "-D HAVE_SETJMP=1" ];
+    libtccOptions = [ "-D HAVE_LONG_LONG=1" ];
+  };
+
+  boot2 = round {
+    name = "tinycc-boot2";
+    prev = boot1;
+    buildOptions = [ "-D HAVE_BITFIELD=1" "-D HAVE_FLOAT_STUB=1" "-D HAVE_LONG_LONG=1" ];
+    libtccOptions = [ "-D HAVE_FLOAT_STUB=1" "-D HAVE_LONG_LONG=1" ];
+  };
+
+  boot3 = round {
+    name = "tinycc-boot3";
+    prev = boot2;
+    buildOptions = [ "-D HAVE_BITFIELD=1" "-D HAVE_FLOAT=1" "-D HAVE_LONG_LONG=1" ];
+    libtccOptions = [ "-D HAVE_FLOAT=1" "-D HAVE_LONG_LONG=1" ];
+  };
 in
-# Step two: link it against the Mes C library.  -L names the directory whose
-# <arch>-mes subdirectory holds crt1.o and libc+tcc.a; the second -L is the
-# Mes source tree, where the ELF header and footer MesCC links with live.
-mescc {
-  pname = "tinycc-boot-mes";
-  args = [
-    "-L"
-    "${mes-libc}/lib"
-    "-L"
-    "${mesSrc}/lib"
-    "-l"
-    "c+tcc"
-    "-o"
-    out
-    assembly
-  ];
+{
+  inherit
+    boot-mes
+    bootMes
+    boot0
+    boot1
+    boot2
+    boot3
+    ;
+
+  # What anything above this asks for: the last round, and its library.
+  inherit (boot3) compiler libs;
 }

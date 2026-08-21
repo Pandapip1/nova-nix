@@ -154,6 +154,18 @@ let
     a = mescc-compile name ".a" "-c" s;
   };
 
+  # The same library in source form, for a compiler that is not MesCC.  tcc,
+  # once it exists, recompiles its own C library from these -- from the
+  # gcc-variant sources, which are the fuller set MesCC could not manage.
+  gnuSource = {
+    libc = bundle "libc+gnu" sources.libc_gnu_SOURCES;
+    libtcc1 = bundle "libtcc1" sources.libtcc1_SOURCES;
+    crt1 = "${src}/lib/linux/${arch}-mes-gcc/crt1.c";
+    crti = "${src}/lib/linux/${arch}-mes-gcc/crti.c";
+    crtn = "${src}/lib/linux/${arch}-mes-gcc/crtn.c";
+    getopt = "${src}/lib/posix/getopt.c";
+  };
+
   crt1-s = mescc-compile "crt1" ".s" "-S" "${src}/lib/linux/${arch}-mes-mescc/crt1.c";
   crt1 = mescc-compile "crt1" ".o" "-c" crt1-s;
 
@@ -202,6 +214,8 @@ derivationWithMeta {
       "-I"
       "${src}/include/linux/${arch}"
     ];
+
+    inherit gnuSource;
 
     inherit
       crt1

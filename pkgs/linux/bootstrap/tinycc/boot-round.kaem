@@ -1,0 +1,27 @@
+# One round of tcc compiling itself.
+#
+# tcc is built by the round below it and links against that round's library
+# (-B), and each round is allowed more of C than the last: long long, then
+# bitfields, then floats.  The first round was compiled by MesCC and knows
+# almost none of it; by the last, tcc compiles itself with what a normal
+# build would use.  The flags are upstream's, from the fork's own boot.sh.
+#
+# Every option is its own variable because kaem substitutes a variable as a
+# SINGLE argument: a variable holding "-D A=1 -D B=1" arrives as one option
+# that tcc cannot read.  The rounds never differ in more than three, so the
+# three are named, and a round that does not use one repeats a harmless flag
+# rather than leaving a hole kaem would pass as an empty argument.
+#
+# config.h is empty -- catm with no inputs makes it so -- because everything
+# it would say is passed as -D here.
+#
+# The \" are kaem's escape for a literal quote, and they are not decoration:
+# these defines are STRING literals in C, and kaem strips an ordinary quote
+# while grouping.  Without the escape tcc is handed TCC_LIBGCC=libc.a, which
+# expands to a bare identifier and fails to compile as `'libc' undeclared`.
+
+cd ${TMPDIR}
+${bin_catm} config.h
+${bin_mkdir} -p ${out}/bin
+
+${prevTcc} -B ${prevLibs}/lib -g -v -o ${out}/bin/tcc -D BOOTSTRAP=1 ${opt1} ${opt2} ${opt3} -I . -I ${src} -D TCC_TARGET_${tccTarget}=1 -D CONFIG_TCCDIR=\"\" -D CONFIG_SYSROOT=\"\" -D CONFIG_TCC_CRTPREFIX=\"{B}\" -D CONFIG_TCC_ELFINTERP=\"\" -D CONFIG_TCC_LIBPATHS=\"{B}\" -D CONFIG_TCC_SYSINCLUDEPATHS=${sysIncludePaths} -D TCC_LIBGCC=\"libc.a\" -D TCC_LIBTCC1=\"libtcc1.a\" -D CONFIG_TCCBOOT=1 -D CONFIG_TCC_STATIC=1 -D CONFIG_USE_LIBGCC=1 -D TCC_MES_LIBC=1 -D TCC_VERSION=\"0.9.28-${version}\" -D ONE_SOURCE=1 ${src}/tcc.c
