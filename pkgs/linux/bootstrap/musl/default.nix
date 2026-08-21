@@ -22,17 +22,16 @@
 }:
 let
   pname = "musl";
-  version = "1.2.6";
+
+  sources = import ./sources.nix { };
+  inherit (sources) version;
 
   fetchurl = import <nix/fetchurl.nix>;
 in
 derivationWithMeta {
   inherit pname version system;
 
-  tarball = fetchurl {
-    url = "https://musl.libc.org/releases/musl-${version}.tar.gz";
-    sha256 = "d585fd3b613c66151fc3249e8ed44f77020cb5e6c1e635a616d3f9f82460512a";
-  };
+  tarball = sources.src;
 
   # tcc cannot assemble the backward jecxz that sigsetjmp uses.
   sigsetjmpPatch = fetchurl {
