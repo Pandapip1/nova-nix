@@ -153,6 +153,17 @@ let
       gnutar = self.gnutar-musl;
     };
 
+    # musl again, this time built by gcc: everything tcc could not assemble,
+    # plus a shared library, a dynamic loader and the musl-gcc wrapper that
+    # the compilers above link against.
+    musl-gcc = callPackage ./bootstrap/musl/gcc.nix {
+      inherit (self.stage0) system platforms;
+      gcc = self.gcc;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
+    };
+
     # The last link in the chain: a real C compiler.
     gcc = callPackage ./bootstrap/gcc {
       inherit (self.stage0) system platforms;

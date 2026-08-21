@@ -52,6 +52,7 @@ import Control.Monad (filterM, when)
 import qualified Data.ByteString as BS
 import Data.Char (toLower, toUpper)
 import Data.Either (fromRight)
+import Data.Foldable (for_)
 import Data.IORef (IORef, atomicModifyIORef', newIORef, readIORef)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -71,7 +72,7 @@ import Nix.Derivation (Derivation (..), DerivationOutput (..), fromATerm)
 import Nix.Hash (IncrementalHash, bytesToHexText, hashFinalizeBytes, hashInitWithAlgo, hashPlaceholder, hashUpdateChunk, hexToBytes, rawHashWithAlgo)
 import Nix.Store (PathLock, PathRegistration, Store (..), isValid, placeInStore, registerPaths, releasePathLock, scanReferences, scanTempReferences)
 import qualified Nix.Store.ExecBit as ExecBit
-import Nix.Store.Path (StoreDir (..), StorePath (spHash, spName), defaultStoreDirText, storePathToFilePath)
+import Nix.Store.Path (StoreDir (..), StorePath (spHash, spName), defaultStoreDirText, storePathToFilePath, unStoreDir)
 import Nix.Substituter (CacheConfig, SubstResult (..), catchSync, trySubstitute)
 import qualified NovaCache.NAR as NAR
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesPathExist, removeDirectoryRecursive, removePathForcibly)
@@ -222,8 +223,29 @@ buildDerivationInner config store drv = do
       createDirectoryIfMissing True buildDir
       (`finally` cleanupBuildDir buildDir) $ do
         -- 3. Compute output paths (but do NOT pre-create them - the builder
-        --    is responsible for creating $out, $dev, etc.)
-        let outputDirs = [(doName out, buildDir </> T.unpack (doName out)) | out <- drvOutputs drv]
+        --    is responsible for creating $out, $dev, etc.).
+        --
+        --    $out is the FINAL store path, and the builder writes there
+        --    directly, as upstream's does.  Building into the temp directory
+        --    and moving afterwards looks equivalent and is not: an output
+        --    that records where it was built - a compiler's driver, a
+        --    libtool archive, musl's musl-gcc.specs - would record the temp
+        --    path, which is deleted the moment the build ends.  It leaves a
+        --    store path that is not self-contained, and the reference
+        --    scanner can only note the edge, not repair the bytes.  A path
+        --    cannot be rewritten after the fact either: the temp path and
+        --    the store path are different lengths, so an embedded copy
+        --    cannot be replaced in a binary without moving everything after
+        --    it.  Upstream avoids all of this by never using a second path,
+        --    and so does this.
+        let outputDirs = [(doName out, storePathToFilePath (bcStoreDir config) (doPath out)) | out <- drvOutputs drv]
+
+        -- A path left by an interrupted run is not valid (validity is a DB
+        -- fact) but it is still on disk, and the builder must start from
+        -- nothing.  Clearing it here rather than at registration is what
+        -- building in place requires: by then it IS the output.
+        for_ outputDirs $ \(_, outDir) -> removePathForcibly outDir
+        createDirectoryIfMissing True (unStoreDir (bcStoreDir config))
 
         -- 4. Decode builder/args/env for the spawn boundary.  Derivation
         --    strings are BYTES (identity); spawning a process needs real
@@ -251,7 +273,11 @@ buildDerivationInner config store drv = do
                in -- 5. Run the builder
                   runBuilder builderPath builderArgs environ buildDir
         case exitResult of
-          Left (exitCode, stderrText) ->
+          Left (exitCode, stderrText) -> do
+            -- Whatever the builder wrote is in the store now, so failure has
+            -- to take it back out: an unregistered tree there is invisible to
+            -- the database and would only confuse the next run.
+            for_ outputDirs $ \(_, outDir) -> removePathForcibly outDir
             pure (BuildFailure ("builder failed: " <> stderrText) exitCode)
           Right () -> do
             -- 6. Success: validate that the builder created all expected
@@ -763,8 +789,9 @@ prepareOutput config store candidates tempPairs drvPathText (output, (_outName, 
       if valid
         then pure (Right Nothing)
         else do
-          onDisk <- doesPathExist targetPath
-          when onDisk (removePathForcibly targetPath)
+          -- The builder wrote straight into the store path, so there is
+          -- nothing to clear: outDir IS targetPath.  A stale tree from an
+          -- interrupted run was removed before the build, not here.
           inputRefs <- scanReferences candidates outDir
           selfRefs <- scanTempReferences tempPairs outDir
           let refs = dedupStorePaths (inputRefs ++ selfRefs)
