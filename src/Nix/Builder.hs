@@ -71,7 +71,7 @@ import Nix.Derivation (Derivation (..), DerivationOutput (..), fromATerm)
 import Nix.Hash (IncrementalHash, bytesToHexText, hashFinalizeBytes, hashInitWithAlgo, hashPlaceholder, hashUpdateChunk, hexToBytes, rawHashWithAlgo)
 import Nix.Store (PathLock, PathRegistration, Store (..), isValid, placeInStore, registerPaths, releasePathLock, scanReferences, scanTempReferences)
 import qualified Nix.Store.ExecBit as ExecBit
-import Nix.Store.Path (StoreDir (..), StorePath (spHash, spName), storePathToFilePath)
+import Nix.Store.Path (StoreDir (..), StorePath (spHash, spName), defaultStoreDirText, storePathToFilePath)
 import Nix.Substituter (CacheConfig, SubstResult (..), catchSync, trySubstitute)
 import qualified NovaCache.NAR as NAR
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesPathExist, removeDirectoryRecursive, removePathForcibly)
@@ -244,8 +244,8 @@ buildDerivationInner config store drv = do
                   -- its destination as an ARGUMENT rather than reading the
                   -- environment (stage0's hex0: 'hex0 input output') can be
                   -- driven directly.
-                  rewrite = rewritePlaceholders outputDirs
-                  builderPath = T.unpack builderText
+                  rewrite = onStore config . rewritePlaceholders outputDirs
+                  builderPath = T.unpack (onStore config builderText)
                   environ = buildEnvironment config (Map.map rewrite decodedEnv) builderPath buildDir outputDirs
                   builderArgs = map (T.unpack . rewrite) argTexts
                in -- 5. Run the builder
@@ -285,6 +285,33 @@ decodeBuilderStrings drv = do
 -- ---------------------------------------------------------------------------
 -- Input validation
 -- ---------------------------------------------------------------------------
+
+-- | Rewrite a derivation string's store paths from their identity to where
+-- this machine keeps them.
+--
+-- A derivation names store objects by the canonical @\/nix\/store@ spelling,
+-- which is what its hash is computed over and must stay identical on every
+-- platform.  The objects themselves live under the configured store dir --
+-- @C:\\nix\\store@ on Windows, or wherever @--store@ points.  The spawn
+-- boundary is where identity has to become a location: the builder path, its
+-- arguments and its environment all name inputs that have to be opened.
+--
+-- Only the store dir prefix moves, and only where it differs, so the usual
+-- case (the identity dir IS the store dir) rewrites nothing.  Reference
+-- scanning is unaffected either way: it matches on a path's hash, not on the
+-- directory in front of it.
+--
+-- Windows worked before this without the rewrite, but only by accident: a
+-- @\/@-rooted path there resolves against the CURRENT DRIVE, so
+-- @\/nix\/store\/...@ found @C:\\nix\\store\\...@ exactly when the process
+-- happened to be running on C:.  On a Unix host nothing rescues it -- the
+-- path is absolute and simply is not there.
+onStore :: BuildConfig -> Text -> Text
+onStore config
+  | storeDirText == defaultStoreDirText = id
+  | otherwise = T.replace (defaultStoreDirText <> "/") (storeDirText <> "/")
+  where
+    storeDirText = T.pack (unStoreDir (bcStoreDir config))
 
 -- | Check that all inputs needed to build a derivation are present in the store.
 --
