@@ -1,0 +1,14 @@
+# Taken from nixpkgs' minimal-bootstrap (pkgs/os-specific/linux/minimal-bootstrap/gawk).
+# gawk stamps the build date into version output; without this two builds of
+# the same source differ.
+#
+--- configure
++++ configure
+@@ -3676,7 +3676,6 @@ cat >> $CONFIG_STATUS <<EOF
+ 
+ EOF
+ cat >> $CONFIG_STATUS <<\EOF
+-date > stamp-h
+ exit 0
+ EOF
+ chmod +x $CONFIG_STATUS

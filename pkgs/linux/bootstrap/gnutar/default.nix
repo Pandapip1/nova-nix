@@ -18,17 +18,14 @@
 }:
 let
   pname = "gnutar";
-  version = "1.12";
 
-  fetchurl = import <nix/fetchurl.nix>;
+  sources = import ./sources.nix { };
+  inherit (sources) version;
 in
 derivationWithMeta {
   inherit pname version system;
 
-  tarball = fetchurl {
-    url = "https://ftp.gnu.org/gnu/tar/tar-${version}.tar.gz";
-    sha256 = "c6c37e888b136ccefab903c51149f4b7bd659d69d4aea21245f61053a57aa60a";
-  };
+  tarball = sources.src;
 
   # A configure script looks tools up by bare name, so this is what it may
   # find -- the bootstrap's own, and not the host's.
