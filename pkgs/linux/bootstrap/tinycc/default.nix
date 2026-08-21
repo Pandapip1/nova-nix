@@ -16,6 +16,9 @@ lib.makeScope newScope (
 
     mainline = callPackage ./mainline-sources.nix { };
 
+    # Named so that the package above can build from the same tree.
+    mainlineSrc = mainline.src;
+
     boot = callPackage ./boot.nix {
       inherit stage0 nyacc;
       inherit (mes) mes-m2;

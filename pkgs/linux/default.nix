@@ -104,6 +104,14 @@ let
       inherit (self.stage0) system platforms;
       tinycc = self.tinycc.boot;
     };
+
+    # tcc rebuilt against musl: the compiler everything above uses.
+    tinycc-musl = callPackage ./bootstrap/tinycc-musl {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot // {
+        inherit (self.tinycc) mainlineSrc version;
+      };
+    };
   };
 in
 self
