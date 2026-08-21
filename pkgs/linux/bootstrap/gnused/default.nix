@@ -17,23 +17,15 @@
 }:
 let
   pname = "gnused";
-  version = "4.0.9";
 
-  fetchurl = import <nix/fetchurl.nix>;
+  sources = import ./sources.nix { };
+  inherit (sources) version;
 in
 derivationWithMeta {
   inherit pname version system;
 
-  tarball = fetchurl {
-    url = "https://ftp.gnu.org/gnu/sed/sed-${version}.tar.gz";
-    sha256 = "c365874794187f8444e5d22998cd5888ffa47f36def4b77517a808dec27c0600";
-  };
-
-  makefile = fetchurl {
-    url = "https://raw.githubusercontent.com/fosslinux/live-bootstrap/1bc4296091c51f53a5598050c8956d16e945b0f5/sysa/sed-4.0.9/mk/main.mk";
-    name = "main.mk";
-    sha256 = "cad7c18d085399d640e23a7feb70b36a378ed7f7dd5053c350f49707622e2e70";
-  };
+  tarball = sources.src;
+  inherit (sources) makefile;
 
   # What the script may run.  This replaces the PATH the builder would
   # otherwise assemble, which includes the host's /usr/bin.
@@ -43,6 +35,8 @@ derivationWithMeta {
     "${tinycc.compiler}/bin"
     "${stage0.mescc-tools-extra.bin}/bin"
   ];
+
+  libc = "mes";
 
   CC = "${tinycc.compiler}/bin/tcc -static -B ${tinycc.libs}/lib -I ${mesInclude}";
   AR = "${tinycc.compiler}/bin/tcc -ar";

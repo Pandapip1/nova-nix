@@ -15,6 +15,17 @@ let
   newScope = extra: lib.callPackageWith (self // extra);
   callPackage = newScope { };
 
+  # The tcc built on the Mes C library comes as a compiler and a directory of
+  # libraries built separately from it; the tcc built on musl is one path that
+  # is both.  Packages that take either are written against the two-part
+  # shape, so this presents the second the same way rather than teaching each
+  # of them about the difference.
+  muslToolchain = drv: drv // {
+    compiler = drv;
+    libs = drv;
+    inherit (self.tinycc) mainlineSrc version;
+  };
+
   self = {
     inherit lib newScope callPackage;
 
@@ -80,6 +91,14 @@ let
       mesInclude = "${self.mes.src}/include";
     };
 
+    # The same sed against musl, because the Mes C library's stdio gets getc
+    # and ungetc on a pipe wrong and every modern config.status depends on
+    # them agreeing.  See bootstrap/gnused/musl.nix.
+    gnused-musl = callPackage ./bootstrap/gnused/musl.nix {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+    };
+
     gnugrep = callPackage ./bootstrap/gnugrep {
       inherit (self.stage0) system platforms;
       tinycc = self.tinycc.boot;
@@ -97,6 +116,101 @@ let
       inherit (self.stage0) system platforms;
       tinycc = self.tinycc.boot;
       mesInclude = "${self.mes.src}/include";
+    };
+
+    # Every autotools configure script uses awk.
+    # 3.0.6, the newest awk the Mes C library can build.  It exists to build
+    # the one below.
+    gawk-mes = callPackage ./bootstrap/gawk/mes.nix {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    # The awk everything from here up uses.
+    gawk = callPackage ./bootstrap/gawk {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+      bootGawk = self.gawk-mes;
+    };
+
+    # The same tar against musl, which restores modification times where the
+    # one below it does not.  See bootstrap/gnutar/musl.nix.
+    gnutar-musl = callPackage ./bootstrap/gnutar/musl.nix {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+    };
+
+    # The full coreutils, which the 5.0 below is not: live-bootstrap's
+    # makefile names the 62 programs it compiles, and env, uname, date and
+    # stat are not among them.
+    coreutils-musl = callPackage ./bootstrap/coreutils/musl.nix {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+    };
+
+    # find and xargs, which gcc's build runs.
+    findutils = callPackage ./bootstrap/findutils {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
+    };
+
+    # The assembler and linker gcc needs.
+    binutils = callPackage ./bootstrap/binutils {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
+    };
+
+    # Compiled against musl: 3.8 needs socklen_t, which the Mes C library
+    # does not have.
+    diffutils = callPackage ./bootstrap/diffutils {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+      coreutils = self.coreutils-musl;
+    };
+
+    # The C library that replaces Mes's, and the compiler on top of it.  Both
+    # are built twice, because the first musl is compiled by the tcc that
+    # still stands on the Mes C library and that tcc miscompiles musl's
+    # vfprintf: every %e/%f/%g prints zero however correct the arithmetic
+    # behind it was.  Compiling musl again with the tcc that the first musl
+    # produced fixes it, which is the same argument as tcc's own second round
+    # -- a compiler that compiled itself is one whose output has been checked
+    # by the thing it produced.
+    musl-intermediate = callPackage ./bootstrap/musl {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+    };
+
+    tinycc-musl-intermediate = callPackage ./bootstrap/tinycc-musl {
+      inherit (self.stage0) system platforms;
+      musl = self.musl-intermediate;
+      tinycc = self.tinycc.boot // {
+        inherit (self.tinycc) mainlineSrc version;
+      };
+    };
+
+    # The C library everything above links against.
+    musl = callPackage ./bootstrap/musl {
+      inherit (self.stage0) system platforms;
+      tinycc = muslToolchain self.tinycc-musl-intermediate;
+    };
+
+    # ... and the compiler everything above uses.
+    tinycc-musl = callPackage ./bootstrap/tinycc-musl {
+      inherit (self.stage0) system platforms;
+      tinycc = muslToolchain self.tinycc-musl-intermediate;
     };
   };
 in
