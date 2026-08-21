@@ -174,6 +174,27 @@ let
       coreutils = self.coreutils-musl;
     };
 
+    # A tar new enough for the pax headers a modern release tarball uses,
+    # which the 1.12 below it predates.
+    gnutar-latest = callPackage ./bootstrap/gnutar/latest.nix {
+      inherit (self.stage0) system platforms;
+      gcc = self.gcc;
+      musl = self.musl-gcc;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
+    };
+
+    # The end of the ladder: a current compiler, built by gcc 10.
+    gcc-latest = callPackage ./bootstrap/gcc/latest.nix {
+      inherit (self.stage0) system platforms;
+      gcc = self.gcc10;
+      musl = self.musl-gcc;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-latest;
+      coreutils = self.coreutils-musl;
+    };
+
     # musl again, this time built by gcc: everything tcc could not assemble,
     # plus a shared library, a dynamic loader and the musl-gcc wrapper that
     # the compilers above link against.
