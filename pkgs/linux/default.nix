@@ -46,7 +46,12 @@ let
 
     # The first C compiler here that implements enough of C to build a system,
     # and the first that can compile itself.
-    tinycc = callPackage ./bootstrap/tinycc { };
+    # The shared tinycc, told what it is targeting: 32-bit ELF on x86, whose
+    # Mes headers live under include/linux/x86.
+    tinycc = callPackage ../bootstrap/tinycc {
+      tccTarget = "I386";
+      mesArchInclude = "linux/x86";
+    };
 
     # How a release tarball becomes a source tree, using the unpackers this
     # bootstrap built rather than nova-nix's builtin:unpack.
