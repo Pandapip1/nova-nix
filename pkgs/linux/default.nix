@@ -42,6 +42,14 @@ let
     unpackTarball = callPackage ./bootstrap/unpack.nix {
       inherit (self.stage0) system platforms;
     };
+
+    # The first program here that is not part of a compiler.  Everything
+    # above needs it: their sources are patched before they will build.
+    gnupatch = callPackage ./bootstrap/gnupatch {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
   };
 in
 self
