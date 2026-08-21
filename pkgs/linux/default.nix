@@ -153,6 +153,17 @@ let
       gnutar = self.gnutar-musl;
     };
 
+    # The same gcc with C++, built by the one above: every gcc after 4.7 is
+    # written in C++ and needs a C++ compiler to build at all.
+    gcc-cxx = callPackage ./bootstrap/gcc/cxx.nix {
+      inherit (self.stage0) system platforms;
+      gcc = self.gcc;
+      musl = self.musl-gcc;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
+    };
+
     # musl again, this time built by gcc: everything tcc could not assemble,
     # plus a shared library, a dynamic loader and the musl-gcc wrapper that
     # the compilers above link against.

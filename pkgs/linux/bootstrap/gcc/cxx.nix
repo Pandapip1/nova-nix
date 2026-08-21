@@ -1,17 +1,16 @@
-# GCC 4.6.4, compiled by tcc against musl.
+# GCC 4.6.4 with C++, compiled by the GCC 4.6.4 below it.
 #
-# The last link in the chain: a real C compiler, every byte of it traced back
-# to the 181-byte hex0 seed.
+# The gcc that tcc built speaks only C -- that was as far as tcc could carry
+# it.  This is the same source built by that compiler, with libstdc++ and g++,
+# which is what every gcc after 4.7 needs: they are written in C++ themselves.
 #
-# 4.6.4 because it is the newest gcc that tcc can still compile -- later ones
-# are written in C++ and need a C++ compiler to build, which is what this one
-# goes on to provide.  gmp, mpfr and mpc are unpacked into the source tree,
-# which is how gcc's build expects to find them when there is no system copy.
+# It links against the musl that gcc built rather than the one tcc built,
+# because libstdc++ wants a shared C library and a dynamic loader.
 {
   derivationWithMeta,
   system,
   platforms,
-  tinycc,
+  gcc,
   musl,
   binutils,
   gnumake,
@@ -26,7 +25,7 @@
   coreutils,
 }:
 let
-  pname = "gcc";
+  pname = "gcc-cxx";
 
   sources = import ./sources.nix { };
   inherit (sources)
@@ -65,23 +64,21 @@ derivationWithMeta {
     "${diffutils}/bin"
     "${findutils}/bin"
     "${binutils}/bin"
-    "${tinycc}/bin"
+    "${gcc}/bin"
     "${bash}/bin"
   ];
 
   muslInclude = "${musl}/include";
-
-  CC = "${tinycc}/bin/tcc -B ${tinycc}/lib";
-  AR = "${tinycc}/bin/tcc -ar";
+  muslLib = "${musl}/lib";
 
   builder = "${bash}/bin/bash";
   args = [
     "-e"
-    ./build.sh
+    ./cxx-build.sh
   ];
 
   meta = {
-    description = "GNU Compiler Collection, version ${version}";
+    description = "GNU Compiler Collection, version ${version}, with C++";
     homepage = "https://gcc.gnu.org";
     license = "gpl3Plus";
     inherit platforms;
