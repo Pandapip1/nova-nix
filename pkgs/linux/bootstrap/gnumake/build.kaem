@@ -1,0 +1,74 @@
+# GNU make 4.4.1, compiled by tcc.
+#
+# The source is unpacked here rather than taken from a store path: it has to
+# be patched, and a store path is read-only.  untar writing into the build
+# directory is the writable copy.
+#
+# Three patches, all carried beside this file: two keep make from looking in
+# /bin, /lib and /usr/include for things a hermetic build must not find, and
+# the third teaches it what the Mes C library does and does not have -- lstat
+# is implemented but not declared, getloadavg is missing entirely.
+#
+# There is no ./configure.  What it would have discovered is asserted below as
+# one -D per answer, the list nixpkgs' minimal bootstrap derived by running
+# configure once with this compiler and keeping the answers that are used.
+#
+# config.h is made by concatenating the two headers make generates for
+# itself, and the two .in.h headers are copied to the names the sources
+# include -- both jobs configure would otherwise do.
+
+cd ${TMPDIR}
+${bin_ungz} --file ${tarball} --output make.tar
+${bin_untar} --file make.tar
+cd make-${version}
+
+${bin_patch} -Np1 -i ${patch1}
+${bin_patch} -Np1 -i ${patch2}
+${bin_patch} -Np1 -i ${patch3}
+
+${bin_catm} src/config.h src/mkconfig.h src/mkcustom.h
+${bin_cp} lib/glob.in.h lib/glob.h
+${bin_cp} lib/fnmatch.in.h lib/fnmatch.h
+
+alias CC="${tcc} -static -B ${libs}/lib -I./src -I./lib -I${mesinc} -DHAVE_CONFIG_H -DMAKE_MAINTAINER_MODE -DLIBDIR=\"${out}/lib\" -DLOCALEDIR=\"/fake-locale\" -DPOSIX=1 -DNO_OUTPUT_SYNC=1 -DO_TMPFILE=020000000 -DFILE_TIMESTAMP_HI_RES=0 -DHAVE_ALLOCA -DHAVE_ALLOCA_H -DHAVE_ATEXIT -DHAVE_DECL_BSD_SIGNAL=0 -DHAVE_DECL_GETLOADAVG=0 -DHAVE_DECL_SYS_SIGLIST=0 -DHAVE_DECL__SYS_SIGLIST=0 -DHAVE_DECL___SYS_SIGLIST=0 -DHAVE_DIRENT_H -DHAVE_DUP2 -DHAVE_FCNTL_H -DHAVE_FDOPEN -DHAVE_GETCWD -DHAVE_GETTIMEOFDAY -DHAVE_INTTYPES_H -DHAVE_ISATTY -DHAVE_LIMITS_H -DHAVE_LOCALE_H -DHAVE_MEMORY_H -DHAVE_MKTEMP -DHAVE_SA_RESTART -DHAVE_SETVBUF -DHAVE_SIGACTION -DHAVE_SIGSETMASK -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRDUP -DHAVE_STRERROR -DHAVE_STRINGS_H -DHAVE_STRING_H -DHAVE_STRTOLL -DHAVE_SYS_FILE_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIMEB_H -DHAVE_SYS_TIME_H -DHAVE_SYS_WAIT_H -DHAVE_TTYNAME -DHAVE_UMASK -DHAVE_UNISTD_H -DHAVE_WAITPID -DMAKE_JOBSERVER -DMAKE_SYMLINKS -DPATH_SEPARATOR_CHAR=':' -DSCCS_GET=\"get\" -DSTDC_HEADERS -Dsig_atomic_t=int -Dvfork=fork"
+
+CC -c src/ar.c
+CC -c src/arscan.c
+CC -c src/commands.c
+CC -c src/default.c
+CC -c src/dir.c
+CC -c src/expand.c
+CC -c src/file.c
+CC -c src/function.c
+CC -c src/getopt.c
+CC -c src/getopt1.c
+CC -c src/guile.c
+CC -c src/hash.c
+CC -c src/implicit.c
+CC -c src/job.c
+CC -c src/load.c
+CC -c src/loadapi.c
+CC -c src/main.c
+CC -c src/misc.c
+CC -c src/output.c
+CC -c src/read.c
+CC -c src/remake.c
+CC -c src/rule.c
+CC -c src/shuffle.c
+CC -c src/signame.c
+CC -c src/strcache.c
+CC -c src/variable.c
+CC -c src/version.c
+CC -c src/vpath.c
+CC -c lib/fnmatch.c
+CC -c lib/glob.c
+CC -c src/remote-stub.c
+CC -c src/posixos.c
+
+# Link, then check it runs before installing it.
+CC -o make ar.o arscan.o commands.o default.o dir.o expand.o file.o function.o getopt.o getopt1.o guile.o hash.o implicit.o job.o load.o loadapi.o main.o misc.o output.o read.o remake.o rule.o shuffle.o signame.o strcache.o variable.o version.o vpath.o fnmatch.o glob.o remote-stub.o posixos.o
+./make --version
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} ./make ${out}/bin/make
+${bin_chmod} 555 ${out}/bin/make

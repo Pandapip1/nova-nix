@@ -42,6 +42,62 @@ let
     unpackTarball = callPackage ./bootstrap/unpack.nix {
       inherit (self.stage0) system platforms;
     };
+
+    # The first program here that is not part of a compiler.  Everything
+    # above needs it: their sources are patched before they will build.
+    gnupatch = callPackage ./bootstrap/gnupatch {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    # What everything above is built with: they ship Makefiles.
+    gnumake = callPackage ./bootstrap/gnumake {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    # The programs every build script above assumes exist.
+    coreutils = callPackage ./bootstrap/coreutils {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    # The first real shell: everything above is built by ./configure scripts,
+    # which kaem cannot run.
+    bash = callPackage ./bootstrap/bash {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    # The first package built by a shell script rather than a kaem file.
+    gnused = callPackage ./bootstrap/gnused {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    gnugrep = callPackage ./bootstrap/gnugrep {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    # The first package built by running its own ./configure.
+    gnutar = callPackage ./bootstrap/gnutar {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
+
+    gzip = callPackage ./bootstrap/gzip {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
   };
 in
 self
