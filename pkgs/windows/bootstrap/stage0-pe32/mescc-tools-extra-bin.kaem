@@ -1,0 +1,34 @@
+# Assemble mescc-tools-extra's bin directory.
+#
+# Everything above this bootstrap wants one directory to put on PATH rather
+# than thirteen separate store paths, and this is where the utilities that
+# have just been built make it.  mkdir creates it and cp fills it.
+#
+# The counterpart of
+# ../../../linux/bootstrap/stage0-posix/mescc-tools-extra-bin.kaem, and shorter
+# by a third: there is no chmod pass, because a PE32 file is runnable because
+# of what is in its header and not because of a mode bit.  M2libc's Windows
+# chmod accepts the call and does nothing, so the pass would not have failed --
+# it would have been thirteen lies.
+#
+# The names end in .exe, which is what Windows expects of a program and what
+# every executable this bootstrap produces is already called.  Nothing here
+# depends on it: kaem is given the full path of what it runs.
+#
+# Every path comes from the environment, which is where `derivation` puts each
+# attribute.  kaem has no loops, so the list is written out.
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} ${bin_sha256sum} ${out}/bin/sha256sum.exe
+${bin_cp} ${bin_match} ${out}/bin/match.exe
+${bin_cp} ${bin_mkdir} ${out}/bin/mkdir.exe
+${bin_cp} ${bin_untar} ${out}/bin/untar.exe
+${bin_cp} ${bin_ungz} ${out}/bin/ungz.exe
+${bin_cp} ${bin_unbz2} ${out}/bin/unbz2.exe
+${bin_cp} ${bin_unxz} ${out}/bin/unxz.exe
+${bin_cp} ${bin_catm} ${out}/bin/catm.exe
+${bin_cp} ${bin_cp} ${out}/bin/cp.exe
+${bin_cp} ${bin_chmod} ${out}/bin/chmod.exe
+${bin_cp} ${bin_rm} ${out}/bin/rm.exe
+${bin_cp} ${bin_replace} ${out}/bin/replace.exe
+${bin_cp} ${bin_wrap} ${out}/bin/wrap.exe

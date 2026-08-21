@@ -18,6 +18,12 @@
   mesArchInclude,
   # Extra -D arguments for the target, e.g. PE needs TCC_TARGET_PE as well.
   extraTargetDefines ? [ ],
+  # hex2, blood-elf and arenaSize, passed straight through to boot.nix -- see
+  # there.  Defaulted the same way there, so a call site only names them to
+  # override.
+  hex2 ? stage0.hex2,
+  bloodElf ? stage0.blood_elf_0,
+  arenaSize ? "100000000",
 }:
 lib.makeScope newScope (
   self:
@@ -39,6 +45,9 @@ lib.makeScope newScope (
         tccTarget
         mesArchInclude
         extraTargetDefines
+        hex2
+        bloodElf
+        arenaSize
         ;
       inherit (mes) mes-m2;
       mes-libc = mes.libc;
