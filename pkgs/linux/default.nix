@@ -92,6 +92,12 @@ let
       tinycc = self.tinycc.boot;
       mesInclude = "${self.mes.src}/include";
     };
+
+    gzip = callPackage ./bootstrap/gzip {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
   };
 in
 self
