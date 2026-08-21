@@ -322,10 +322,12 @@ rec {
     out
   ];
 
-  # Phase-2: M1 to hex2.  crt1.M1 is where Linux's nine instructions become a
-  # hundred: Windows hands a program one UTF-16 command line and nothing else,
-  # so argc, argv and the environment are all built there.  pe-end.M1 closes
-  # the image the way the PE header expects.
+  # Phase-2: M1 to hex2.  Linux's nine instructions of startup become a
+  # hundred here: Windows hands a program one UTF-16 command line and nothing
+  # else, so argc, argv and the environment are built by argv.M1 before crt1.M1
+  # has anything to pass to main.  defs.M1 names the instructions that neither
+  # macro file above it does, and pe-end.M1 closes the image the way the PE
+  # header expects.
   mes_hex2 = run "mes.hex2" M1 [
     "--architecture"
     "x86"
@@ -335,11 +337,15 @@ rec {
     "-f"
     "${src}/lib/x86-mes/x86.M1"
     "-f"
+    "${src}/lib/windows/x86-mes/defs.M1"
+    "-f"
+    "${src}/lib/windows/x86-mes/argv.M1"
+    "-f"
     "${src}/lib/windows/x86-mes-m2/crt1.M1"
     "-f"
     mes_M1
     "-f"
-    "${src}/lib/windows/x86-mes-m2/pe-end.M1"
+    "${src}/lib/windows/x86-mes/pe-end.M1"
     "-o"
     out
   ];

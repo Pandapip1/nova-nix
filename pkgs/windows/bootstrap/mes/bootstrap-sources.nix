@@ -11,9 +11,9 @@
 rec {
   # Mes's own version, plus the date of the Windows-backend commit: this is
   # 0.27.1 with a backend upstream does not carry yet.
-  version = "0.27.1-unstable-2026-08-20";
+  version = "0.27.1-unstable-2026-08-21";
 
-  rev = "631becc90e5322cbab145280394528a5c1c68008";
+  rev = "9c836c4d2c56585867aa89501dc0aadf4c3d583b";
   ref = "windows-pe32";
 
   src = builtins.fetchGit {

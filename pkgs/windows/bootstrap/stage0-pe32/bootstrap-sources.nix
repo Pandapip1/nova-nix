@@ -10,7 +10,7 @@
 # M2libc and mescc-tools as git submodules, pinned to the exact commits
 # stage0-posix itself vendors them at (nothing in any of them is
 # Windows-specific, so nothing needed porting but the one bootstrap.c
-# stage0-pe32 carries itself).  `submodules = true` fetches them along with
+# the M2libc fork carries).  `submodules = true` fetches them along with
 # everything else, so `src` already has `M2-Planet/`, `M2libc/` and
 # `mescc-tools/` at the paths stage0-pe32's own build script
 # (`x86/mescc-tools-mini.cmd`) reads them from -- a plain archive tarball
@@ -21,9 +21,9 @@
 # `rev`/`narHash`, there is nothing to prefetch by hand.
 { }:
 rec {
-  version = "0-unstable-2026-08-20";
+  version = "0-unstable-2026-08-21";
 
-  rev = "b82038daad2665475c4261ab5ceced8c7d4c1d13";
+  rev = "d1fd6cdd8e14ecd018f216d2edeeaca65551f29c";
   ref = "main";
 
   src = builtins.fetchGit {

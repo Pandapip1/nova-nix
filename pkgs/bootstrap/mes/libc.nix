@@ -51,6 +51,17 @@
   # exist yet passes null.
   ldexplFile ? null,
   arch ? "x86",
+  # How many cells Mes may have, which is what MES_ARENA counts -- a cell is
+  # twelve bytes here, plus a tenth again for the jam buffer.  100000000 is
+  # nixpkgs' number for the same reason it patches gc.c: a translation unit of
+  # 159 files does not compile in less.
+  #
+  # It is a call-site argument because it is not always available.  A Linux
+  # Mes asks the kernel for 1.3GB and gets it; a Windows one reserves address
+  # space with NtAllocateVirtualMemory and gets what a 32-bit process can hold
+  # in one piece, which is a gigabyte on Windows 11 and 256MB under wine.  See
+  # lib/windows/brk.c, which discovers the figure rather than declaring it.
+  arenaSize ? "100000000",
 }:
 let
   out = builtins.placeholder "out";
@@ -139,17 +150,18 @@ let
       # Mes sizes its heap and its stack from the environment, and the
       # defaults are not enough for a translation unit of this size: libc+tcc
       # is 159 files concatenated into one, and compiling it segfaults on the
-      # default arena.  These are the numbers nixpkgs' minimal bootstrap
-      # patches into gc.c for the same reason.
-      MES_ARENA = "100000000";
-      MES_MAX_ARENA = "100000000";
+      # default arena.
+      MES_ARENA = arenaSize;
+      MES_MAX_ARENA = arenaSize;
       MES_STACK = "6000000";
 
       MES_PREFIX = "${src}";
       GUILE_LOAD_PATH = "${src}/mes/module:${src}/module:${nyacc.guilePath}";
       M1 = stage0.M1;
-      HEX2 = stage0.hex2;
-      BLOOD_ELF = stage0.blood_elf_0;
+      # The hand-written hex2 takes its arguments positionally; mescc.scm
+      # passes flags, so on Windows this is the one written in C.  On Linux
+      # the chain's hex2 is already that one.
+      HEX2 = if windows then stage0.hex2-new else stage0.hex2;
 
       builder = mes-m2;
       args = [
