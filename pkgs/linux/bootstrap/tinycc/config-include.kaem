@@ -1,0 +1,5 @@
+# tcc reads a config.h; everything it would say is passed as -D instead, so
+# the file is empty and this exists only to give a -I somewhere to point.
+
+${bin_mkdir} -p ${out}
+${bin_cp} ${configH} ${out}/config.h

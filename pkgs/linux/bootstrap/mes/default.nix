@@ -1,0 +1,35 @@
+# GNU Mes, built by the compiler, assembler and linker stage0-posix ends with.
+#
+# The chain below this one stops at hex2; this is the first thing above it
+# that is not a bootstrap tool but a program someone would want: a Scheme
+# interpreter, and with it MesCC, the C compiler that goes on to build TinyCC.
+{
+  lib,
+  newScope,
+  stage0,
+  nyacc,
+}:
+lib.makeScope newScope (
+  self:
+  with self;
+  {
+    inherit (stage0) system platforms;
+
+    inherit (callPackage ./bootstrap-sources.nix { }) version src ldexplFile;
+
+    inherit
+      (callPackage ./mes-m2.nix {
+        inherit (stage0) M1 hex2;
+        M2 = stage0.M2;
+        blood-elf = stage0.blood_elf_0;
+      })
+      mes-m2
+      ;
+
+    # The C library MesCC compiles, and what TinyCC will link against.
+    libc = callPackage ./libc.nix {
+      inherit stage0 ldexplFile;
+      inherit (stage0) kaem;
+    };
+  }
+)

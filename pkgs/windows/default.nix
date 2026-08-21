@@ -74,7 +74,7 @@ let
     mes = callPackage ./bootstrap/mes { };
 
     # Not a stage: the parser modules MesCC loads, which Mes does not vendor.
-    nyacc = callPackage ./bootstrap/nyacc { };
+    nyacc = callPackage ../bootstrap/nyacc { };
   };
 in
 self

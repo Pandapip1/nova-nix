@@ -1,0 +1,15 @@
+# Unpack a .tar.gz into $out, using the unpackers this bootstrap built.
+#
+# nova-nix has a builtin:unpack, but it knows tar and zstd only, and the point
+# of a source bootstrap is that the thing which opens the archive was built
+# here too -- ungz and untar come from mescc-tools-extra, compiled by
+# M2-Planet.
+#
+# untar extracts relative to the working directory, so $out is where the work
+# happens rather than somewhere to copy into afterwards: these tools have no
+# recursive copy.
+
+${bin_mkdir} -p ${out}
+${bin_ungz} --file ${tarball} --output ${TMPDIR}/archive.tar
+cd ${out}
+${bin_untar} --file ${TMPDIR}/archive.tar
