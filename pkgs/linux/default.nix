@@ -64,6 +64,14 @@ let
       tinycc = self.tinycc.boot;
       mesInclude = "${self.mes.src}/include";
     };
+
+    # The first real shell: everything above is built by ./configure scripts,
+    # which kaem cannot run.
+    bash = callPackage ./bootstrap/bash {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
   };
 in
 self
