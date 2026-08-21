@@ -1,5 +1,13 @@
 # The Mes C library, compiled by MesCC.
 #
+# Shared by every package set.  What the library is made of is decided by
+# build-aux/configure-lib.sh in the Mes tree, which reads mes_kernel and picks
+# a different set of files for each; that decision arrives here as `sources`,
+# and the rest of this file is the same work whichever set it was.  Where the
+# two kernels genuinely differ -- what a program starts at, and what a linker
+# has to put around it -- there is an `if windows` below and a note saying
+# why.
+#
 # mes-m2 is the interpreter the chain below produced; MesCC is the C compiler
 # written in Scheme that it runs, parsing C with Nyacc, emitting M1 assembly,
 # and spawning M1 and hex2 to assemble and link.  This is the first thing in
@@ -18,6 +26,7 @@
 # the process with an argument vector and no such limit applies.  kaem is left
 # with the two jobs that genuinely need a shell: making a directory.
 {
+  lib,
   derivationWithMeta,
   src,
   version,
@@ -27,12 +36,32 @@
   mes-m2,
   nyacc,
   stage0,
-  ldexplFile,
+  # The kernel this library is for, spelled as Mes spells it: it names the
+  # include and lib subdirectories, and it decides the two things below that
+  # are not shared.
+  mesKernel,
+  # The source lists, as configure-lib.sh computes them for that kernel.
+  # Kept with the package set it belongs to, since it is that kernel's data.
+  sources,
+  # The two definitions scripts/mescc.scm.in expects to already exist, one of
+  # which is the kernel -- so this is per-kernel too.  See the file.
+  mesccPrelude,
+  arch ? "x86",
+  # How many cells Mes may have, which is what MES_ARENA counts -- a cell is
+  # twelve bytes here, plus a tenth again for the jam buffer.  100000000 is
+  # nixpkgs' number for the same reason it patches gc.c: a translation unit of
+  # 159 files does not compile in less.
+  #
+  # It is a call-site argument because it is not always available.  A Linux
+  # Mes asks the kernel for 1.3GB and gets it; a Windows one reserves address
+  # space with NtAllocateVirtualMemory and gets what a 32-bit process can hold
+  # in one piece, which is a gigabyte on Windows 11 and 256MB under wine.  See
+  # lib/windows/brk.c, which discovers the figure rather than declaring it.
+  arenaSize ? "100000000",
 }:
 let
-  arch = "x86";
-  sources = import ./libc-sources.nix { };
   out = builtins.placeholder "out";
+  windows = mesKernel == "windows";
 
   inherit (stage0.mescc-tools-extra) mkdir cp catm;
 
@@ -55,6 +84,7 @@ let
     bin_mkdir = mkdir;
     bin_cp = cp;
     inherit configH src arch;
+    archInclude = "${src}/include/${mesKernel}/${arch}";
     builder = kaem;
     args = [
       "--verbose"
@@ -73,7 +103,7 @@ let
     builder = catm;
     args = [
       out
-      ./mescc-prelude.scm
+      mesccPrelude
       "${src}/scripts/mescc.scm.in"
     ];
   };
@@ -116,17 +146,18 @@ let
       # Mes sizes its heap and its stack from the environment, and the
       # defaults are not enough for a translation unit of this size: libc+tcc
       # is 159 files concatenated into one, and compiling it segfaults on the
-      # default arena.  These are the numbers nixpkgs' minimal bootstrap
-      # patches into gc.c for the same reason.
-      MES_ARENA = "100000000";
-      MES_MAX_ARENA = "100000000";
+      # default arena.
+      MES_ARENA = arenaSize;
+      MES_MAX_ARENA = arenaSize;
       MES_STACK = "6000000";
 
       MES_PREFIX = "${src}";
       GUILE_LOAD_PATH = "${src}/mes/module:${src}/module:${nyacc.guilePath}";
       M1 = stage0.M1;
-      HEX2 = stage0.hex2;
-      BLOOD_ELF = stage0.blood_elf_0;
+      # The hand-written hex2 takes its arguments positionally; mescc.scm
+      # passes flags, so on Windows this is the one written in C.  On Linux
+      # the chain's hex2 is already that one.
+      HEX2 = if windows then stage0.hex2-new else stage0.hex2;
 
       builder = mes-m2;
       args = [
@@ -143,7 +174,7 @@ let
         "-I"
         "${src}/include"
         "-I"
-        "${src}/include/linux/${arch}"
+        "${src}/include/${mesKernel}/${arch}"
         "-o"
         out
         "${input}"
@@ -162,20 +193,83 @@ let
   # The same library in source form, for a compiler that is not MesCC.  tcc,
   # once it exists, recompiles its own C library from these -- from the
   # gcc-variant sources, which are the fuller set MesCC could not manage.
+  #
+  # Only ELF has the crt pieces: crti and crtn exist to bracket .init and
+  # .fini, which is a thing the ELF linker does with sections and the PE one
+  # does not.  A Windows entry point is crt1 and nothing else.
   gnuSource = {
-    # ldexpl is appended: 0.27.1's list does not have it, and mainline TinyCC
-    # needs it to parse a floating-point constant.  See bootstrap-sources.nix
-    # for where the file comes from.
-    libc = bundle "libc+gnu" (inTree sources.libc_gnu_SOURCES ++ [ ldexplFile ]);
+    libc = bundle "libc+gnu" (inTree sources.libc_gnu_SOURCES);
     libtcc1 = bundle "libtcc1" (inTree sources.libtcc1_SOURCES);
+    getopt = "${src}/lib/posix/getopt.c";
+  }
+  // lib.optionalAttrs (!windows) {
     crt1 = "${src}/lib/linux/${arch}-mes-gcc/crt1.c";
     crti = "${src}/lib/linux/${arch}-mes-gcc/crti.c";
     crtn = "${src}/lib/linux/${arch}-mes-gcc/crtn.c";
-    getopt = "${src}/lib/posix/getopt.c";
+  };
+
+  # What runs before main, which is the one part of a C library that cannot be
+  # written portably and, on Windows, cannot be written in C at all.
+  #
+  # On Linux the kernel has already put argc, argv and the environment on the
+  # stack, so crt1.c is a dozen lines of moving them into place and MesCC
+  # compiles it like anything else.  Windows passes one UTF-16 command line
+  # and nothing else: splitting it is assembly, it runs before there is a
+  # stdin to report a failure on, and it is shared with the M2-Planet build
+  # that already needed it -- so it is three .M1 files, assembled here rather
+  # than compiled.
+  #
+  # M1 is given both macro files.  A DEFINE is global to an assembly and the
+  # startup uses both dialects' names: x86_defs.M1 is what M2-Planet emits and
+  # x86.M1 is what MesCC emits, and the Windows files were written against the
+  # first.
+  windowsCrt1 = derivationWithMeta {
+    pname = "mes-crt1";
+    name = "mes-crt1-${version}.o";
+    inherit version system meta;
+    builder = stage0.M1;
+    args = [
+      "--architecture"
+      arch
+      "--little-endian"
+      "-f"
+      "${src}/lib/m2/x86/x86_defs.M1"
+      "-f"
+      "${src}/lib/${arch}-mes/x86.M1"
+      "-f"
+      "${src}/lib/windows/${arch}-mes/defs.M1"
+      "-f"
+      "${src}/lib/windows/${arch}-mes/argv.M1"
+      "-f"
+      "${src}/lib/windows/${arch}-mes-mescc/crt1.M1"
+      "-o"
+      out
+    ];
+  };
+
+  # What hex2 puts around the program to make it an executable.  hex2 has no
+  # idea what a format is: these two files are the whole of it, and mescc.scm
+  # reaches for the pair whose name its kernel implies.
+  #
+  # The header is two files concatenated because hex2 is given exactly one and
+  # the Windows one is genuinely two things: the PE header, and the code that
+  # finds ntdll and resolves what the program will call out of its export
+  # table.  A PE32 program from this bootstrap imports nothing at all, so that
+  # resolver has to be inside the image.
+  pe32Header = derivationWithMeta {
+    pname = "mes-pe32-header.hex2";
+    name = "mes-pe32-header-${version}.hex2";
+    inherit version system meta;
+    builder = catm;
+    args = [
+      out
+      "${src}/lib/m2/x86/PE32-i386.hex2"
+      "${src}/lib/m2/x86/ntdll-i386.hex2"
+    ];
   };
 
   crt1-s = mescc-compile "crt1" ".s" "-S" "${src}/lib/linux/${arch}-mes-mescc/crt1.c";
-  crt1 = mescc-compile "crt1" ".o" "-c" crt1-s;
+  crt1 = if windows then windowsCrt1 else mescc-compile "crt1" ".o" "-c" crt1-s;
 
   libc-mini = compiled "libc-mini" (bundle "libc-mini" (inTree sources.libc_mini_SOURCES));
   libmescc = compiled "libmescc" (bundle "libmescc" (inTree sources.libmescc_SOURCES));
@@ -191,7 +285,11 @@ derivationWithMeta {
   bin_cp = cp;
 
   inherit crt1 mescc;
-  crt1_s = crt1-s;
+  # The assembly the startup was linked from, kept beside it the way every
+  # library here is kept in both forms.  On Linux that is what MesCC emitted;
+  # on Windows the .M1 is the source, and there is nothing it was emitted
+  # from.
+  crt1_s = if windows then "${src}/lib/windows/${arch}-mes-mescc/crt1.M1" else crt1-s;
   libc_mini_a = libc-mini.a;
   libc_mini_s = libc-mini.s;
   libmescc_a = libmescc.a;
@@ -201,12 +299,19 @@ derivationWithMeta {
   libc_tcc_a = libc-tcc.a;
   libc_tcc_s = libc-tcc.s;
 
+  # The format's header and footer, installed under the name mescc.scm will
+  # look for and the kernel directory it will look in.  Only Windows: the ELF
+  # pair is already in the Mes tree, which is on the library path anyway.
+  inherit mesKernel;
+  pe32_header = if windows then pe32Header else "";
+  pe32_footer = if windows then "${src}/lib/windows/${arch}-mes/pe-end.M1" else "";
+
   builder = kaem;
   args = [
     "--verbose"
     "--strict"
     "--file"
-    ./libc-out.kaem
+    (if windows then ./libc-out-windows.kaem else ./libc-out.kaem)
   ];
 
   passthru = {
@@ -220,14 +325,13 @@ derivationWithMeta {
       "-I"
       "${src}/include"
       "-I"
-      "${src}/include/linux/${arch}"
+      "${src}/include/${mesKernel}/${arch}"
     ];
 
     inherit gnuSource;
 
     inherit
       crt1
-      crt1-s
       libc-mini
       libmescc
       libc
@@ -235,5 +339,12 @@ derivationWithMeta {
       mescc
       configInclude
       ;
+  }
+  // lib.optionalAttrs (!windows) { inherit crt1-s; }
+  // lib.optionalAttrs windows {
+    # What a caller has to hand hex2 to link a PE32 executable, for anything
+    # that links one without going through mescc.scm.
+    inherit pe32Header;
+    pe32Footer = "${src}/lib/windows/${arch}-mes/pe-end.M1";
   };
 }

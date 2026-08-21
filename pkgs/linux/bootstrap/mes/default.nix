@@ -15,7 +15,7 @@ lib.makeScope newScope (
   {
     inherit (stage0) system platforms;
 
-    inherit (callPackage ./bootstrap-sources.nix { }) version src ldexplFile;
+    inherit (callPackage ./bootstrap-sources.nix { }) version src;
 
     inherit
       (callPackage ./mes-m2.nix {
@@ -27,9 +27,15 @@ lib.makeScope newScope (
       ;
 
     # The C library MesCC compiles, and what TinyCC will link against.
-    libc = callPackage ./libc.nix {
-      inherit stage0 ldexplFile;
+    #
+    # The shared package, told which kernel: that picks the include directory,
+    # the source lists, and what a program starts at.
+    libc = callPackage ../../../bootstrap/mes/libc.nix {
+      inherit stage0;
       inherit (stage0) kaem;
+      mesKernel = "linux";
+      sources = import ./libc-sources.nix { };
+      mesccPrelude = ./mescc-prelude.scm;
     };
   }
 )

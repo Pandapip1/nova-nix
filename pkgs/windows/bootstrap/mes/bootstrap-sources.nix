@@ -11,10 +11,10 @@
 rec {
   # Mes's own version, plus the date of the Windows-backend commit: this is
   # 0.27.1 with a backend upstream does not carry yet.
-  version = "0.27.1-unstable-2026-08-20";
+  version = "0.27.1-unstable-2026-08-23";
 
-  rev = "c36e0883cab247089329f4137bbc2f32f4228532";
-  ref = "windows-pe32";
+  rev = "ba9b38b6bef2ac100e3697c9c305cd9ff0fd2c1c";
+  ref = "windows-pe32-ntcall";
 
   src = builtins.fetchGit {
     url = "https://github.com/Pandapip1/mes.git";

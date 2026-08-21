@@ -1,0 +1,34 @@
+# Generate tccdefs_.h -- the PE32 counterpart of tccdefs.kaem beside this.
+#
+# See that file for what this is for and why alloca is removed from the
+# predefined macros.  Two things differ here, both the same differences
+# boot-round-windows.kaem has from boot-round.kaem:
+#
+# No `cd ${TMPDIR}`, and so no relative paths: every intermediate is named
+# under ${out} instead.  kaem's cd is a native chdir(), and nothing on this
+# side has shown that call behaves the way this build needs under the
+# exec-wrapper this chain builds through -- it fails outright, with "cd
+# failed!" and nothing further.
+#
+# c2str is linked the way every other program on this side is: a PE-target
+# tcc adds neither crt1.o nor a default C library, and the default it does
+# reach for (msvcrt and friends) is not what this bootstrap has.  So
+# -nostdlib, and crt1.o, -lc and -ltcc1 named outright.
+#
+# The intermediates stay in ${out} rather than being cleaned up.  Nothing in
+# this bootstrap has an rm yet, and a few extra files beside tccdefs_.h cost
+# nothing -- the round below reads it by name.
+
+${bin_mkdir} -p ${out}
+
+${prevTcc} -B ${prevLibs}/lib -DC2STR -nostdlib ${prevLibs}/lib/crt1.o -o ${out}/c2str ${src}/conftest.c -L ${prevLibs}/lib -lc -ltcc1
+
+# See tccdefs.kaem for why these two patterns and the replacement arrive as
+# variables rather than as quoted strings written here.
+${bin_replace} --file ${src}/include/tccdefs.h --output ${out}/tccdefs-1.h --match-on ${allocaBuiltin} --replace-with ${blank}
+${bin_replace} --file ${out}/tccdefs-1.h --output ${out}/tccdefs-2.h --match-on ${allocaDecl} --replace-with ${blank}
+
+# Not straight to ${out}/tccdefs_.h: catm below reads this and writes that,
+# and they cannot be the same file.
+${out}/c2str ${out}/tccdefs-2.h ${out}/tccdefs-3.h
+${bin_catm} ${out}/tccdefs_.h ${out}/tccdefs-3.h ${configLine}

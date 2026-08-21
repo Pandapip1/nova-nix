@@ -1,0 +1,47 @@
+# Recompile the C library with the tcc that has just been built -- the PE32
+# counterpart of libs.kaem beside this, differing in two ways: how crt1
+# gets into ${out}/lib, and no `cd`.
+#
+# crt1 is not recompiled here. mes-libc's own crt1 is not C at all on this
+# side -- lib/windows/x86-mes-mescc/crt1.M1, hand-assembled the same way
+# every round's argv/envp plumbing on this platform is -- so there is no
+# crt1_c to hand tcc, and every round after the first would be recompiling
+# the exact same instructions from the exact same source for no reason: it
+# is copied once, the way it is copied into mes-libc's own lib/ directory
+# in the first place.
+#
+# crti and crtn are absent outright, not merely uncompiled. Both exist on
+# the ELF side to bracket .init and .fini -- and PE's own loader does not
+# implement a section relocation-and-run mechanism that would give them
+# anything to run against, so lib/bootstrap/mes/libc.nix's gnuSource does
+# not carry them for this kernel and nothing here should expect to find
+# them either.
+#
+# No `cd ${TMPDIR}`: every other kaem script this side of the bootstrap
+# names its working paths explicitly rather than changing into one, and
+# that is deliberate here too, not just carried over -- kaem's cd is a
+# native chdir(), and nothing else on this side has proven that call
+# behaves the way this build would need under the exec-wrapper this
+# chain builds through. Every intermediate .o below is written straight
+# into ${out}/lib and read back from there, so there is no cwd to be
+# wrong about.
+
+${bin_mkdir} -p ${out}/lib
+
+${bin_cp} ${crt1_o} ${out}/lib/crt1.o
+
+# libtcc1 is the COMPILER's runtime, not the C library's: the helpers tcc
+# emits calls to for arithmetic the instruction set does not do in one go.
+# It comes from tinycc's own lib/, beside the compiler being built -- not
+# from the Mes C library, which ships a file of the same name meaning
+# something else.  Taking the wrong one leaves the helpers subtly wrong: casts
+# from floating point to integer quietly produce zero.
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} ${libtccOpt3} -c -o ${out}/lib/libtcc1.o ${libtcc1_c}
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} ${libtccOpt3} -c -o ${out}/lib/va_list.o ${valist_c}
+${tcc} -ar ${out}/lib/libtcc1.a ${out}/lib/libtcc1.o ${out}/lib/va_list.o
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/libc.o ${libc_c}
+${tcc} -ar ${out}/lib/libc.a ${out}/lib/libc.o
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/libgetopt.o ${getopt_c}
+${tcc} -ar ${out}/lib/libgetopt.a ${out}/lib/libgetopt.o

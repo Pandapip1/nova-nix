@@ -44,5 +44,19 @@ lib.makeScope newScope (
       M1
       hex2-new
       ;
+
+    # Above the chain, where every program is C and the five steps that make
+    # one an executable stop varying.  See the file.
+    m2-program = callPackage ./m2-program.nix { };
+
+    # The shell.  This chain does not need one -- cmd.exe drives it -- but
+    # nova-nix does: a derivation whose output is a directory needs something
+    # that can run mkdir and then a dozen cp's.
+    kaem = callPackage ./kaem.nix { };
+
+    # And what that shell runs.  `mescc-tools-extra` is the bin directory;
+    # the individual utilities are named too, since a kaem script has to
+    # spell each one out rather than search a PATH.
+    mescc-tools-extra = callPackage ./mescc-tools-extra.nix { };
   }
 )

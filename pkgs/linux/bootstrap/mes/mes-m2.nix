@@ -208,6 +208,12 @@ rec {
     "${src}/lib/linux/wait4.c"
     "-f"
     "${src}/lib/linux/waitpid.c"
+    # After fork.c, execve.c and waitpid.c, which are what it is made of:
+    # M2-Planet is one-pass and a definition has to come before whatever uses
+    # it.  system* only reaches for spawn where there is no fork, so here this
+    # is compiled and never called; src/posix.c names it either way.
+    "-f"
+    "${src}/lib/posix/spawn.c"
     "-f"
     "${src}/lib/linux/gettimeofday.c"
     "-f"

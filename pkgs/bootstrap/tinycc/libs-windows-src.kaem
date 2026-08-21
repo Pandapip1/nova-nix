@@ -1,0 +1,38 @@
+# Recompile the C library with the tcc that has just been built -- the PE32
+# counterpart of libs.kaem beside this, differing in two ways: crt1 is
+# recompiled from crt1_c rather than crt1.c/crti.c/crtn.c, and there is no
+# `cd`.
+#
+# crt1_c is a real C source from boot0 up (unlike bootMes's own library,
+# still linked via libs-windows.kaem's copy of the hand-assembled one --
+# see pkgs/bootstrap/tinycc/boot.nix's own crt1Object/crt1Source split for
+# why the two libraries differ here at all): every round after bootMes has
+# a real tcc doing the compiling, which can build a real crt1 the ordinary
+# way.
+#
+# crti and crtn are absent outright, not merely uncompiled -- see
+# libs-windows.kaem's own comment for why PE has nothing for them to
+# bracket.
+#
+# No `cd ${TMPDIR}`: see libs-windows.kaem's own comment; the same applies
+# here.
+
+${bin_mkdir} -p ${out}/lib
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/crt1.o ${crt1_c}
+
+# libtcc1 is the COMPILER's runtime, not the C library's: the helpers tcc
+# emits calls to for arithmetic the instruction set does not do in one go.
+# It comes from tinycc's own lib/, beside the compiler being built -- not
+# from the Mes C library, which ships a file of the same name meaning
+# something else.  Taking the wrong one leaves the helpers subtly wrong: casts
+# from floating point to integer quietly produce zero.
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} ${libtccOpt3} -c -o ${out}/lib/libtcc1.o ${libtcc1_c}
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} ${libtccOpt3} -c -o ${out}/lib/va_list.o ${valist_c}
+${tcc} -ar ${out}/lib/libtcc1.a ${out}/lib/libtcc1.o ${out}/lib/va_list.o
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/libc.o ${libc_c}
+${tcc} -ar ${out}/lib/libc.a ${out}/lib/libc.o
+
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/libgetopt.o ${getopt_c}
+${tcc} -ar ${out}/lib/libgetopt.a ${out}/lib/libgetopt.o
