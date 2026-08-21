@@ -23,6 +23,10 @@ let
     # The bootstrap is a scope of its own, so the names of its intermediate
     # links (hex2-0, M0.hex2, M1-macro-1.M1) stay inside it.
     stage0 = callPackage ./bootstrap/stage0-posix { };
+
+    # The stage above it, built by the compiler, assembler and linker stage0
+    # ends with.  Its own intermediates (mes.M1, mes.hex2) stay inside it too.
+    mes = callPackage ./bootstrap/mes { };
   };
 in
 self
