@@ -1190,6 +1190,21 @@ class (Monad m) => MonadEval m where
   -- run before the tree is copied to the store.
   setExecutableFile :: Text -> m ()
 
+  -- | Look up a previously recorded fetch, by a key naming exactly what was
+  -- fetched.  'Nothing' when nothing was recorded, or when what was recorded
+  -- no longer describes anything on disk.
+  --
+  -- This is what lets @builtins.fetchGit@ skip the network for a revision it
+  -- has already fetched.  A pinned revision names one tree for all time, so
+  -- the result cannot go stale: either the store still holds it, or the entry
+  -- is ignored and the fetch happens again.
+  lookupFetchCache :: Text -> m (Maybe Text)
+
+  -- | Record a fetch under that key.  Failing to record is not an error --
+  -- the cache is an optimisation, and a build that cannot write one should
+  -- still finish.
+  writeFetchCache :: Text -> Text -> m ()
+
   -- | Read a symlink's target WITHOUT following it.
   readSymlinkTarget :: Text -> m Text
 
@@ -1315,6 +1330,8 @@ instance MonadEval PureEval where
   narHashOfPath _ = throwEvalError "builtins.fetchGit: not available in pure evaluation"
   isExecutableFile _ = throwEvalError "builtins.path: not available in pure evaluation"
   setExecutableFile _ = throwEvalError "builtins.fetchGit: not available in pure evaluation"
+  lookupFetchCache _ = pure Nothing
+  writeFetchCache _ _ = pure ()
   readSymlinkTarget _ = throwEvalError "builtins.path: not available in pure evaluation"
   addSourceNar _ _ = throwEvalError "builtins.path: not available in pure evaluation"
   addFixedOutputFile _ _ = throwEvalError "builtins.fetchurl: not available in pure evaluation"
