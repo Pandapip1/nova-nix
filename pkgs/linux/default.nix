@@ -57,6 +57,13 @@ let
       tinycc = self.tinycc.boot;
       mesInclude = "${self.mes.src}/include";
     };
+
+    # The programs every build script above assumes exist.
+    coreutils = callPackage ./bootstrap/coreutils {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+      mesInclude = "${self.mes.src}/include";
+    };
   };
 in
 self
