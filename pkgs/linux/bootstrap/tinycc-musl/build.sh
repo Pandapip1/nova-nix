@@ -88,6 +88,20 @@ build_tcc ./tcc-musl tcc-musl-2 "$musl/lib"
 mkdir -p "$out/bin" "$out/lib"
 cp tcc-musl-2 "$out/bin/tcc"
 chmod 555 "$out/bin/tcc"
+
+# -B names one directory, not a search path -- tcc's TCC_OPTION_B replaces the
+# library path rather than appending to it, and this tcc resolves both
+# CONFIG_TCC_CRTPREFIX and CONFIG_TCC_LIBPATHS from it.  So the crt objects and
+# musl's archives are copied in beside libtcc1.a: everything a link needs is
+# then reachable from a single -B, and no caller has to know that the C library
+# lives somewhere else.
+cp "$musl"/lib/*.a "$musl"/lib/*.o "$out/lib/"
+
+# ... with the freshly built libtcc1.a last, so it wins over the copy musl
+# carries, which was compiled by the older Mes-libc tcc.  The copy arrived
+# read-only, as everything does from a store path, so it is removed rather
+# than written over.
+rm -f "$out/lib/libtcc1.a"
 cp libtcc1.a "$out/lib/libtcc1.a"
 
 "$out/bin/tcc" -v
