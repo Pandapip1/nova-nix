@@ -19,4 +19,25 @@ rec {
     url = "https://git.savannah.gnu.org/git/mes.git";
     inherit rev ref;
   };
+
+  # ldexpl, which 0.27.1 does not have and mainline TinyCC needs: tccpp.c
+  # calls it when it parses a floating-point constant, and without it tcc
+  # links with an undefined symbol.
+  #
+  # Upstream added it after the release, on a branch rather than in a tag, so
+  # it is pinned as its own revision and one file is taken from it.  nixpkgs'
+  # minimal bootstrap vendors a copy of this same file for the same reason,
+  # saying the Mes GitLab force-pushes too often to link to; savannah is
+  # where the commit actually lives, and a revision there does not move.
+  ldexpl = {
+    rev = "315238d4cc26b9f64849d74f07c7f56343cadeae";
+    ref = "wip-bootstrap-x86_64";
+  };
+
+  ldexplSrc = builtins.fetchGit {
+    url = "https://git.savannah.gnu.org/git/mes.git";
+    inherit (ldexpl) rev ref;
+  };
+
+  ldexplFile = "${ldexplSrc}/lib/math/ldexpl.c";
 }

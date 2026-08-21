@@ -1,0 +1,32 @@
+# Generate tccdefs_.h, the predefined macros mainline tcc compiles into itself.
+#
+# Mainline tcc no longer reads a tccdefs.h at runtime: CONFIG_TCC_PREDEFS
+# makes it compile the definitions in, as a C string.  conftest.c, built with
+# -DC2STR, is the converter upstream ships for exactly that, and it is built
+# here by the tcc the round below produced.
+#
+# The Mes config.h line appended at the end is what nixpkgs' minimal
+# bootstrap appends for the same reason: the predefined macros have to pull in
+# Mes's configuration too, since that is the C library this tcc targets.
+
+cd ${TMPDIR}
+${bin_mkdir} -p ${out}
+
+${prevTcc} -B ${prevLibs}/lib -DC2STR -o c2str ${src}/conftest.c
+
+# alloca is dropped from the predefined macros before they are converted.
+# tccdefs.h both declares alloca and makes it an alias for __builtin_alloca;
+# the Mes C library DEFINES alloca itself, in C, and a definition of a name
+# the compiler has already claimed as a builtin fails to compile as
+# "incompatible types for redefinition of 'alloca'".  Only this one name
+# collides, so only this one is removed -- the rest of the predefs stand.
+# Both patterns and the replacement come through variables.  A quoted string
+# written here is split on spaces by kaem before replace ever sees it, and an
+# empty argument disappears altogether -- so the pattern would arrive in three
+# pieces and the replacement not at all.  A variable is substituted as ONE
+# argument, which is exactly what is needed.
+${bin_replace} --file ${src}/include/tccdefs.h --output tccdefs-1.h --match-on ${allocaBuiltin} --replace-with ${blank}
+${bin_replace} --file tccdefs-1.h --output tccdefs-2.h --match-on ${allocaDecl} --replace-with ${blank}
+
+./c2str tccdefs-2.h tccdefs_.h
+${bin_catm} ${out}/tccdefs_.h tccdefs_.h ${configLine}

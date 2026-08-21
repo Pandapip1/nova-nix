@@ -1,15 +1,27 @@
 # Collect what a program links against into one directory.
 #
-# Everything above wants a single path to point at -- crt1.o and the archives
-# beside each other -- rather than one store path per library.  libtcc1.c is
-# carried across as source, not compiled: tcc compiles it itself, against its
-# own headers.
+# The lib/${arch}-mes/ layout is not decoration: MesCC looks for a library by
+# building <libdir>/<arch>-mes/<name> and searching each -L in turn, so this
+# is the shape it will find crt1.o and libc+tcc.s in.
+#
+# Each library is here twice, and both forms are used.  MesCC links from
+# assembly -- hex2 is its linker, and hex2 reads what M1 assembles -- so `-l
+# c+tcc` finds libc+tcc.s.  tcc, once it exists, links objects and reads the
+# .a instead.
+#
+# libtcc1.c is carried across as source, not compiled: tcc compiles that one
+# itself, against its own headers.
 
-${bin_mkdir} -p ${out}/lib
-${bin_cp} ${crt1} ${out}/lib/crt1.o
-${bin_cp} ${libc_mini} ${out}/lib/libc-mini.a
-${bin_cp} ${libmescc} ${out}/lib/libmescc.a
-${bin_cp} ${libc} ${out}/lib/libc.a
-${bin_cp} ${libc_tcc} ${out}/lib/libc+tcc.a
+${bin_mkdir} -p ${out}/lib/${arch}-mes
+${bin_cp} ${crt1} ${out}/lib/${arch}-mes/crt1.o
+${bin_cp} ${crt1_s} ${out}/lib/${arch}-mes/crt1.s
+${bin_cp} ${libc_mini_a} ${out}/lib/${arch}-mes/libc-mini.a
+${bin_cp} ${libc_mini_s} ${out}/lib/${arch}-mes/libc-mini.s
+${bin_cp} ${libmescc_a} ${out}/lib/${arch}-mes/libmescc.a
+${bin_cp} ${libmescc_s} ${out}/lib/${arch}-mes/libmescc.s
+${bin_cp} ${libc_a} ${out}/lib/${arch}-mes/libc.a
+${bin_cp} ${libc_s} ${out}/lib/${arch}-mes/libc.s
+${bin_cp} ${libc_tcc_a} ${out}/lib/${arch}-mes/libc+tcc.a
+${bin_cp} ${libc_tcc_s} ${out}/lib/${arch}-mes/libc+tcc.s
 ${bin_cp} ${src}/lib/libtcc1.c ${out}/lib/libtcc1.c
 ${bin_cp} ${mescc} ${out}/lib/mescc.scm

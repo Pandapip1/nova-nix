@@ -32,6 +32,16 @@ let
     # Shared with the Windows set -- it is pure Scheme, and says nothing about
     # the platform MesCC runs on or compiles for.
     nyacc = callPackage ../bootstrap/nyacc { };
+
+    # The first C compiler here that implements enough of C to build a system,
+    # and the first that can compile itself.
+    tinycc = callPackage ./bootstrap/tinycc { };
+
+    # How a release tarball becomes a source tree, using the unpackers this
+    # bootstrap built rather than nova-nix's builtin:unpack.
+    unpackTarball = callPackage ./bootstrap/unpack.nix {
+      inherit (self.stage0) system platforms;
+    };
   };
 in
 self
