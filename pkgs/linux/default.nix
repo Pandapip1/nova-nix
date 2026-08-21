@@ -135,11 +135,31 @@ let
       bootGawk = self.gawk-mes;
     };
 
+    # The same tar against musl, which restores modification times where the
+    # one below it does not.  See bootstrap/gnutar/musl.nix.
+    gnutar-musl = callPackage ./bootstrap/gnutar/musl.nix {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+    };
+
+    # The full coreutils, which the 5.0 below is not: live-bootstrap's
+    # makefile names the 62 programs it compiles, and env, uname, date and
+    # stat are not among them.
+    coreutils-musl = callPackage ./bootstrap/coreutils/musl.nix {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+    };
+
     # find and xargs, which gcc's build runs.
     findutils = callPackage ./bootstrap/findutils {
       inherit (self.stage0) system platforms;
       tinycc = self.tinycc-musl;
       gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
     };
 
     # The assembler and linker gcc needs.
@@ -147,6 +167,8 @@ let
       inherit (self.stage0) system platforms;
       tinycc = self.tinycc-musl;
       gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
     };
 
     # Compiled against musl: 3.8 needs socklen_t, which the Mes C library
@@ -155,6 +177,7 @@ let
       inherit (self.stage0) system platforms;
       tinycc = self.tinycc-musl;
       gnused = self.gnused-musl;
+      coreutils = self.coreutils-musl;
     };
 
     # The C library that replaces Mes's, and the compiler on top of it.  Both
