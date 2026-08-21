@@ -7,6 +7,7 @@
   lib,
   newScope,
   stage0,
+  nyacc,
 }:
 lib.makeScope newScope (
   self:
@@ -24,5 +25,11 @@ lib.makeScope newScope (
       })
       mes-m2
       ;
+
+    # The C library MesCC compiles, and what TinyCC will link against.
+    libc = callPackage ./libc.nix {
+      inherit stage0;
+      inherit (stage0) kaem;
+    };
   }
 )

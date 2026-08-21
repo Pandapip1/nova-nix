@@ -27,6 +27,11 @@ let
     # The stage above it, built by the compiler, assembler and linker stage0
     # ends with.  Its own intermediates (mes.M1, mes.hex2) stay inside it too.
     mes = callPackage ./bootstrap/mes { };
+
+    # Not a stage: the parser modules MesCC loads, which Mes does not vendor.
+    # Shared with the Windows set -- it is pure Scheme, and says nothing about
+    # the platform MesCC runs on or compiles for.
+    nyacc = callPackage ../bootstrap/nyacc { };
   };
 in
 self

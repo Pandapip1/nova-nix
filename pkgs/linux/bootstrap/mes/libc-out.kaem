@@ -1,0 +1,15 @@
+# Collect what a program links against into one directory.
+#
+# Everything above wants a single path to point at -- crt1.o and the archives
+# beside each other -- rather than one store path per library.  libtcc1.c is
+# carried across as source, not compiled: tcc compiles it itself, against its
+# own headers.
+
+${bin_mkdir} -p ${out}/lib
+${bin_cp} ${crt1} ${out}/lib/crt1.o
+${bin_cp} ${libc_mini} ${out}/lib/libc-mini.a
+${bin_cp} ${libmescc} ${out}/lib/libmescc.a
+${bin_cp} ${libc} ${out}/lib/libc.a
+${bin_cp} ${libc_tcc} ${out}/lib/libc+tcc.a
+${bin_cp} ${src}/lib/libtcc1.c ${out}/lib/libtcc1.c
+${bin_cp} ${mescc} ${out}/lib/mescc.scm
