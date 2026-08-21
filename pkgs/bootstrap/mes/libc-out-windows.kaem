@@ -1,0 +1,45 @@
+# Collect what a program links against into one directory -- the Windows one.
+#
+# The same as libc-out.kaem beside this, which is the shared script, plus the
+# two files that are the PE32 format.  kaem has no way to include one file
+# from another, so the shared part is repeated rather than referred to; keep
+# the two in step.
+#
+# The lib/${arch}-mes/ layout is not decoration: MesCC looks for a library by
+# building <libdir>/<arch>-mes/<name> and searching each -L in turn, so this
+# is the shape it will find crt1.o and libc+tcc.s in.
+#
+# Each library is here twice, and both forms are used.  MesCC links from
+# assembly -- hex2 is its linker, and hex2 reads what M1 assembles -- so `-l
+# c+tcc` finds libc+tcc.s.  tcc, once it exists, links objects and reads the
+# .a instead.
+#
+# libtcc1.c is carried across as source, not compiled: tcc compiles that one
+# itself, against its own headers.
+
+${bin_mkdir} -p ${out}/lib/${arch}-mes
+${bin_cp} ${crt1} ${out}/lib/${arch}-mes/crt1.o
+${bin_cp} ${crt1_s} ${out}/lib/${arch}-mes/crt1.s
+${bin_cp} ${libc_mini_a} ${out}/lib/${arch}-mes/libc-mini.a
+${bin_cp} ${libc_mini_s} ${out}/lib/${arch}-mes/libc-mini.s
+${bin_cp} ${libmescc_a} ${out}/lib/${arch}-mes/libmescc.a
+${bin_cp} ${libmescc_s} ${out}/lib/${arch}-mes/libmescc.s
+${bin_cp} ${libc_a} ${out}/lib/${arch}-mes/libc.a
+${bin_cp} ${libc_s} ${out}/lib/${arch}-mes/libc.s
+${bin_cp} ${libc_tcc_a} ${out}/lib/${arch}-mes/libc+tcc.a
+${bin_cp} ${libc_tcc_s} ${out}/lib/${arch}-mes/libc+tcc.s
+${bin_cp} ${src}/lib/libtcc1.c ${out}/lib/libtcc1.c
+${bin_cp} ${mescc} ${out}/lib/mescc.scm
+
+# And what hex2 puts around a program to make it a PE32 executable.  mescc.scm
+# builds the name from the kernel and the machine -- pe32-header.hex2, not
+# elf32-header.hex2 -- and looks for it under <libdir>/<kernel>/<arch>-mes,
+# which is why these two are one directory deeper than everything above.
+#
+# The footer is pe-end.M1 under another name.  All it holds is :PE_end, the
+# label the PE header measures the image against, and it has to be assembled
+# last for that label to mean the end.
+
+${bin_mkdir} -p ${out}/lib/${mesKernel}/${arch}-mes
+${bin_cp} ${pe32_header} ${out}/lib/${mesKernel}/${arch}-mes/pe32-header.hex2
+${bin_cp} ${pe32_footer} ${out}/lib/${mesKernel}/${arch}-mes/pe32-footer-single-main.hex2

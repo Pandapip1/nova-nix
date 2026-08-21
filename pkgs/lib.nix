@@ -1,8 +1,8 @@
 # The small amount of lib this package set needs.
 #
 # nixpkgs gets these from `lib`; nova-nix has no nixpkgs to draw on while
-# bootstrapping itself, so the two functions that make a package set a package
-# set are defined here, in terms of builtins only.
+# bootstrapping itself, so the handful a package set cannot do without are
+# defined here, in terms of builtins only.
 rec {
   # callPackageWith autoArgs fn args
   #
@@ -53,4 +53,19 @@ rec {
         };
     in
     self;
+
+  # optional cond value
+  #
+  # A one-element list when cond holds and an empty one when it does not, so
+  # that a conditional entry can be ++'d into a list without an if around the
+  # whole list.  nixpkgs' lib.lists.optional.
+  optional = cond: value: if cond then [ value ] else [ ];
+
+  # optionalAttrs cond attrs
+  #
+  # The same for a set: `//`'d in when cond holds, nothing when it does not.
+  # Note that `attrs` is only evaluated when it is used, so the entries may
+  # name things that make no sense unless cond holds.  nixpkgs'
+  # lib.attrsets.optionalAttrs.
+  optionalAttrs = cond: attrs: if cond then attrs else { };
 }
