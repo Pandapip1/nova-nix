@@ -1,0 +1,21 @@
+# ansidecl.h defines __attribute__ away for anything that is not a new
+# enough gcc, and tcc reports GCC_VERSION 0 -- so every __attribute__
+# vanishes, including the aligned() that bfd's mmap window depends on, and
+# binutils fails an assertion at runtime.  tcc does understand the
+# attributes binutils uses, so it is excluded from the definition.
+#
+# Taken from nixpkgs, pkgs/os-specific/linux/minimal-bootstrap/binutils/
+# fix-tinycc-attribute.patch.
+diff --git a/include/ansidecl.h b/include/ansidecl.h
+index 0ae6a986..214a41f9 100644
+--- a/include/ansidecl.h
++++ b/include/ansidecl.h
+@@ -68,7 +68,7 @@ So instead we use the macro below and test it against specific values.  */
+    macros freely, and know that they will come into play for the
+    version of gcc in which they are supported.  */
+ 
+-#if (GCC_VERSION < 2007)
++#if (GCC_VERSION < 2007) && !defined(__TINYC__)
+ # define __attribute__(x)
+ #endif
+ 

@@ -135,6 +135,13 @@ let
       bootGawk = self.gawk-mes;
     };
 
+    # The assembler and linker gcc needs.
+    binutils = callPackage ./bootstrap/binutils {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc-musl;
+      gnused = self.gnused-musl;
+    };
+
     # Compiled against musl: 3.8 needs socklen_t, which the Mes C library
     # does not have.
     diffutils = callPackage ./bootstrap/diffutils {

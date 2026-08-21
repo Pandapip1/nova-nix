@@ -31,6 +31,16 @@ cd build
 sed -i 's|switch(size)|if (reg >= 8) { cstr_printf(add_str, "%r%d%c", reg, (size == 1) ? '"'"'b'"'"' : ((size == 2) ? '"'"'w'"'"' : ((size == 4) ? '"'"'d'"'"' : '"'"' '"'"'))); return; } switch(size)|' i386-asm.c
 sed -i 's|vpush_type_size(pointed_type(\&vtop\[-1\].type), \&align);|vpush_type_size(pointed_type(\&vtop[-1].type), \&align); if (!(vtop[-1].type.t \& VT_UNSIGNED)) gen_cast_s(VT_PTRDIFF_T);|' tccgen.c
 
+# Link statically unless told otherwise, which is nixpkgs' static-link.patch
+# as an edit rather than a patch file.  There is no shared musl in this
+# bootstrap, so a dynamically linked output names an interpreter that does not
+# exist and the kernel refuses to run it -- and passing -static everywhere is
+# not enough, because a configure script or a libtool relink drops flags out
+# of CC on its way to the final link, which is how binutils ended up with a
+# gas nothing could execute.
+sed -i 's|    s->nocommon = 1;|    s->static_link = 1;\n    s->nocommon = 1;|' libtcc.c
+grep -q 'static_link = 1' libtcc.c
+
 : > config.h
 
 # tcc looks for libtcc1.a beside itself; musl's copy is the one to use until
