@@ -1,5 +1,8 @@
 # Nyacc: the parser modules MesCC loads.  Source only -- there is nothing to
 # build, so the scope exposes the tree and the module directory within it.
+#
+# Shared by every package set: pure Scheme, saying nothing about the platform
+# MesCC runs on or compiles for.
 { lib, newScope }:
 
 lib.makeScope newScope (

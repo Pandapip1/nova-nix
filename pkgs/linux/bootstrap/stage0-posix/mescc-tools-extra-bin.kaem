@@ -1,0 +1,42 @@
+# Assemble mescc-tools-extra's bin directory.
+#
+# Everything above this bootstrap wants one directory to put on PATH rather
+# than thirteen separate store paths, and this is where the utilities that
+# have just been built make it.  mkdir creates it, cp fills it, chmod makes
+# each one runnable: a store path is read-only once registered, but not while
+# it is being built.
+#
+# Every path comes from the environment, which is where `derivation` puts each
+# attribute.  kaem has no loops, so the list is written out.
+#
+# `${bin_NAME}` is the freshly linked utility; `${out}/bin/NAME` is where it
+# is going.  The three used to do the work -- mkdir, cp, chmod -- are the same
+# binaries, named again so the script does not depend on PATH at all.
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} ${bin_sha256sum} ${out}/bin/sha256sum
+${bin_chmod} 0555 ${out}/bin/sha256sum
+${bin_cp} ${bin_match} ${out}/bin/match
+${bin_chmod} 0555 ${out}/bin/match
+${bin_cp} ${bin_mkdir} ${out}/bin/mkdir
+${bin_chmod} 0555 ${out}/bin/mkdir
+${bin_cp} ${bin_untar} ${out}/bin/untar
+${bin_chmod} 0555 ${out}/bin/untar
+${bin_cp} ${bin_ungz} ${out}/bin/ungz
+${bin_chmod} 0555 ${out}/bin/ungz
+${bin_cp} ${bin_unbz2} ${out}/bin/unbz2
+${bin_chmod} 0555 ${out}/bin/unbz2
+${bin_cp} ${bin_unxz} ${out}/bin/unxz
+${bin_chmod} 0555 ${out}/bin/unxz
+${bin_cp} ${bin_catm} ${out}/bin/catm
+${bin_chmod} 0555 ${out}/bin/catm
+${bin_cp} ${bin_cp} ${out}/bin/cp
+${bin_chmod} 0555 ${out}/bin/cp
+${bin_cp} ${bin_chmod} ${out}/bin/chmod
+${bin_chmod} 0555 ${out}/bin/chmod
+${bin_cp} ${bin_rm} ${out}/bin/rm
+${bin_chmod} 0555 ${out}/bin/rm
+${bin_cp} ${bin_replace} ${out}/bin/replace
+${bin_chmod} 0555 ${out}/bin/replace
+${bin_cp} ${bin_wrap} ${out}/bin/wrap
+${bin_chmod} 0555 ${out}/bin/wrap
