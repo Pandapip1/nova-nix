@@ -40,7 +40,7 @@
     "lib/linux/x86-mes-mescc/syscall-internal.c"
   ];
 
-  # 107 files
+  # 108 files
   libc_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -120,6 +120,7 @@
     "lib/linux/execve.c"
     "lib/linux/fcntl.c"
     "lib/linux/fork.c"
+    "lib/posix/spawn.c"
     "lib/linux/fstat.c"
     "lib/linux/fsync.c"
     "lib/linux/_getcwd.c"
@@ -151,7 +152,7 @@
     "lib/linux/kill.c"
   ];
 
-  # 159 files
+  # 160 files
   libc_tcc_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -231,6 +232,7 @@
     "lib/linux/execve.c"
     "lib/linux/fcntl.c"
     "lib/linux/fork.c"
+    "lib/posix/spawn.c"
     "lib/linux/fstat.c"
     "lib/linux/fsync.c"
     "lib/linux/_getcwd.c"
@@ -314,9 +316,7 @@
     "lib/x86-mes-mescc/setjmp.c"
   ];
 
-  # 1 files
-  # 261 files, the gcc-variant sources: what a real C compiler compiles,
-  # as opposed to the subset MesCC can manage.  tcc compiles these.
+  # 263 files
   libc_gnu_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -396,6 +396,7 @@
     "lib/linux/execve.c"
     "lib/linux/fcntl.c"
     "lib/linux/fork.c"
+    "lib/posix/spawn.c"
     "lib/linux/fstat.c"
     "lib/linux/fsync.c"
     "lib/linux/_getcwd.c"
@@ -484,6 +485,7 @@
     "lib/ctype/isgraph.c"
     "lib/ctype/isprint.c"
     "lib/ctype/ispunct.c"
+    "lib/math/ldexpl.c"
     "lib/math/ceil.c"
     "lib/math/fabs.c"
     "lib/math/floor.c"
@@ -581,8 +583,8 @@
     "lib/linux/sigprogmask.c"
   ];
 
+  # 1 file
   libtcc1_SOURCES = [
     "lib/libtcc1.c"
   ];
-
 }

@@ -46,10 +46,6 @@
   # The two definitions scripts/mescc.scm.in expects to already exist, one of
   # which is the kernel -- so this is per-kernel too.  See the file.
   mesccPrelude,
-  # ldexpl is appended to the GNU-variant source list; see bootstrap-sources.
-  # Nothing needs it until TinyCC does, so a kernel whose TinyCC does not
-  # exist yet passes null.
-  ldexplFile ? null,
   arch ? "x86",
   # How many cells Mes may have, which is what MES_ARENA counts -- a cell is
   # twelve bytes here, plus a tenth again for the jam buffer.  100000000 is
@@ -202,10 +198,7 @@ let
   # .fini, which is a thing the ELF linker does with sections and the PE one
   # does not.  A Windows entry point is crt1 and nothing else.
   gnuSource = {
-    # ldexpl is appended: 0.27.1's list does not have it, and mainline TinyCC
-    # needs it to parse a floating-point constant.  See bootstrap-sources.nix
-    # for where the file comes from.
-    libc = bundle "libc+gnu" (inTree sources.libc_gnu_SOURCES ++ lib.optional (ldexplFile != null) ldexplFile);
+    libc = bundle "libc+gnu" (inTree sources.libc_gnu_SOURCES);
     libtcc1 = bundle "libtcc1" (inTree sources.libtcc1_SOURCES);
     getopt = "${src}/lib/posix/getopt.c";
   }

@@ -13,7 +13,7 @@ rec {
   # 0.27.1 with a backend upstream does not carry yet.
   version = "0.27.1-unstable-2026-08-21";
 
-  rev = "9c836c4d2c56585867aa89501dc0aadf4c3d583b";
+  rev = "c6e6e4c2d6eeef603f1a10fb37383f0be0a5442b";
   ref = "windows-pe32";
 
   src = builtins.fetchGit {

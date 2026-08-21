@@ -16,7 +16,14 @@
 # one translation unit before compiling, so a definition has to come before
 # whatever uses it.
 #
-# Seventeen of the files below are lib/stub/.  That is not a Windows fact so
+# libc_gnu_SOURCES names lib/windows/x86-mes-gcc/, and that directory does not
+# exist yet.  It is the fuller set a real C compiler builds -- TinyCC
+# recompiles the library from it once TinyCC exists -- and the six per-compiler
+# files in it are _exit, _write, filetime, ntlow, ntcall and iosb: the ones
+# whose bodies are assembly, and so are written once per compiler that has to
+# emit it.  Nothing asks for that list until there is a TinyCC on this side.
+#
+# Eighteen of the files below are lib/stub/.  That is not a Windows fact so
 # much as a not-yet fact: stat, mkdir, rename and readdir all have an ntdll
 # call waiting for them, and nothing in the bootstrap has asked yet.  A stub
 # says under __mes_debug that it did nothing, rather than pretending.
@@ -41,7 +48,7 @@
     "lib/mes/globals.c"
   ];
 
-  # 109 files
+  # 115 files
   libc_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -75,6 +82,7 @@
     "lib/mes/assert_msg.c"
     "lib/posix/write.c"
     "lib/stdlib/atoi.c"
+    "lib/windows/lseek.c"
     "lib/dirent/__getdirentries.c"
     "lib/dirent/closedir.c"
     "lib/dirent/opendir.c"
@@ -119,14 +127,18 @@
     "lib/windows/dup2.c"
     "lib/windows/execve.c"
     "lib/stub/fcntl.c"
+    "lib/windows/wow64resolve.c"
+    "lib/windows/wow64gate.c"
     "lib/windows/fork.c"
     "lib/stub/fstat.c"
     "lib/stub/fsync.c"
     "lib/windows/_getcwd.c"
     "lib/stub/getdents.c"
+    "lib/windows/x86-mes-mescc/filetime.c"
     "lib/windows/gettimeofday.c"
     "lib/windows/ioctl3.c"
     "lib/stub/link.c"
+    "lib/windows/lseek.c"
     "lib/stub/lstat.c"
     "lib/windows/_open3.c"
     "lib/linux/malloc.c"
@@ -137,6 +149,7 @@
     "lib/stub/readdir.c"
     "lib/stub/rename.c"
     "lib/stub/rmdir.c"
+    "lib/windows/spawn.c"
     "lib/stub/stat.c"
     "lib/stub/symlink.c"
     "lib/windows/time.c"
@@ -154,7 +167,7 @@
     "lib/windows/ntdll.c"
   ];
 
-  # 161 files
+  # 167 files
   libc_tcc_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -188,6 +201,7 @@
     "lib/mes/assert_msg.c"
     "lib/posix/write.c"
     "lib/stdlib/atoi.c"
+    "lib/windows/lseek.c"
     "lib/dirent/__getdirentries.c"
     "lib/dirent/closedir.c"
     "lib/dirent/opendir.c"
@@ -232,14 +246,18 @@
     "lib/windows/dup2.c"
     "lib/windows/execve.c"
     "lib/stub/fcntl.c"
+    "lib/windows/wow64resolve.c"
+    "lib/windows/wow64gate.c"
     "lib/windows/fork.c"
     "lib/stub/fstat.c"
     "lib/stub/fsync.c"
     "lib/windows/_getcwd.c"
     "lib/stub/getdents.c"
+    "lib/windows/x86-mes-mescc/filetime.c"
     "lib/windows/gettimeofday.c"
     "lib/windows/ioctl3.c"
     "lib/stub/link.c"
+    "lib/windows/lseek.c"
     "lib/stub/lstat.c"
     "lib/windows/_open3.c"
     "lib/linux/malloc.c"
@@ -250,6 +268,7 @@
     "lib/stub/readdir.c"
     "lib/stub/rename.c"
     "lib/stub/rmdir.c"
+    "lib/windows/spawn.c"
     "lib/stub/stat.c"
     "lib/stub/symlink.c"
     "lib/windows/time.c"
@@ -319,7 +338,7 @@
     "lib/x86-mes-mescc/setjmp.c"
   ];
 
-  # 249 files
+  # 256 files
   libc_gnu_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -353,6 +372,7 @@
     "lib/mes/assert_msg.c"
     "lib/posix/write.c"
     "lib/stdlib/atoi.c"
+    "lib/windows/lseek.c"
     "lib/dirent/__getdirentries.c"
     "lib/dirent/closedir.c"
     "lib/dirent/opendir.c"
@@ -397,14 +417,18 @@
     "lib/windows/dup2.c"
     "lib/windows/execve.c"
     "lib/stub/fcntl.c"
+    "lib/windows/wow64resolve.c"
+    "lib/windows/wow64gate.c"
     "lib/windows/fork.c"
     "lib/stub/fstat.c"
     "lib/stub/fsync.c"
     "lib/windows/_getcwd.c"
     "lib/stub/getdents.c"
+    "lib/windows/x86-mes-gcc/filetime.c"
     "lib/windows/gettimeofday.c"
     "lib/windows/ioctl3.c"
     "lib/stub/link.c"
+    "lib/windows/lseek.c"
     "lib/stub/lstat.c"
     "lib/windows/_open3.c"
     "lib/linux/malloc.c"
@@ -415,6 +439,7 @@
     "lib/stub/readdir.c"
     "lib/stub/rename.c"
     "lib/stub/rmdir.c"
+    "lib/windows/spawn.c"
     "lib/stub/stat.c"
     "lib/stub/symlink.c"
     "lib/windows/time.c"
@@ -489,6 +514,7 @@
     "lib/ctype/isgraph.c"
     "lib/ctype/isprint.c"
     "lib/ctype/ispunct.c"
+    "lib/math/ldexpl.c"
     "lib/math/ceil.c"
     "lib/math/fabs.c"
     "lib/math/floor.c"

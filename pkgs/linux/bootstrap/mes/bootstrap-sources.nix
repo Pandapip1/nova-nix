@@ -1,43 +1,29 @@
 # The pinned GNU Mes source: the stage above stage0-posix.
 #
-# Upstream, from savannah, at the 0.27.1 release tag.  The Windows set pins a
-# fork instead, because upstream has no Windows backend; nothing on this side
-# needs one, so this is the release as published.
+# The same fork the Windows set pins, at the same revision.  Upstream has no
+# Windows backend, which is why the fork exists; nothing on this side needs
+# one, but one Mes for both sets is worth more than a version of its own --
+# a change to the C library or to MesCC is then made once and both sets see
+# it, and the two builds cannot drift into disagreeing about what Mes is.
+#
+# It is v0.27.1 plus twenty-seven commits, of which three are upstream's own
+# post-release fixes and the rest are the Windows backend.  The tag is a
+# direct ancestor, so nothing on this side lost anything by moving.
 #
 # To move the pin: change `rev` (and `ref`), then re-evaluate -- fetchGit
 # reports the new pin's own `rev`/`narHash`, there is nothing to prefetch by
 # hand.
 { }:
 rec {
-  version = "0.27.1";
+  # 0.27.1 plus what the branch adds; the same string the Windows set uses,
+  # because it is the same source.
+  version = "0.27.1-unstable-2026-08-21";
 
-  # refs/tags/v0.27.1 (an annotated tag; this is the commit it names).
-  rev = "c331d801da386ba752f3fe92d0538102a90e988d";
-  ref = "refs/tags/v0.27.1";
+  rev = "c6e6e4c2d6eeef603f1a10fb37383f0be0a5442b";
+  ref = "windows-pe32";
 
   src = builtins.fetchGit {
-    url = "https://git.savannah.gnu.org/git/mes.git";
+    url = "https://github.com/Pandapip1/mes.git";
     inherit rev ref;
   };
-
-  # ldexpl, which 0.27.1 does not have and mainline TinyCC needs: tccpp.c
-  # calls it when it parses a floating-point constant, and without it tcc
-  # links with an undefined symbol.
-  #
-  # Upstream added it after the release, on a branch rather than in a tag, so
-  # it is pinned as its own revision and one file is taken from it.  nixpkgs'
-  # minimal bootstrap vendors a copy of this same file for the same reason,
-  # saying the Mes GitLab force-pushes too often to link to; savannah is
-  # where the commit actually lives, and a revision there does not move.
-  ldexpl = {
-    rev = "315238d4cc26b9f64849d74f07c7f56343cadeae";
-    ref = "wip-bootstrap-x86_64";
-  };
-
-  ldexplSrc = builtins.fetchGit {
-    url = "https://git.savannah.gnu.org/git/mes.git";
-    inherit (ldexpl) rev ref;
-  };
-
-  ldexplFile = "${ldexplSrc}/lib/math/ldexpl.c";
 }

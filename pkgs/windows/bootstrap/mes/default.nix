@@ -29,9 +29,6 @@ lib.makeScope newScope (
     # The shared package, told which kernel: that picks the include directory,
     # the source lists, what a program starts at, and -- only here -- the PE32
     # header and footer that hex2 wraps an executable in.
-    #
-    # No ldexplFile: that is appended to the GNU-variant sources for mainline
-    # TinyCC's sake, and there is no TinyCC on this side yet to need it.
     libc = callPackage ../../../bootstrap/mes/libc.nix {
       inherit stage0;
       inherit (stage0) kaem;
