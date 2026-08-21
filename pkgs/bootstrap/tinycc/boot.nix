@@ -26,13 +26,13 @@
   mesSrc,
   mainlineSrc,
   mainlineVersion,
+  tccTarget,
+  mesArchInclude,
+  extraTargetDefines,
 }:
 let
   # The fork's source, which every round below mainline builds from.
   forkSrc = src;
-
-  arch = "x86";
-  tccTarget = "I386";
   out = builtins.placeholder "out";
 
   meta = {
@@ -107,6 +107,9 @@ let
       "${src}"
       "-D"
       "TCC_TARGET_${tccTarget}=1"
+    ]
+    ++ builtins.concatMap (d: [ "-D" d ]) extraTargetDefines
+    ++ [
       "-D"
       "inline="
       "-D"
@@ -183,7 +186,7 @@ let
       # argument, so anything that has to be several cannot be one string.
       incConfig = mes-libc.configInclude;
       incMes = "${mesSrc}/include";
-      incMesArch = "${mesSrc}/include/linux/${arch}";
+      incMesArch = "${mesSrc}/include/${mesArchInclude}";
       inherit tccTarget;
 
       # The rounds differ only in how much of C the library may use, and
