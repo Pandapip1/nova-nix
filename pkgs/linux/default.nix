@@ -164,6 +164,16 @@ let
       coreutils = self.coreutils-musl;
     };
 
+    # The first gcc here written in C++, built by the g++ above it.
+    gcc10 = callPackage ./bootstrap/gcc/10.nix {
+      inherit (self.stage0) system platforms;
+      gcc = self.gcc-cxx;
+      musl = self.musl-gcc;
+      gnused = self.gnused-musl;
+      gnutar = self.gnutar-musl;
+      coreutils = self.coreutils-musl;
+    };
+
     # musl again, this time built by gcc: everything tcc could not assemble,
     # plus a shared library, a dynamic loader and the musl-gcc wrapper that
     # the compilers above link against.
