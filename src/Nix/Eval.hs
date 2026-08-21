@@ -3542,49 +3542,145 @@ fetchGit rawUrl name mRef mRev submodules shallow =
   case checkGitUrl rawUrl of
     Left err -> throwEvalError err
     Right url -> do
-      cloneDir <- createScratchDir "nova-nix-fetchgit-"
-      let ctx = "builtins.fetchGit"
-          git = gitRun ctx cloneDir
-          depthArgs = if shallow then ["--depth", "1"] else []
-          refArg = fromMaybe "HEAD" mRef
-          checkoutTarget = fromMaybe "FETCH_HEAD" mRev
-      _ <- git ["init", "--quiet", "."]
-      _ <- git ["remote", "add", "origin", url]
-      _ <- git (["fetch", "--quiet"] ++ depthArgs ++ ["origin", refArg])
-      _ <- git ["checkout", "--quiet", checkoutTarget]
-      when submodules $
-        void (git ["submodule", "update", "--init", "--recursive"])
-      -- Git records a file's executability in its index (100755 vs 100644),
-      -- and on Unix the checkout restores it as a mode bit.  Windows has no
-      -- such bit for git to restore, so the tree would hash differently
-      -- there; take the modes from the index instead, before .git goes away.
-      markExecutablesFromIndex ctx cloneDir
-      rev <- git ["rev-parse", "HEAD"]
-      revCountText <- git ["rev-list", "--count", "HEAD"]
-      lastModifiedText <- git ["show", "-s", "--format=%ct", "HEAD"]
-      removeGitMetadata ctx cloneDir
-      storePath <- copyPathToStore cloneDir name Nothing
-      narHash <- narHashOfPath cloneDir
-      removeScratchDir cloneDir
-      revCount <- decodeDecimal ctx revCountText
-      lastModified <- decodeDecimal ctx lastModifiedText
-      let lastModifiedDate =
-            T.pack (formatTime defaultTimeLocale "%Y%m%d%H%M%S" (posixSecondsToUTCTime (fromIntegral lastModified)))
-      pure
-        ( VAttrs
-            ( attrSetFromMap $
-                Map.fromList
-                  [ ("outPath", evaluated (VPath (canonPathValue storePath))),
-                    ("rev", evaluated (mkStr rev)),
-                    ("shortRev", evaluated (mkStr (T.take 7 rev))),
-                    ("revCount", evaluated (VInt (fromIntegral revCount))),
-                    ("submodules", evaluated (VBool submodules)),
-                    ("lastModified", evaluated (VInt (fromIntegral lastModified))),
-                    ("lastModifiedDate", evaluated (mkStr lastModifiedDate)),
-                    ("narHash", evaluated (mkStr ("sha256-" <> bytesToBase64 narHash)))
-                  ]
-            )
+      -- A pinned revision names one tree for all time, so a fetch of it can
+      -- be remembered.  Without this every evaluation re-clones, which is
+      -- slow always and fatal whenever the far end is down -- a bootstrap
+      -- pinned to a dozen revisions cannot be built at all while one host is
+      -- returning 500s, though nothing about it has changed.
+      --
+      -- Only a pinned rev is cached.  A bare ref means "whatever this branch
+      -- points at now", and answering that from a note taken earlier would be
+      -- answering a different question.
+      cached <- case mRev of
+        Nothing -> pure Nothing
+        Just rev -> do
+          entry <- lookupFetchCache (fetchCacheKey url name rev submodules)
+          case entry >>= decodeFetchCache of
+            Nothing -> pure Nothing
+            Just fields -> do
+              -- The note is only good while the tree it names is still there.
+              stillThere <- doesPathExist (fcStorePath fields)
+              pure (if stillThere then Just fields else Nothing)
+      case cached of
+        Just fields -> pure (fetchGitResult submodules fields)
+        Nothing -> fetchGitUncached url name mRef mRev submodules shallow
+
+-- | The fetch itself, when nothing is remembered about it.
+fetchGitUncached :: (MonadEval m) => Text -> Text -> Maybe Text -> Maybe Text -> Bool -> Bool -> m NixValue
+fetchGitUncached url name mRef mRev submodules shallow =
+  do
+    cloneDir <- createScratchDir "nova-nix-fetchgit-"
+    let ctx = "builtins.fetchGit"
+        git = gitRun ctx cloneDir
+        depthArgs = if shallow then ["--depth", "1"] else []
+        refArg = fromMaybe "HEAD" mRef
+        checkoutTarget = fromMaybe "FETCH_HEAD" mRev
+    _ <- git ["init", "--quiet", "."]
+    _ <- git ["remote", "add", "origin", url]
+    _ <- git (["fetch", "--quiet"] ++ depthArgs ++ ["origin", refArg])
+    _ <- git ["checkout", "--quiet", checkoutTarget]
+    when submodules $
+      void (git ["submodule", "update", "--init", "--recursive"])
+    -- Git records a file's executability in its index (100755 vs 100644),
+    -- and on Unix the checkout restores it as a mode bit.  Windows has no
+    -- such bit for git to restore, so the tree would hash differently
+    -- there; take the modes from the index instead, before .git goes away.
+    markExecutablesFromIndex ctx cloneDir
+    rev <- git ["rev-parse", "HEAD"]
+    revCountText <- git ["rev-list", "--count", "HEAD"]
+    lastModifiedText <- git ["show", "-s", "--format=%ct", "HEAD"]
+    removeGitMetadata ctx cloneDir
+    storePath <- copyPathToStore cloneDir name Nothing
+    narHash <- narHashOfPath cloneDir
+    removeScratchDir cloneDir
+    revCount <- decodeDecimal ctx revCountText
+    lastModified <- decodeDecimal ctx lastModifiedText
+    let fields =
+          FetchCache
+            { fcStorePath = storePath,
+              fcRev = rev,
+              fcRevCount = revCount,
+              fcLastModified = lastModified,
+              fcNarHash = bytesToBase64 narHash
+            }
+    -- Remembered only for a pinned revision; see fetchGit.
+    case mRev of
+      Nothing -> pure ()
+      Just pinned -> writeFetchCache (fetchCacheKey url name pinned submodules) (encodeFetchCache fields)
+    pure (fetchGitResult submodules fields)
+
+-- | What @builtins.fetchGit@ hands back, from the few facts about a fetch
+-- that are worth keeping.  Shared by the fetch and by the cache, so the two
+-- cannot describe the same tree differently.
+data FetchCache = FetchCache
+  { fcStorePath :: !Text,
+    fcRev :: !Text,
+    fcRevCount :: !Integer,
+    fcLastModified :: !Integer,
+    fcNarHash :: !Text
+  }
+
+fetchGitResult :: Bool -> FetchCache -> NixValue
+fetchGitResult submodules fields =
+  let lastModifiedDate =
+        T.pack
+          ( formatTime
+              defaultTimeLocale
+              "%Y%m%d%H%M%S"
+              (posixSecondsToUTCTime (fromIntegral (fcLastModified fields)))
+          )
+   in VAttrs
+        ( attrSetFromMap $
+            Map.fromList
+              [ ("outPath", evaluated (VPath (canonPathValue (fcStorePath fields)))),
+                ("rev", evaluated (mkStr (fcRev fields))),
+                ("shortRev", evaluated (mkStr (T.take 7 (fcRev fields)))),
+                ("revCount", evaluated (VInt (fromIntegral (fcRevCount fields)))),
+                ("submodules", evaluated (VBool submodules)),
+                ("lastModified", evaluated (VInt (fromIntegral (fcLastModified fields)))),
+                ("lastModifiedDate", evaluated (mkStr lastModifiedDate)),
+                ("narHash", evaluated (mkStr ("sha256-" <> fcNarHash fields)))
+              ]
         )
+
+-- | What a remembered fetch is filed under.  Everything that decides which
+-- tree comes back is in the key, so a hit cannot be for a different tree:
+-- the URL, the store name, the revision, and whether submodules were taken.
+fetchCacheKey :: Text -> Text -> Text -> Bool -> Text
+fetchCacheKey url name rev submodules =
+  T.intercalate "\n" ["fetchGit-1", url, name, rev, if submodules then "submodules" else "no-submodules"]
+
+-- | One field per line, in a fixed order.  Anything that does not read back
+-- as exactly five lines is treated as no entry at all.
+encodeFetchCache :: FetchCache -> Text
+encodeFetchCache fields =
+  T.intercalate
+    "\n"
+    [ fcStorePath fields,
+      fcRev fields,
+      T.pack (show (fcRevCount fields)),
+      T.pack (show (fcLastModified fields)),
+      fcNarHash fields
+    ]
+
+decodeFetchCache :: Text -> Maybe FetchCache
+decodeFetchCache raw = case T.splitOn "\n" raw of
+  [storePath, rev, revCount, lastModified, narHash] -> do
+    count <- readDecimalMaybe revCount
+    modified <- readDecimalMaybe lastModified
+    pure
+      FetchCache
+        { fcStorePath = storePath,
+          fcRev = rev,
+          fcRevCount = count,
+          fcLastModified = modified,
+          fcNarHash = narHash
+        }
+  _ -> Nothing
+  where
+    readDecimalMaybe t = case TR.decimal t of
+      Right (value, rest) | T.null rest -> Just value
+      _ -> Nothing
 
 -- | Mark every file git records as executable (mode 100755) as such in the
 -- checked-out tree.  Submodules are included: their contents are part of the

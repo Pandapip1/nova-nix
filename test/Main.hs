@@ -8178,6 +8178,8 @@ instance MonadEval StubStoreEval where
   copyPathToStore _ _ _ = throwEvalError "builtins.path: not available in the stub evaluator"
   narHashOfPath _ = throwEvalError "builtins.fetchGit: not available in the stub evaluator"
   setExecutableFile _ = throwEvalError "builtins.fetchGit: not available in the stub evaluator"
+  lookupFetchCache _ = pure Nothing
+  writeFetchCache _ _ = pure ()
   isExecutableFile _ = throwEvalError "builtins.path: not available in the stub evaluator"
   readSymlinkTarget _ = throwEvalError "builtins.path: not available in the stub evaluator"
   addSourceNar _ _ = throwEvalError "builtins.path: not available in the stub evaluator"

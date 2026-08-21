@@ -43,6 +43,7 @@ module Nix.Store.Path
     storePathToText,
     isCanonicalStoreText,
     storeTextToFilePath,
+    storeTextToFilePathIn,
     parseStorePath,
     parseStorePathBaseName,
 
@@ -127,9 +128,16 @@ isCanonicalStoreText txt = case T.stripPrefix defaultStoreDirText txt of
 -- would otherwise resolve against the working drive.  On Unix the two
 -- dirs coincide and this is 'T.unpack'.
 storeTextToFilePath :: Text -> FilePath
-storeTextToFilePath txt
+storeTextToFilePath = storeTextToFilePathIn platformStoreDir
+
+-- | 'storeTextToFilePath' against a given store directory rather than the
+-- platform's own.  A store path's identity is always the canonical
+-- @\/nix\/store@ spelling; where the object actually is depends on the store
+-- in use, which @--store@ can move.
+storeTextToFilePathIn :: StoreDir -> Text -> FilePath
+storeTextToFilePathIn storeDir txt
   | isCanonicalStoreText txt =
-      unStoreDir platformStoreDir <> T.unpack (T.drop (T.length defaultStoreDirText) txt)
+      unStoreDir storeDir <> T.unpack (T.drop (T.length defaultStoreDirText) txt)
   | otherwise = T.unpack txt
 
 -- | Length of the Nix base-32 hash component in store paths (32 chars).

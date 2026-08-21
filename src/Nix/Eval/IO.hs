@@ -41,6 +41,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Foreign.Ptr (Ptr, castPtr, nullPtr)
 import Foreign.StablePtr (castPtrToStablePtr, castStablePtrToPtr, deRefStablePtr, freeStablePtr, newStablePtr)
@@ -198,7 +199,7 @@ instance MonadEval EvalIO where
       Left err@(NixEvalError ErrorUncatchable _) -> liftIO (throwIO err)
       Right val -> pure (Right val)
 
-  doesPathExist path = wrapIO (Dir.doesPathExist (SP.storeTextToFilePath path))
+  doesPathExist path = evalReadPath path >>= \file -> wrapIO (Dir.doesPathExist file)
 
   listDirectory path = wrapIO $ do
     let dir = SP.storeTextToFilePath path
@@ -358,9 +359,9 @@ instance MonadEval EvalIO where
               (unEvalIO (eval scopedEnv expr))
           )
 
-  readFileBytes path = wrapIO (BS.readFile (SP.storeTextToFilePath path))
+  readFileBytes path = evalReadPath path >>= \file -> wrapIO (BS.readFile file)
 
-  getFileType path = wrapIO (classifyPath (SP.storeTextToFilePath path))
+  getFileType path = evalReadPath path >>= \file -> wrapIO (classifyPath file)
 
   runProcess cmd cmdArgs stdinText = wrapIO $ do
     let cp =
@@ -421,13 +422,37 @@ instance MonadEval EvalIO where
     pure destPath
 
   narHashOfPath path =
-    wrapIO (sha256Digest . NAR.serialise <$> ExecBit.serialiseFromPath (SP.storeTextToFilePath path))
+    evalReadPath path >>= \file -> wrapIO (sha256Digest . NAR.serialise <$> ExecBit.serialiseFromPath file)
 
-  isExecutableFile path = wrapIO (ExecBit.isExecutable (SP.storeTextToFilePath path))
+  isExecutableFile path = evalReadPath path >>= \file -> wrapIO (ExecBit.isExecutable file)
 
-  setExecutableFile path = wrapIO (ExecBit.markExecutable (SP.storeTextToFilePath path))
+  setExecutableFile path = evalReadPath path >>= \file -> wrapIO (ExecBit.markExecutable file)
 
-  readSymlinkTarget path = wrapIO (T.pack <$> Dir.getSymbolicLinkTarget (SP.storeTextToFilePath path))
+  lookupFetchCache key = wrapIO $ do
+    file <- fetchCacheFile key
+    there <- Dir.doesFileExist file
+    if not there
+      then pure Nothing
+      else do
+        recorded <- try (BS.readFile file) :: IO (Either SomeException BS.ByteString)
+        pure $ case recorded of
+          Left _ -> Nothing
+          Right bytes -> either (const Nothing) Just (TE.decodeUtf8' bytes)
+
+  writeFetchCache key value = wrapIO $ do
+    file <- fetchCacheFile key
+    -- The cache is an optimisation: a machine that cannot write one still
+    -- has to be able to build.
+    _ <-
+      try
+        ( do
+            Dir.createDirectoryIfMissing True (takeDirectory file)
+            BS.writeFile file (TE.encodeUtf8 value)
+        ) ::
+        IO (Either SomeException ())
+    pure ()
+
+  readSymlinkTarget path = evalReadPath path >>= \file -> wrapIO (T.pack <$> Dir.getSymbolicLinkTarget file)
 
   addSourceNar name narBytes =
     case NAR.deserialise narBytes of
@@ -599,6 +624,18 @@ scratchSuffixBytes = 16
 -- Helpers
 -- ---------------------------------------------------------------------------
 
+-- | Where a recorded fetch is kept: one file per key, under this user's
+-- cache directory, named by the key's own hash so that a key containing a
+-- URL cannot name a directory.
+--
+-- Outside the store on purpose.  The store holds what a derivation refers
+-- to, and this refers to nothing -- it is a note about work already done,
+-- and deleting it costs a re-fetch and nothing else.
+fetchCacheFile :: Text -> IO FilePath
+fetchCacheFile key = do
+  dir <- Dir.getXdgDirectory Dir.XdgCache "nova-nix/fetch"
+  pure (dir </> T.unpack (bytesToHexText (sha256Digest (TE.encodeUtf8 key))))
+
 -- | Where a store path lives on this machine: this evaluation's store dir
 -- mapped to a filesystem path.  Every eval-time read and write of a
 -- store object resolves through this, landing in the same store the
@@ -609,6 +646,19 @@ storeFilePath = SP.storePathToFilePath
 -- | 'storeFilePath' against the store this evaluation was given.
 evalFilePath :: SP.StorePath -> EvalIO FilePath
 evalFilePath sp = EvalIO (asks ((`storeFilePath` sp) . esStoreDir))
+
+-- | A path as evaluation spells it, resolved to where it is on this machine.
+--
+-- Store paths are canonical @\/nix\/store@ text wherever they came from, and
+-- the objects are under this evaluation's store dir; anything that is not a
+-- store path is already a filesystem path and passes through.  Every
+-- eval-time READ of a path goes through here, for the same reason writes go
+-- through 'evalFilePath': @--store@ has to mean the same thing in both
+-- directions, or a path written under it cannot be found again.
+evalReadPath :: Text -> EvalIO FilePath
+evalReadPath path = EvalIO $ do
+  storeDir <- asks esStoreDir
+  pure (SP.storeTextToFilePathIn storeDir path)
 
 -- | A store path's identity: the canonical @/nix/store@ spelling every
 -- platform shares.  Hashes and eval-visible strings carry this form; it
