@@ -49,6 +49,19 @@ lib.makeScope newScope (
       hex2_1
       M1
       hex2
+      # The full script's tools, built by the ones above: a C driver that runs
+      # the whole compile in one command, and the shell everything above this
+      # bootstrap is written against.
+      M2_Mesoplanet
+      blood_elf
+      get_machine
+      M2_Planet
+      kaem
       ;
+
+    # Not part of the chain: the file utilities everything above it needs.
+    # `.bin` is the directory to put on PATH; the rest are the utilities
+    # themselves, for a build that wants one by name.
+    mescc-tools-extra = callPackage ./mescc-tools-extra.nix { };
   }
 )

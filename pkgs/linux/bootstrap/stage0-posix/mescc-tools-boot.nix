@@ -1,12 +1,14 @@
 # The chain above hex0, one derivation per link.
 #
-# A translation of stage0-posix's x86/mescc-tools-mini-kaem.kaem into nix, the
+# A translation of stage0-posix's x86/mescc-tools-mini-kaem.kaem and
+# x86/mescc-tools-full-kaem.kaem into nix, the
 # way nixpkgs' mescc-tools-boot.nix translates the same file, and the way
 # ../../../windows/bootstrap/stage0-pe32/mescc-tools-boot.nix translates the
 # Windows fork's cmd script.  Upstream needs kaem to sequence these because it
 # has nothing else that can order one program's output into the next one's
 # input; here each link is a derivation and nova-nix orders them, so kaem has
-# no counterpart and the chain stops below it.
+# no counterpart -- except as a program: the last phases build kaem itself,
+# because everything ABOVE this bootstrap is written against it as a shell.
 #
 # Every program takes its destination as an argument rather than reading $out,
 # so the output path is passed as builtins.placeholder "out" and the builder
@@ -488,6 +490,430 @@ rec {
     "${src}/M2libc/x86/ELF-x86-debug.hex2"
     "-f"
     hex2_linker_2_hex2
+    "-o"
+    out
+  ];
+
+  ###########################################################################
+  # Phase-12 M2-Mesoplanet, a C driver: preprocess, compile, assemble, link #
+  ###########################################################################
+
+  M2_Mesoplanet_1_M1 = run "M2-Mesoplanet-1.M1" M2 [
+    "--architecture"
+    "x86"
+    "-f"
+    "${src}/M2libc/sys/types.h"
+    "-f"
+    "${src}/M2libc/stddef.h"
+    "-f"
+    "${src}/M2libc/x86/linux/fcntl.c"
+    "-f"
+    "${src}/M2libc/fcntl.c"
+    "-f"
+    "${src}/M2libc/sys/utsname.h"
+    "-f"
+    "${src}/M2libc/x86/linux/unistd.c"
+    "-f"
+    "${src}/M2libc/x86/linux/sys/stat.c"
+    "-f"
+    "${src}/M2libc/ctype.c"
+    "-f"
+    "${src}/M2libc/stdlib.c"
+    "-f"
+    "${src}/M2libc/stdarg.h"
+    "-f"
+    "${src}/M2libc/stdio.h"
+    "-f"
+    "${src}/M2libc/stdio.c"
+    "-f"
+    "${src}/M2libc/string.c"
+    "-f"
+    "${src}/M2libc/bootstrappable.c"
+    "-f"
+    "${src}/M2-Mesoplanet/cc.h"
+    "-f"
+    "${src}/M2-Mesoplanet/cc_globals.c"
+    "-f"
+    "${src}/M2-Mesoplanet/cc_env.c"
+    "-f"
+    "${src}/M2-Mesoplanet/cc_reader.c"
+    "-f"
+    "${src}/M2-Mesoplanet/cc_spawn.c"
+    "-f"
+    "${src}/M2-Mesoplanet/cc_core.c"
+    "-f"
+    "${src}/M2-Mesoplanet/cc_macro.c"
+    "-f"
+    "${src}/M2-Mesoplanet/cc.c"
+    "--debug"
+    "-o"
+    out
+  ];
+
+  M2_Mesoplanet_1_footer_M1 = run "M2-Mesoplanet-1-footer.M1" blood_elf_0 [
+    "--little-endian"
+    "-f"
+    M2_Mesoplanet_1_M1
+    "-o"
+    out
+  ];
+
+  M2_Mesoplanet_1_hex2 = run "M2-Mesoplanet-1.hex2" M1 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "-f"
+    "${src}/M2libc/x86/x86_defs.M1"
+    "-f"
+    "${src}/M2libc/x86/libc-full.M1"
+    "-f"
+    M2_Mesoplanet_1_M1
+    "-f"
+    M2_Mesoplanet_1_footer_M1
+    "-o"
+    out
+  ];
+
+  M2_Mesoplanet = run "M2-Mesoplanet" hex2 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "--base-address"
+    "0x08048000"
+    "-f"
+    "${src}/M2libc/x86/ELF-x86-debug.hex2"
+    "-f"
+    M2_Mesoplanet_1_hex2
+    "-o"
+    out
+  ];
+
+  ##########################################################
+  # Phase-13 blood-elf again, now built by the tools above #
+  ##########################################################
+
+  blood_elf_1_M1 = run "blood-elf-1.M1" M2 [
+    "--architecture"
+    "x86"
+    "-f"
+    "${src}/M2libc/sys/types.h"
+    "-f"
+    "${src}/M2libc/stddef.h"
+    "-f"
+    "${src}/M2libc/x86/linux/fcntl.c"
+    "-f"
+    "${src}/M2libc/fcntl.c"
+    "-f"
+    "${src}/M2libc/sys/utsname.h"
+    "-f"
+    "${src}/M2libc/x86/linux/unistd.c"
+    "-f"
+    "${src}/M2libc/ctype.c"
+    "-f"
+    "${src}/M2libc/stdlib.c"
+    "-f"
+    "${src}/M2libc/stdarg.h"
+    "-f"
+    "${src}/M2libc/stdio.h"
+    "-f"
+    "${src}/M2libc/stdio.c"
+    "-f"
+    "${src}/M2libc/bootstrappable.c"
+    "-f"
+    "${src}/mescc-tools/stringify.c"
+    "-f"
+    "${src}/mescc-tools/blood-elf.c"
+    "--debug"
+    "-o"
+    out
+  ];
+
+  blood_elf_1_footer_M1 = run "blood-elf-1-footer.M1" blood_elf_0 [
+    "--little-endian"
+    "-f"
+    blood_elf_1_M1
+    "-o"
+    out
+  ];
+
+  blood_elf_1_hex2 = run "blood-elf-1.hex2" M1 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "-f"
+    "${src}/M2libc/x86/x86_defs.M1"
+    "-f"
+    "${src}/M2libc/x86/libc-full.M1"
+    "-f"
+    blood_elf_1_M1
+    "-f"
+    blood_elf_1_footer_M1
+    "-o"
+    out
+  ];
+
+  blood_elf = run "blood-elf" hex2 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "--base-address"
+    "0x08048000"
+    "-f"
+    "${src}/M2libc/x86/ELF-x86-debug.hex2"
+    "-f"
+    blood_elf_1_hex2
+    "-o"
+    out
+  ];
+
+  #############################################################
+  # Phase-14 get_machine, which reports what it is running on #
+  #############################################################
+
+  get_machine_M1 = run "get_machine.M1" M2 [
+    "--architecture"
+    "x86"
+    "-f"
+    "${src}/M2libc/sys/types.h"
+    "-f"
+    "${src}/M2libc/stddef.h"
+    "-f"
+    "${src}/M2libc/sys/utsname.h"
+    "-f"
+    "${src}/M2libc/x86/linux/unistd.c"
+    "-f"
+    "${src}/M2libc/x86/linux/fcntl.c"
+    "-f"
+    "${src}/M2libc/fcntl.c"
+    "-f"
+    "${src}/M2libc/ctype.c"
+    "-f"
+    "${src}/M2libc/stdlib.c"
+    "-f"
+    "${src}/M2libc/stdarg.h"
+    "-f"
+    "${src}/M2libc/stdio.h"
+    "-f"
+    "${src}/M2libc/stdio.c"
+    "-f"
+    "${src}/M2libc/bootstrappable.c"
+    "-f"
+    "${src}/mescc-tools/get_machine.c"
+    "--debug"
+    "-o"
+    out
+  ];
+
+  get_machine_footer_M1 = run "get_machine-footer.M1" blood_elf [
+    "--little-endian"
+    "-f"
+    get_machine_M1
+    "-o"
+    out
+  ];
+
+  get_machine_hex2 = run "get_machine.hex2" M1 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "-f"
+    "${src}/M2libc/x86/x86_defs.M1"
+    "-f"
+    "${src}/M2libc/x86/libc-full.M1"
+    "-f"
+    get_machine_M1
+    "-f"
+    get_machine_footer_M1
+    "-o"
+    out
+  ];
+
+  get_machine = run "get_machine" hex2 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "--base-address"
+    "0x08048000"
+    "-f"
+    "${src}/M2libc/x86/ELF-x86-debug.hex2"
+    "-f"
+    get_machine_hex2
+    "-o"
+    out
+  ];
+
+  ##########################################
+  # Phase-15 M2-Planet again, the same way #
+  ##########################################
+
+  M2_1_M1 = run "M2-1.M1" M2 [
+    "--architecture"
+    "x86"
+    "-f"
+    "${src}/M2libc/sys/types.h"
+    "-f"
+    "${src}/M2libc/stddef.h"
+    "-f"
+    "${src}/M2libc/sys/utsname.h"
+    "-f"
+    "${src}/M2libc/x86/linux/unistd.c"
+    "-f"
+    "${src}/M2libc/x86/linux/fcntl.c"
+    "-f"
+    "${src}/M2libc/fcntl.c"
+    "-f"
+    "${src}/M2libc/ctype.c"
+    "-f"
+    "${src}/M2libc/stdlib.c"
+    "-f"
+    "${src}/M2libc/stdarg.h"
+    "-f"
+    "${src}/M2libc/stdio.h"
+    "-f"
+    "${src}/M2libc/stdio.c"
+    "-f"
+    "${src}/M2libc/bootstrappable.c"
+    "-f"
+    "${src}/M2-Planet/cc.h"
+    "-f"
+    "${src}/M2-Planet/cc_globals.c"
+    "-f"
+    "${src}/M2-Planet/cc_reader.c"
+    "-f"
+    "${src}/M2-Planet/cc_strings.c"
+    "-f"
+    "${src}/M2-Planet/cc_types.c"
+    "-f"
+    "${src}/M2-Planet/cc_emit.c"
+    "-f"
+    "${src}/M2-Planet/cc_core.c"
+    "-f"
+    "${src}/M2-Planet/cc_macro.c"
+    "-f"
+    "${src}/M2-Planet/cc.c"
+    "--debug"
+    "-o"
+    out
+  ];
+
+  M2_1_footer_M1 = run "M2-1-footer.M1" blood_elf [
+    "--little-endian"
+    "-f"
+    M2_1_M1
+    "-o"
+    out
+  ];
+
+  M2_1_hex2 = run "M2-1.hex2" M1 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "-f"
+    "${src}/M2libc/x86/x86_defs.M1"
+    "-f"
+    "${src}/M2libc/x86/libc-full.M1"
+    "-f"
+    M2_1_M1
+    "-f"
+    M2_1_footer_M1
+    "-o"
+    out
+  ];
+
+  M2_Planet = run "M2-Planet" hex2 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "--base-address"
+    "0x08048000"
+    "-f"
+    "${src}/M2libc/x86/ELF-x86-debug.hex2"
+    "-f"
+    M2_1_hex2
+    "-o"
+    out
+  ];
+
+  #####################################################################
+  # Phase-16 kaem, the shell the rest of the bootstrap is written for #
+  #####################################################################
+
+  kaem_M1 = run "kaem.M1" M2 [
+    "--architecture"
+    "x86"
+    "-f"
+    "${src}/M2libc/sys/types.h"
+    "-f"
+    "${src}/M2libc/stddef.h"
+    "-f"
+    "${src}/M2libc/sys/utsname.h"
+    "-f"
+    "${src}/M2libc/x86/linux/unistd.c"
+    "-f"
+    "${src}/M2libc/x86/linux/fcntl.c"
+    "-f"
+    "${src}/M2libc/fcntl.c"
+    "-f"
+    "${src}/M2libc/ctype.c"
+    "-f"
+    "${src}/M2libc/stdlib.c"
+    "-f"
+    "${src}/M2libc/string.c"
+    "-f"
+    "${src}/M2libc/stdarg.h"
+    "-f"
+    "${src}/M2libc/stdio.h"
+    "-f"
+    "${src}/M2libc/stdio.c"
+    "-f"
+    "${src}/M2libc/bootstrappable.c"
+    "-f"
+    "${src}/mescc-tools/Kaem/kaem.h"
+    "-f"
+    "${src}/mescc-tools/Kaem/variable.c"
+    "-f"
+    "${src}/mescc-tools/Kaem/kaem_globals.c"
+    "-f"
+    "${src}/mescc-tools/Kaem/kaem.c"
+    "--debug"
+    "-o"
+    out
+  ];
+
+  kaem_footer_M1 = run "kaem-footer.M1" blood_elf_0 [
+    "-f"
+    kaem_M1
+    "--little-endian"
+    "-o"
+    out
+  ];
+
+  kaem_hex2 = run "kaem.hex2" M1 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "-f"
+    "${src}/M2libc/x86/x86_defs.M1"
+    "-f"
+    "${src}/M2libc/x86/libc-full.M1"
+    "-f"
+    kaem_M1
+    "-f"
+    kaem_footer_M1
+    "-o"
+    out
+  ];
+
+  kaem = run "kaem" hex2 [
+    "--architecture"
+    "x86"
+    "--little-endian"
+    "-f"
+    "${src}/M2libc/x86/ELF-x86-debug.hex2"
+    "-f"
+    kaem_hex2
+    "--base-address"
+    "0x8048000"
     "-o"
     out
   ];
