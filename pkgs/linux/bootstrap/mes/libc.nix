@@ -97,10 +97,15 @@ let
   # include path are arguments, and M1 and hex2 are named in the environment
   # rather than found on PATH -- mescc.scm reads (or (getenv "M1") "M1") --
   # so no bin directory has to exist yet.
+  # base is the library's name, suffix what it is being compiled to.  The
+  # store path has to END in that suffix: MesCC decides what an input is by
+  # it, and takes anything that is not .c, .E or .s for an object file -- so
+  # a .s that is not named .s links to nothing, silently and successfully.
   mescc-compile =
-    name: input:
+    base: suffix: mode: input:
     derivationWithMeta {
-      pname = "mes-${name}";
+      pname = "mes-${base}${suffix}";
+      name = "mes-${base}-${version}${suffix}";
       inherit version system meta;
 
       # Mes sizes its heap and its stack from the environment, and the
@@ -124,7 +129,7 @@ let
         "main"
         "${mescc}"
         "--"
-        "-c"
+        mode
         "-D"
         "HAVE_CONFIG_H=1"
         # First, so the config.h written above wins the name.
@@ -140,26 +145,41 @@ let
       ];
     };
 
-  crt1 = mescc-compile "crt1.o" "${src}/lib/linux/${arch}-mes-mescc/crt1.c";
-  libc-mini = mescc-compile "libc-mini.a" (bundle "libc-mini" sources.libc_mini_SOURCES);
-  libmescc = mescc-compile "libmescc.a" (bundle "libmescc" sources.libmescc_SOURCES);
-  libc = mescc-compile "libc.a" (bundle "libc" sources.libc_SOURCES);
-  libc-tcc = mescc-compile "libc+tcc.a" (bundle "libc+tcc" sources.libc_tcc_SOURCES);
+  # Every library is shipped twice over, and both forms are used.  MesCC
+  # LINKS from assembly -- hex2 is the linker, and it reads .s -- so `-l c+tcc`
+  # looks for libc+tcc.s.  tcc, once it exists, links objects, and reads the
+  # .a.  Upstream builds both for the same reason.
+  compiled = name: source: rec {
+    s = mescc-compile name ".s" "-S" source;
+    a = mescc-compile name ".a" "-c" s;
+  };
+
+  crt1-s = mescc-compile "crt1" ".s" "-S" "${src}/lib/linux/${arch}-mes-mescc/crt1.c";
+  crt1 = mescc-compile "crt1" ".o" "-c" crt1-s;
+
+  libc-mini = compiled "libc-mini" (bundle "libc-mini" sources.libc_mini_SOURCES);
+  libmescc = compiled "libmescc" (bundle "libmescc" sources.libmescc_SOURCES);
+  libc = compiled "libc" (bundle "libc" sources.libc_SOURCES);
+  libc-tcc = compiled "libc+tcc" (bundle "libc+tcc" sources.libc_tcc_SOURCES);
 in
 derivationWithMeta {
   pname = "mes-libc";
   inherit version system meta;
 
-  inherit src;
+  inherit src arch;
   bin_mkdir = mkdir;
   bin_cp = cp;
 
-  crt1 = crt1;
-  libc_mini = libc-mini;
-  inherit libmescc;
-  libc = libc;
-  libc_tcc = libc-tcc;
-  inherit mescc;
+  inherit crt1 mescc;
+  crt1_s = crt1-s;
+  libc_mini_a = libc-mini.a;
+  libc_mini_s = libc-mini.s;
+  libmescc_a = libmescc.a;
+  libmescc_s = libmescc.s;
+  libc_a = libc.a;
+  libc_s = libc.s;
+  libc_tcc_a = libc-tcc.a;
+  libc_tcc_s = libc-tcc.s;
 
   builder = kaem;
   args = [
@@ -170,8 +190,22 @@ derivationWithMeta {
   ];
 
   passthru = {
+    # What a caller has to repeat to compile against this library: the same
+    # include path MesCC was given here.
+    CFLAGS = [
+      "-D"
+      "HAVE_CONFIG_H=1"
+      "-I"
+      "${configInclude}"
+      "-I"
+      "${src}/include"
+      "-I"
+      "${src}/include/linux/${arch}"
+    ];
+
     inherit
       crt1
+      crt1-s
       libc-mini
       libmescc
       libc
