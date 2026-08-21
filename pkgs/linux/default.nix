@@ -98,6 +98,12 @@ let
       tinycc = self.tinycc.boot;
       mesInclude = "${self.mes.src}/include";
     };
+
+    # The C library that replaces Mes's.
+    musl = callPackage ./bootstrap/musl {
+      inherit (self.stage0) system platforms;
+      tinycc = self.tinycc.boot;
+    };
   };
 in
 self
