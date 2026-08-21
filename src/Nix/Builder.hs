@@ -68,7 +68,7 @@ import qualified Network.HTTP.Types.Status as HTTP
 import Nix.Builder.Unpack (UnpackLimits, builtinUnpackBuilder, defaultUnpackLimits, runBuiltinUnpack)
 import Nix.DependencyGraph (DepGraph, TopoResult (..), buildDepGraph, topoSort)
 import qualified Nix.DependencyGraph
-import Nix.Derivation (Derivation (..), DerivationOutput (..), fromATerm)
+import Nix.Derivation (Derivation (..), DerivationOutput (..), currentPlatform, fromATerm, platformToText)
 import Nix.Hash (IncrementalHash, bytesToHexText, hashFinalizeBytes, hashInitWithAlgo, hashPlaceholder, hashUpdateChunk, hexToBytes, rawHashWithAlgo)
 import Nix.Store (PathLock, PathRegistration, Store (..), isValid, placeInStore, registerPaths, releasePathLock, scanReferences, scanTempReferences)
 import qualified Nix.Store.ExecBit as ExecBit
@@ -156,7 +156,15 @@ data BuildConfig = BuildConfig
     -- | Binary caches to try before building (checked in priority order).
     bcCaches :: ![CacheConfig],
     -- | Extraction budget for @builtin:unpack@ builds.
-    bcUnpackLimits :: !UnpackLimits
+    bcUnpackLimits :: !UnpackLimits,
+    -- | Launchers for derivations whose @system@ this machine cannot execute
+    -- directly, keyed by that system string: @x86-windows@ -> a wine binary.
+    -- The launcher is prepended to the builder at the spawn boundary and
+    -- never enters the derivation, so a PE32 chain built through wine here
+    -- produces the same store paths as the same chain built on Windows --
+    -- which is the property that makes the cross-platform hash check mean
+    -- anything.
+    bcExecWrappers :: !(Map Text FilePath)
   }
   deriving (Eq, Show)
 
@@ -175,6 +183,7 @@ defaultBuildConfig dir =
           else "/bin/bash",
       bcSandbox = False,
       bcCaches = [],
+      bcExecWrappers = Map.empty,
       bcUnpackLimits = defaultUnpackLimits
     }
 
@@ -270,8 +279,16 @@ buildDerivationInner config store drv = do
                   builderPath = T.unpack (onStore config builderText)
                   environ = buildEnvironment config (Map.map rewrite decodedEnv) builderPath buildDir outputDirs
                   builderArgs = map (T.unpack . rewrite) argTexts
+                  -- A derivation for a system this machine cannot execute
+                  -- runs through its configured launcher instead.  The
+                  -- environment still names the real builder, because that
+                  -- is what the derivation says and what a native build
+                  -- would see.
+                  (spawnPath, spawnArgs) = case execWrapperFor config drv of
+                    Nothing -> (builderPath, builderArgs)
+                    Just launcher -> (launcher, builderPath : builderArgs)
                in -- 5. Run the builder
-                  runBuilder builderPath builderArgs environ buildDir
+                  runBuilder spawnPath spawnArgs environ buildDir
         case exitResult of
           Left (exitCode, stderrText) -> do
             -- Whatever the builder wrote is in the store now, so failure has
@@ -571,6 +588,19 @@ runBuilder builderPath builderArgs buildEnv workDir = do
 -- Fix: when the builder is cmd.exe with @\/c@, use 'Proc.shell' which
 -- passes the command string directly to @cmd.exe \/c@ without quoting.
 -- For all other builders, use 'Proc.proc' (standard @CommandLineToArgvW@).
+-- | The launcher for this derivation's system, if this machine needs one.
+--
+-- A derivation names the system its builder runs on.  When that is the
+-- machine's own, the builder is spawned directly; when it is not -- a PE32
+-- chain evaluated on Linux -- a launcher configured for that system is
+-- spawned with the builder as its first argument.  Returning 'Nothing' for
+-- the host's own platform is what keeps a configured wrapper from wrapping
+-- native builds as well.
+execWrapperFor :: BuildConfig -> Derivation -> Maybe FilePath
+execWrapperFor config drv
+  | drvPlatform drv == currentPlatform = Nothing
+  | otherwise = Map.lookup (platformToText (drvPlatform drv)) (bcExecWrappers config)
+
 mkBuilderProcess :: FilePath -> [String] -> Proc.CreateProcess
 mkBuilderProcess builder args
   | isWindows,

@@ -63,6 +63,9 @@ data CliOpts = CliOpts
     optSubstituter :: !(Maybe String),
     -- | Trusted public key (@name:base64@) for the substituter.
     optTrustedKey :: !(Maybe String),
+    -- | @SYSTEM=PATH@ launchers for derivations this machine cannot execute
+    -- directly, e.g. @x86-windows=/path/to/wine@.
+    optExecWrappers :: ![String],
     optCommand :: !Command
   }
 
@@ -91,7 +94,7 @@ emptyPushArgs = PushArgs Nothing Nothing Nothing False []
 -- silent drop: an unknown or typo'd flag once ended parsing and quietly
 -- discarded everything after it (e.g. a requested @--substituter@).
 parseArgs :: [String] -> Either String CliOpts
-parseArgs = go (CliOpts [] False False Nothing Nothing Nothing CmdHelp)
+parseArgs = go (CliOpts [] False False Nothing Nothing Nothing [] CmdHelp)
   where
     go opts [] = Right opts
     go opts ("--nix-path" : val : rest) =
@@ -106,6 +109,8 @@ parseArgs = go (CliOpts [] False False Nothing Nothing Nothing CmdHelp)
       go (opts {optSubstituter = Just url}) rest
     go opts ("--trusted-key" : key : rest) =
       go (opts {optTrustedKey = Just key}) rest
+    go opts ("--exec-wrapper" : spec : rest) =
+      go (opts {optExecWrappers = optExecWrappers opts ++ [spec]}) rest
     go opts ("eval" : rest) = goEval opts rest
     go _ ["build"] = Left "build requires a FILE.nix argument"
     go opts ("build" : path : rest) =
@@ -161,7 +166,7 @@ parseArgs = go (CliOpts [] False False Nothing Nothing Nothing CmdHelp)
       goStoreDelete opts (paths ++ [path]) rest
     -- Flags that consume the following argument as their value.
     valueFlags =
-      ["--nix-path", "--store", "--substituter", "--trusted-key", "--expr", "--cache", "--key-file", "--compression"]
+      ["--nix-path", "--store", "--substituter", "--trusted-key", "--exec-wrapper", "--expr", "--cache", "--key-file", "--compression"]
 
 -- | Merge --nix-path entries, bundled data dir, and NIX_PATH search paths.
 -- The data dir is appended last so user paths take priority.
@@ -212,6 +217,7 @@ main = do
       hPutStrLn stderr "  --all                  With push: select every valid path in the store"
       hPutStrLn stderr "  --key-file PATH        With push: file holding the cache API key"
       hPutStrLn stderr ("  --compression KIND     With push: artifact packaging (" <> T.unpack pushCompressionValues <> "; default none)")
+      hPutStrLn stderr "  --exec-wrapper S=PATH  Run system S's derivations through PATH (repeatable)"
       hPutStrLn stderr "  --store DIR            Use DIR as the store (default: the platform store)"
       hPutStrLn stderr "  --substituter URL      Try this binary cache before building"
       hPutStrLn stderr "  --trusted-key K        Public key (name:base64) for the substituter"
@@ -315,6 +321,7 @@ buildFile :: CliOpts -> FilePath -> FilePath -> IO ()
 buildFile opts dataDir rawFilePath = do
   let storeDir = chosenStoreDir opts
   caches <- either failWith pure (substituterConfig (optSubstituter opts) (optTrustedKey opts))
+  wrappers <- either failWith pure (execWrapperConfig (optExecWrappers opts))
   (filePath, source) <- readSourceFile rawFilePath
   case parseNix (T.pack filePath) source of
     Left err -> do
@@ -355,7 +362,7 @@ buildFile opts dataDir rawFilePath = do
           -- builtins.toFile wrote these during evaluation but could not
           -- register them; a derivation naming one needs them valid first.
           materializeEvalTextPaths store textPaths
-          buildResult <- buildAndRegister store caches drvClosure drv drvSP
+          buildResult <- buildAndRegister store caches wrappers drvClosure drv drvSP
           closeStore store
           case buildResult of
             BuildSuccess sp ->
@@ -426,11 +433,25 @@ substituterConfig (Just url) (Just key) =
         }
     ]
 
+-- | Parse @--exec-wrapper SYSTEM=PATH@ specs into a system-keyed map.
+--
+-- A launcher lets this machine build a derivation whose @system@ it cannot
+-- execute -- @x86-windows=/path/to/wine@ for a PE32 chain on Linux.  It is
+-- applied at the spawn boundary only, so the derivation, and therefore every
+-- store path it produces, is identical to one built natively.
+execWrapperConfig :: [String] -> Either T.Text (Map.Map T.Text FilePath)
+execWrapperConfig = fmap Map.fromList . traverse one
+  where
+    one spec = case break (== '=') spec of
+      (sys, '=' : path)
+        | not (null sys), not (null path) -> Right (T.pack sys, path)
+      _ -> Left ("--exec-wrapper expects SYSTEM=PATH, got: " <> T.pack spec)
+
 -- | Write the .drv file to the store and build with dependency resolution.
 -- The drvPath is the store path of the .drv file itself, extracted from
 -- the evaluation result alongside the Derivation struct.
-buildAndRegister :: Store -> [CacheConfig] -> Map.Map T.Text BS.ByteString -> Derivation -> StorePath -> IO BuildResult
-buildAndRegister store caches drvClosure drv drvSP = do
+buildAndRegister :: Store -> [CacheConfig] -> Map.Map T.Text FilePath -> Map.Map T.Text BS.ByteString -> Derivation -> StorePath -> IO BuildResult
+buildAndRegister store caches wrappers drvClosure drv drvSP = do
   -- Materialize the full input-.drv closure (every transitive dependency's
   -- recipe) to the store.  buildWithDeps reads these back to construct the
   -- dependency graph; without them it cannot realize any non-leaf derivation.
@@ -443,7 +464,8 @@ buildAndRegister store caches drvClosure drv drvSP = do
   let config =
         (defaultBuildConfig (stDir store))
           { bcTmpDir = tmpDir,
-            bcCaches = caches
+            bcCaches = caches,
+            bcExecWrappers = wrappers
           }
   buildWithDeps config store drv drvSP
 
