@@ -36,8 +36,15 @@ ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/c
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/crti.o ${crti_c}
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/crtn.o ${crtn_c}
 
+# libtcc1 is the COMPILER's runtime, not the C library's: the helpers tcc
+# emits calls to for arithmetic the instruction set does not do in one go.
+# It comes from tinycc's own lib/, beside the compiler being built -- not
+# from the Mes C library, which ships a file of the same name meaning
+# something else.  Taking the wrong one leaves the helpers subtly wrong: casts
+# from floating point to integer quietly produce zero.
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} -c -o libtcc1.o ${libtcc1_c}
-${tcc} -ar ${out}/lib/libtcc1.a libtcc1.o
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} -c -o va_list.o ${valist_c}
+${tcc} -ar ${out}/lib/libtcc1.a libtcc1.o va_list.o
 
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o libc.o ${libc_c}
 ${tcc} -ar ${out}/lib/libc.a libc.o

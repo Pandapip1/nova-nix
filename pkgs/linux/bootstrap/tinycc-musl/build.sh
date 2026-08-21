@@ -71,9 +71,16 @@ build_tcc() {
 build_tcc tcc tcc-musl "$mesLibs/lib"
 
 # Its own libtcc1, compiled by the new compiler against musl.
+#
+# Both runtime sources, not just the C one.  libtcc1 is the compiler's
+# runtime -- the helpers tcc emits calls to for arithmetic the instruction set
+# will not do in one step -- and leaving half of it out is not a link error:
+# the calls resolve to whatever else is around, and casts from floating point
+# to integer quietly produce zero.
 rm -f libtcc1.a
 ./tcc-musl -B "$musl/lib" -c -D HAVE_CONFIG_H=1 lib/libtcc1.c
-./tcc-musl -B "$musl/lib" -ar libtcc1.a libtcc1.o
+./tcc-musl -B "$musl/lib" -c lib/alloca.S
+./tcc-musl -B "$musl/lib" -ar libtcc1.a libtcc1.o alloca.o
 
 # Second: built by itself.  This is the one that is kept.
 build_tcc ./tcc-musl tcc-musl-2 "$musl/lib"
