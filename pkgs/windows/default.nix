@@ -63,6 +63,10 @@ let
 
     # Not a stage: the parser modules MesCC loads, which Mes does not vendor.
     nyacc = callPackage ../bootstrap/nyacc { };
+
+    # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
+    # Mes headers live under include/windows/x86.
+    tinycc = callPackage ./bootstrap/tinycc { };
   };
 in
 self

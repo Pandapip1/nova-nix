@@ -29,6 +29,21 @@
   tccTarget,
   mesArchInclude,
   extraTargetDefines,
+  # hex2, as MesCC's linker: the one that reads flags (--base-address,
+  # --little-endian) rather than the hand-written one some chains bootstrap
+  # with, which cannot.  Defaults to the ELF chain's own, which is already
+  # that one; the PE32 chain has to say so, because its `stage0.hex2` is the
+  # hand-written positional one and its flag-reading one is `hex2-new`.
+  hex2 ? stage0.hex2,
+  # blood-elf, for `--debug-info`: only ELF programs carry the symbol table
+  # it adds, and the PE32 chain builds no such thing.  null omits BLOOD_ELF
+  # from the environment rather than pointing it at nothing.
+  bloodElf ? stage0.blood_elf_0,
+  # How many cells Mes may have while compiling tcc.c -- see the identical
+  # parameter on pkgs/bootstrap/mes/libc.nix, which explains why this cannot
+  # just be the Linux number everywhere: a 32-bit Windows process only gets
+  # so much contiguous address space, less again under wine.
+  arenaSize ? "100000000",
 }:
 let
   # The fork's source, which every round below mainline builds from.
@@ -50,14 +65,13 @@ let
       {
         inherit pname version system meta;
 
-        MES_ARENA = "100000000";
-        MES_MAX_ARENA = "100000000";
+        MES_ARENA = arenaSize;
+        MES_MAX_ARENA = arenaSize;
         MES_STACK = "6000000";
         MES_PREFIX = "${mesSrc}";
         GUILE_LOAD_PATH = "${mesSrc}/mes/module:${mesSrc}/module:${nyacc.guilePath}";
         M1 = stage0.M1;
-        HEX2 = stage0.hex2;
-        BLOOD_ELF = stage0.blood_elf_0;
+        HEX2 = hex2;
 
         builder = mes-m2;
         args = [
@@ -68,6 +82,7 @@ let
         ]
         ++ args;
       }
+      // (if bloodElf == null then { } else { BLOOD_ELF = bloodElf; })
       // (if name == null then { } else { inherit name; })
     );
 
