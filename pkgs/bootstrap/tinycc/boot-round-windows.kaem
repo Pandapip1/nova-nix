@@ -1,0 +1,15 @@
+# One round of tcc compiling itself -- the PE32 counterpart of
+# boot-round.kaem beside this, differing only in where config.h goes.
+#
+# No `cd ${TMPDIR}`: every other Windows kaem script in this chain avoids
+# it the same way, naming paths explicitly instead -- kaem's cd is a
+# native chdir(), and nothing on this side has proven that call behaves
+# the way this build needs under the exec-wrapper this chain builds
+# through. config.h goes into ${out}/bin (created first) rather than a
+# cwd that was never changed into, and -I names that directory instead
+# of `.`.
+
+${bin_mkdir} -p ${out}/bin
+${bin_catm} ${out}/bin/config.h
+
+${prevTcc} -B ${prevLibs}/lib -g -v -o ${out}/bin/tcc -D BOOTSTRAP=1 ${opt1} ${opt2} ${opt3} ${opt4} ${opt5} ${opt6} ${opt7} ${opt8} -I ${out}/bin -I ${src} -D TCC_TARGET_${tccTarget}=1 -D CONFIG_TCCDIR=\"\" -D CONFIG_SYSROOT=\"\" -D CONFIG_TCC_CRTPREFIX=\"{B}\" -D CONFIG_TCC_ELFINTERP=\"\" -D CONFIG_TCC_LIBPATHS=\"{B}\" -D CONFIG_TCC_SYSINCLUDEPATHS=${sysIncludePaths} -D TCC_LIBGCC=\"libc.a\" -D TCC_LIBTCC1=\"libtcc1.a\" -D CONFIG_TCCBOOT=1 -D CONFIG_TCC_STATIC=1 -D CONFIG_USE_LIBGCC=1 -D TCC_MES_LIBC=1 -D TCC_VERSION=\"0.9.28-${version}\" -D ONE_SOURCE=1 ${src}/tcc.c

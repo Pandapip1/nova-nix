@@ -341,7 +341,7 @@ let
             "--verbose"
             "--strict"
             "--file"
-            ./boot-round.kaem
+            (if crt1Object == null then ./boot-round.kaem else ./boot-round-windows.kaem)
           ];
         }
         # One variable per option; see the script.  A slot a round does not
