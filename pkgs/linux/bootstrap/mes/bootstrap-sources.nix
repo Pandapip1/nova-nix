@@ -17,9 +17,9 @@
 rec {
   # 0.27.1 plus what the branch adds; the same string the Windows set uses,
   # because it is the same source.
-  version = "0.27.1-unstable-2026-08-21";
+  version = "0.27.1-unstable-2026-08-22";
 
-  rev = "c6e6e4c2d6eeef603f1a10fb37383f0be0a5442b";
+  rev = "8168f9f3030618a3d8451a02e819c0e4e2f470ff";
   ref = "windows-pe32";
 
   src = builtins.fetchGit {

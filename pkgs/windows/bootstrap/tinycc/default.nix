@@ -70,8 +70,24 @@ callPackage ../../../bootstrap/tinycc {
   inherit stage0 mes nyacc;
   tccTarget = "I386";
   mesArchInclude = "windows/x86";
-  extraTargetDefines = [ "TCC_TARGET_PE=1" ];
+  # Not TCC_TARGET_PE=1 here: extraTargetDefines only reaches boot.nix's
+  # `assembly` derivation -- the single MesCC-compiled round -- and that
+  # round doesn't need it. tccpe.c's own structs are declared
+  # `#pragma pack(push, 1)`, which MesCC does not implement, so defining
+  # TCC_TARGET_PE here doesn't get a PE-capable bootstrap tcc; it fails
+  # outright, on a pragma nothing downstream of boot-mes was ever going to
+  # read either (boot.nix has no mechanism yet to carry a define into the
+  # later, tcc-compiled rounds where PE support would actually need to
+  # start). Getting a tcc that can emit PE32 is real, separate work: teach
+  # boot.nix to pass a define into a specific later round, and start
+  # TCC_TARGET_PE there instead of here.
   hex2 = stage0.hex2-new;
   bloodElf = null;
-  arenaSize = "15000000";
+  # 19000000, not mes-libc's 15000000: this round's translation unit
+  # (tcc.c, ONE_SOURCE=1, so every file it #includes comes along) needs
+  # more headroom than mes-libc's own largest bundle did. Measured: 15M
+  # failed with "make_cell: out of memory" -- a real, correctly-reported
+  # exhaustion once __assert_fail's own bug (see the mes fork) stopped
+  # eating the message -- and 19M is enough to finish.
+  arenaSize = "19000000";
 }
