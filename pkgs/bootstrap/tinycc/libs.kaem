@@ -42,8 +42,8 @@ ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o ${out}/lib/c
 # from the Mes C library, which ships a file of the same name meaning
 # something else.  Taking the wrong one leaves the helpers subtly wrong: casts
 # from floating point to integer quietly produce zero.
-${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} -c -o libtcc1.o ${libtcc1_c}
-${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} -c -o va_list.o ${valist_c}
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} ${libtccOpt3} -c -o libtcc1.o ${libtcc1_c}
+${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -D TCC_TARGET_${tccTarget}=1 ${libtccOpt1} ${libtccOpt2} ${libtccOpt3} -c -o va_list.o ${valist_c}
 ${tcc} -ar ${out}/lib/libtcc1.a libtcc1.o va_list.o
 
 ${tcc} -std=c11 -I ${incConfig} -I ${incMes} -I ${incMesArch} -c -o libc.o ${libc_c}

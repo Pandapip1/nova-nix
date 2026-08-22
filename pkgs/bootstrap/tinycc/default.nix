@@ -18,6 +18,12 @@
   mesArchInclude,
   # Extra -D arguments for the target, e.g. PE needs TCC_TARGET_PE as well.
   extraTargetDefines ? [ ],
+  # Passed straight through to boot.nix -- see there.
+  laterTargetDefines ? [ ],
+  crt1Object ? null,
+  windowsCrt1Src ? null,
+  baseAddress ? null,
+  pathSep ? ":",
   # hex2, blood-elf and arenaSize, passed straight through to boot.nix -- see
   # there.  Defaulted the same way there, so a call site only names them to
   # override.
@@ -45,6 +51,11 @@ lib.makeScope newScope (
         tccTarget
         mesArchInclude
         extraTargetDefines
+        laterTargetDefines
+        crt1Object
+        windowsCrt1Src
+        baseAddress
+        pathSep
         hex2
         bloodElf
         arenaSize
