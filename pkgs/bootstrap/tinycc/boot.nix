@@ -41,6 +41,20 @@
   # into every recompileLibc call (bootMes's own and every round's) the
   # same way; see recompileLibc's own crt1Object for what this changes.
   crt1Object ? null,
+  # The ImageBase/e_entry base mescc's linker (hex2 --base-address) should
+  # assume when it resolves an absolute address -- a string literal's, a
+  # global's -- into the bytes it writes.  null keeps mescc's own default,
+  # 0x1000000, which is also what lib/linux/x86-mes/elf32-header.hex2
+  # hardcodes as its own base, so the two already agree there and Linux
+  # never has to say so. lib/m2/x86/PE32-i386.hex2 hardcodes 0x400000
+  # instead (see pkgs/windows/bootstrap/mes/mes-m2.nix's own identical
+  # override, for the stage before this one that links against the same
+  # header) -- so boot-mes's link has to be told, or every absolute address
+  # it emits lands 0xC00000 too high: still a valid-looking pointer, just
+  # one past the file's own content, in the zero-filled memory beyond
+  # SizeOfRawData, so the string or global read back through it is all
+  # zero bytes rather than what was meant.
+  baseAddress ? null,
   # hex2, as MesCC's linker: the one that reads flags (--base-address,
   # --little-endian) rather than the hand-written one some chains bootstrap
   # with, which cannot.  Defaults to the ELF chain's own, which is already
@@ -184,6 +198,9 @@ let
       "${mesSrc}/lib"
       "-l"
       "c+tcc"
+    ]
+    ++ (if baseAddress == null then [ ] else [ "--base-address" baseAddress ])
+    ++ [
       "-o"
       out
       assembly
@@ -211,7 +228,8 @@ let
       # mes-libc.gnuSource the way libs.kaem always has.
       crt1Object ? null,
     }:
-    derivationWithMeta {
+    derivationWithMeta (
+    {
       pname = "${name}-libs";
       inherit version system meta;
 
@@ -267,6 +285,7 @@ let
           bin_cp = cp;
           crt1_o = crt1Object;
         }
+    )
     );
 
   # kaem substitutes a variable as one argument, so an option list has to be

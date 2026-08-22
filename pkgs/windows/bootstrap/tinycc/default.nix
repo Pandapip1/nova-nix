@@ -28,24 +28,10 @@
 # every round from boot0 up, where a real (if still bootstrapping) tcc is
 # doing the compiling and #pragma pack is no longer MesCC's problem.
 #
-# boot0 does not build yet -- not from anything in this file. The compiled
-# boot-mes.exe binary itself crashes on every invocation, including with
-# no arguments at all: a null-pointer *call* (not a data read), inside
-# what disassembles as an __ntcall-shaped trampoline (push up to six args,
-# `call *eax` through the first one) reached from a resolve-and-cache
-# pattern matching __ntdll_resolve's own. The name being resolved is an
-# address past the end of the file's real content, in the same
-# zero-mapped-past-PE_end region Mes's own argv/envp live in on this
-# side -- consistent with a string that some earlier step was supposed to
-# place there and didn't, though that step hasn't been found yet. This
-# reproduces standalone (`wine boot-mes.exe` with no arguments, from
-# outside nix entirely), so it is not about anything boot0's own
-# machinery asks of it; boot-mes.exe itself is broken as a program, the
-# same way __assert_fail was broken as a program, before the fixes noted
-# above. Bisecting it needs the same disassembly-first approach that found
-# those three, starting from this crash's own call chain rather than
-# tccgen.c's content, since this one reproduces before argv is even
-# looked at.
+# boot-mes.exe used to crash on every invocation, including with no
+# arguments at all -- see baseAddress below for what that was and the
+# fourth bug it turned out to be (mescc's linker disagreeing with
+# PE32-i386.hex2 about where the image loads).
 {
   stage0,
   mes,
@@ -65,6 +51,23 @@ callPackage ../../../bootstrap/tinycc {
   # round -- it is cdecl, the same calling convention every round's own
   # tcc uses, so the one mes-libc already built serves every round alike.
   crt1Object = mes.libc.crt1;
+  # mescc's linker defaults to 0x1000000, matching Linux's own ELF header;
+  # PE32-i386.hex2 hardcodes ImageBase 0x400000 instead, the same way
+  # mes-m2.nix already tells hex2-new for the round before this one.
+  # boot-mes without this: every absolute address it emits (a string
+  # literal's, a global's) lands 0xC00000 too high -- still inside the
+  # image's declared (zero-filled) VirtualSize, so nothing refuses to load
+  # it, but past SizeOfRawData, so what is read back through it is zero
+  # bytes rather than the content that was meant to be there. This is the
+  # boot-mes.exe crash the comment below used to describe unsolved: found
+  # by disassembling the crash site (a null-through-%eax call inside an
+  # __ntcallN trampoline) back to its caller, which turned out to be
+  # brk.c's own first NtAllocateVirtualMemory call -- __ntdll_resolve
+  # ("NtAllocateVirtualMemory") reading its name argument from
+  # 0x107b6c0, 0xC00000 past where the string literal actually landed
+  # (0x47b6c0, comfortably inside the file), reads zero bytes, matches no
+  # export, and returns 0 for __ntcall6 to call through.
+  baseAddress = "0x400000";
   hex2 = stage0.hex2-new;
   bloodElf = null;
   # 19000000, not mes-libc's 15000000: this round's translation unit

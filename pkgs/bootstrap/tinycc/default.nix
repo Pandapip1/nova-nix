@@ -21,6 +21,7 @@
   # Passed straight through to boot.nix -- see there.
   laterTargetDefines ? [ ],
   crt1Object ? null,
+  baseAddress ? null,
   # hex2, blood-elf and arenaSize, passed straight through to boot.nix -- see
   # there.  Defaulted the same way there, so a call site only names them to
   # override.
@@ -50,6 +51,7 @@ lib.makeScope newScope (
         extraTargetDefines
         laterTargetDefines
         crt1Object
+        baseAddress
         hex2
         bloodElf
         arenaSize
