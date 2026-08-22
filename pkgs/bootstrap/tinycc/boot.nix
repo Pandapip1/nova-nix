@@ -29,6 +29,18 @@
   tccTarget,
   mesArchInclude,
   extraTargetDefines,
+  # Defines every round from boot0 up should carry, both when compiling
+  # tcc.c into that round's own tcc and when that tcc compiles libtcc1.c
+  # for its library. Unlike extraTargetDefines (which reaches only the
+  # single MesCC-compiled bootstrap round) this can be, and usually is,
+  # a strict superset of it: TCC_TARGET_PE=1 belongs here even though
+  # MesCC cannot compile tccpe.c's own #pragma pack, because a real tcc
+  # compiling tcc.c can.
+  laterTargetDefines ? [ ],
+  # A pre-built crt1 object, for a kernel whose crt1 is not C -- threaded
+  # into every recompileLibc call (bootMes's own and every round's) the
+  # same way; see recompileLibc's own crt1Object for what this changes.
+  crt1Object ? null,
   # hex2, as MesCC's linker: the one that reads flags (--base-address,
   # --little-endian) rather than the hand-written one some chains bootstrap
   # with, which cannot.  Defaults to the ELF chain's own, which is already
@@ -178,7 +190,7 @@ let
     ];
   };
 
-  inherit (stage0.mescc-tools-extra) mkdir catm;
+  inherit (stage0.mescc-tools-extra) mkdir catm cp;
 
   # The C library, recompiled by the tcc of this round.  Every round links
   # against the library the round below it made, so every round makes one.
@@ -189,6 +201,15 @@ let
       libtccOptions,
       src ? forkSrc,
       runtimeSecond ? "va_list.c",
+      # What this call's tcc already understands about its target, if
+      # anything -- see round's own use of this below, and bootMes's
+      # deliberate omission of it.
+      targetDefines ? [ ],
+      # A pre-built crt1, for a kernel whose crt1 isn't C -- see
+      # libs-windows.kaem.  null recompiles crt1 (and crti/crtn, which
+      # only exist as source for a kernel that has them at all) from
+      # mes-libc.gnuSource the way libs.kaem always has.
+      crt1Object ? null,
     }:
     derivationWithMeta {
       pname = "${name}-libs";
@@ -204,15 +225,19 @@ let
       incMesArch = "${mesSrc}/include/${mesArchInclude}";
       inherit tccTarget;
 
-      # The rounds differ only in how much of C the library may use, and
-      # never in more than two flags.
+      # The rounds differ in how much of C the library may use, never in more
+      # than two flags for that -- and separately, every round may need to be
+      # told what it is targeting (targetDefines), a thing every *caller* of
+      # this decides for itself: bootMes still uses the bootstrap round's own
+      # (deliberately not-yet-target-aware) tcc to build its library, while
+      # round's own call passes laterTargetDefines through.  Three slots, not
+      # two, so the two kinds never have to share one.
       libtccOpt1 = if libtccOptions == [ ] then "-D BOOTSTRAP=1" else builtins.elemAt libtccOptions 0;
       libtccOpt2 =
         if builtins.length libtccOptions > 1 then builtins.elemAt libtccOptions 1 else "-D BOOTSTRAP=1";
+      libtccOpt3 =
+        if targetDefines == [ ] then "-D BOOTSTRAP=1" else "-D " + builtins.elemAt targetDefines 0;
 
-      crt1_c = mes-libc.gnuSource.crt1;
-      crti_c = mes-libc.gnuSource.crti;
-      crtn_c = mes-libc.gnuSource.crtn;
       # tinycc's own runtime, from the source being built -- see libs.kaem.
       # The second file differs between the two trees: the fork carries
       # va_list.c, mainline an assembly alloca.  nixpkgs pairs them the same
@@ -227,9 +252,22 @@ let
         "--verbose"
         "--strict"
         "--file"
-        ./libs.kaem
+        (if crt1Object == null then ./libs.kaem else ./libs-windows.kaem)
       ];
-    };
+    }
+    // (
+      if crt1Object == null then
+        {
+          crt1_c = mes-libc.gnuSource.crt1;
+          crti_c = mes-libc.gnuSource.crti;
+          crtn_c = mes-libc.gnuSource.crtn;
+        }
+      else
+        {
+          bin_cp = cp;
+          crt1_o = crt1Object;
+        }
+    );
 
   # kaem substitutes a variable as one argument, so an option list has to be
   # one variable per option.  There is no way to loop in the script either, so
@@ -289,8 +327,16 @@ let
         }
         # One variable per option; see the script.  A slot a round does not
         # use repeats a harmless flag rather than being empty, which kaem
-        # would pass as an empty argument.
-        // optionSlots buildOptions
+        # would pass as an empty argument.  laterTargetDefines rides along
+        # after buildOptions -- every round from boot0 up has to already
+        # know what it is targeting, or a later round only regains that
+        # knowledge by being told again.  Not extraTargetDefines: that one
+        # reaches the single MesCC-compiled round, which may need to stay
+        # ignorant of the target for reasons that have nothing to do with
+        # what the *target* is -- MesCC not implementing some C construct
+        # tcc.c only needs once a define is on, on this side's PE32 --
+        # while the tcc-compiled rounds from boot0 on have no such gap.
+        // optionSlots (buildOptions ++ map (d: "-D " + d) laterTargetDefines)
       );
 
       # What the next round builds with.
@@ -303,7 +349,9 @@ let
           tcc
           src
           runtimeSecond
+          crt1Object
           ;
+        targetDefines = laterTargetDefines;
       };
     };
 
@@ -316,6 +364,7 @@ let
       name = "tinycc-boot-mes";
       tcc = boot-mes;
       libtccOptions = [ ];
+      inherit crt1Object;
     };
   };
   # Mainline tcc compiles its predefined macros in rather than reading them

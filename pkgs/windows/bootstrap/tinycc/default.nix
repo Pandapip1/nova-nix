@@ -17,49 +17,35 @@
 # applies for the same reason -- what a 32-bit process can reserve as
 # contiguous address space under wine.
 #
-# boot-mes does not build yet.  Compiling tcc.c through this side's mes-m2.exe
-# segfaults -- a byte write through a null pointer, deterministically, not the
-# GC/allocation-pattern flakiness an earlier look at this suspected (that read
-# was wrong: the one run that looked "clean" was actually hitting an
-# unrelated file-not-found path in a since-fixed test harness, not really
-# avoiding the crash).
+# boot-mes builds: see pkgs/bootstrap/mes and the mes/M2-Planet forks for
+# the three bugs that were stacked underneath the crash this comment used
+# to describe (an unreported assertion failure, hiding an M2-Planet
+# short-circuit bug, hiding a genuine arena exhaustion). What's left of
+# that story: TCC_TARGET_PE is deliberately absent from
+# extraTargetDefines below. MesCC cannot compile tccpe.c's own
+# `#pragma pack(push, 1)`, so it never went in the round that MesCC
+# itself compiles -- laterTargetDefines carries it instead, reaching
+# every round from boot0 up, where a real (if still bootstrapping) tcc is
+# doing the compiling and #pragma pack is no longer MesCC's problem.
 #
-# Bisected to a single line: TinyCC's tccgen.c, inside decl0, the call
-# `type_decl(&type, &ad, &v, TYPE_DIRECT);` a few lines into the loop that
-# walks each declaration.  Confirmed by two independent means of narrowing --
-# truncating tccgen.c at increasingly precise, brace-and-#if-balanced cut
-# points (the first attempt at this was itself contaminated by an unbalanced
-# `#if 0`, which cost a false "it's variable shadowing" lead before being
-# caught and corrected) -- both converge on this exact call.  The same call
-# shape appears earlier in the same file (tccgen.c:3693) and compiles fine
-# there, so it is not the call itself; something about decl0's own state at
-# that point in its two nested `while(1)` loops is what triggers it.  A
-# hand-written minimal repro of that state (shadowed local, address-of after
-# the shadowing scope closes) does not reproduce it either, so whatever this
-# is depends on real accumulated compiler state, not a small isolable
-# construct.
-#
-# Ruled out: arena exhaustion (identical crash at 15M and 25M cells; GC does
-# run -- confirmed via MES_DEBUG=2, dozens of collections happen before the
-# crash -- so it is not "GC never runs", either). Ruled out: g_free literally
-# being NULL in any of gc.c's four cell allocators (make_cell,
-# make_pointer_cell, make_value_cell, alloc) -- a temporary build with a
-# null-guard added to all four still crashed at the identical instruction,
-# meaning whatever pointer is null at the point of the write isn't g_free in
-# one of those.  The crash is a byte store (`movb %al,(%ebx)`, storing literal
-# 2) reached through a conditional branch, inside src/*.c compiled code (a
-# fixed address inside mes-m2.exe, not anything from the target program being
-# compiled) -- consistent with some other cell-shaped allocation this session
-# didn't get to, but not confirmed.  The same tcc.c content compiles cleanly
-# through Linux's mes-m2 (pkgs/linux/....tinycc.boot.boot0 already builds),
-# so this is specific to the Windows-built interpreter, not a defect in
-# tcc.c or in mescc's Scheme-level compiler logic.
-#
-# Next step needs real tooling rather than more blind bisection: M2-Planet's
-# calling convention here (frame pointer in %esi, not %ebp; return-address
-# placement that doesn't match ordinary cdecl) makes the wine crash dump's
-# raw stack contents unreadable without either a symbolized build or
-# purpose-built stack-walking, neither of which exists yet for this chain.
+# boot0 does not build yet -- not from anything in this file. The compiled
+# boot-mes.exe binary itself crashes on every invocation, including with
+# no arguments at all: a null-pointer *call* (not a data read), inside
+# what disassembles as an __ntcall-shaped trampoline (push up to six args,
+# `call *eax` through the first one) reached from a resolve-and-cache
+# pattern matching __ntdll_resolve's own. The name being resolved is an
+# address past the end of the file's real content, in the same
+# zero-mapped-past-PE_end region Mes's own argv/envp live in on this
+# side -- consistent with a string that some earlier step was supposed to
+# place there and didn't, though that step hasn't been found yet. This
+# reproduces standalone (`wine boot-mes.exe` with no arguments, from
+# outside nix entirely), so it is not about anything boot0's own
+# machinery asks of it; boot-mes.exe itself is broken as a program, the
+# same way __assert_fail was broken as a program, before the fixes noted
+# above. Bisecting it needs the same disassembly-first approach that found
+# those three, starting from this crash's own call chain rather than
+# tccgen.c's content, since this one reproduces before argv is even
+# looked at.
 {
   stage0,
   mes,
@@ -70,17 +56,15 @@ callPackage ../../../bootstrap/tinycc {
   inherit stage0 mes nyacc;
   tccTarget = "I386";
   mesArchInclude = "windows/x86";
-  # Not TCC_TARGET_PE=1 here: extraTargetDefines only reaches boot.nix's
-  # `assembly` derivation -- the single MesCC-compiled round -- and that
-  # round doesn't need it. tccpe.c's own structs are declared
-  # `#pragma pack(push, 1)`, which MesCC does not implement, so defining
-  # TCC_TARGET_PE here doesn't get a PE-capable bootstrap tcc; it fails
-  # outright, on a pragma nothing downstream of boot-mes was ever going to
-  # read either (boot.nix has no mechanism yet to carry a define into the
-  # later, tcc-compiled rounds where PE support would actually need to
-  # start). Getting a tcc that can emit PE32 is real, separate work: teach
-  # boot.nix to pass a define into a specific later round, and start
-  # TCC_TARGET_PE there instead of here.
+  # See the comment above: MesCC can't compile tccpe.c, so PE32 starts one
+  # round later than the target itself does.
+  laterTargetDefines = [ "TCC_TARGET_PE=1" ];
+  # mes-libc's own crt1, not recompiled: it isn't C on this side
+  # (lib/windows/x86-mes-mescc/crt1.M1, hand-assembled), and there is
+  # nothing round-specific about it to justify redoing that work at every
+  # round -- it is cdecl, the same calling convention every round's own
+  # tcc uses, so the one mes-libc already built serves every round alike.
+  crt1Object = mes.libc.crt1;
   hex2 = stage0.hex2-new;
   bloodElf = null;
   # 19000000, not mes-libc's 15000000: this round's translation unit
