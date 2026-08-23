@@ -86,6 +86,11 @@ let
     # rather than kaem.
     coreutils = callPackage ./bootstrap/coreutils { };
 
+    # The stream editor every ./configure above here runs on its own output.
+    # One build, not two: the Linux side needs a second sed against musl
+    # because Mes's stdio mishandles a pipe, and ntlibc's does not.
+    gnused = callPackage ./bootstrap/gnused { };
+
     # And the pattern matcher every ./configure above here runs a hundred
     # times.  Its own regex, since ntlibc has none.
     gnugrep = callPackage ./bootstrap/gnugrep { };
