@@ -1,0 +1,104 @@
+# GNU make 4.4.1, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/gnumake/build.kaem, and
+# the same shape: unpack, assert what ./configure would have discovered as
+# one -D per answer, compile every file, link, run it once before installing
+# it.  What differs:
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}.  They name the same directory, but wine
+# drops TMPDIR on the way into the Windows environment, so it arrives empty
+# and cd is left with no argument -- which is what "cd failed!" has been on
+# this side all along.
+#
+# No patches, and so no dependency on a `patch' this side does not have yet.
+# The Linux build carries three; none is needed here:
+#
+#   0001 replaces "/bin/sh" with "sh" so make searches PATH for its shell.
+#        Done with replace below instead -- it is one string, and replace is
+#        the text-editing tool this stage has.
+#   0002 drops /usr/include and friends from the directories make searches
+#        for included makefiles.  Those cannot exist on this side, so there
+#        is nothing impure down them to find.
+#   0003 works around two facts about the Mes C library -- lstat declared
+#        nowhere, getloadavg missing.  ntlibc has both.
+#
+# Nor does this want -Dsig_atomic_t=int, which the Linux build needs because
+# Mes's C library does not define it: ntlibc does, in <signal.h>, so
+# defining it again would turn that typedef into `typedef int int;'.
+#
+# -DNO_ARCHIVES because make's archive support wants <ar.h>, a Unix-ism
+# ntlibc has no counterpart for and a bootstrap has no use for.
+#
+# -I${pwdshim} supplies a <pwd.h>: read.c and gnulib's glob.c include it
+# unconditionally off the WINDOWS32 path, to expand `~user'.  NT has no
+# passwd database, so its getpwnam answers "no such user" and `~user'
+# declines rather than expanding.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output make.tar
+${bin_untar} --file make.tar
+
+cd ${NIX_BUILD_TOP}/make-${version}
+
+# What configure would have generated: config.h out of make's own two
+# headers, and the two gnulib .in.h headers under the names the sources
+# include them by.
+${bin_catm} src/config.h src/mkconfig.h src/mkcustom.h
+${bin_cp} lib/glob.in.h lib/glob.h
+${bin_cp} lib/fnmatch.in.h lib/fnmatch.h
+
+# Both definitions of default_shell in job.c say "/bin/sh"; the only other
+# occurrence in the file is inside a comment, so rewriting every one is
+# exactly the change the Linux patch makes.
+${bin_replace} --file src/job.c --output job-patched.c --match-on ${shellAbs} --replace-with ${shellRel}
+${bin_cp} job-patched.c src/job.c
+
+alias CC="${tcc} -c -std=c99 -nostdinc -B ${ntlibc}/lib -I./src -I./lib -I${pwdshim} -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -DHAVE_CONFIG_H -DMAKE_MAINTAINER_MODE -DPOSIX=1 -DNO_ARCHIVES -DFILE_TIMESTAMP_HI_RES=0 -DSCCS_GET=\"get\" -DLOCALEDIR=\"/fake-locale\" -DLIBDIR=\"${out}/lib\" -DHAVE_DECL_BSD_SIGNAL=1 -DHAVE_DECL_GETLOADAVG=0 -DHAVE_ALLOCA -DHAVE_ALLOCA_H -DHAVE_ATEXIT -DHAVE_DIRENT_H -DHAVE_DUP2 -DHAVE_FCNTL_H -DHAVE_FDOPEN -DHAVE_GETCWD -DHAVE_GETTIMEOFDAY -DHAVE_INTTYPES_H -DHAVE_ISATTY -DHAVE_LIMITS_H -DHAVE_LOCALE_H -DHAVE_MKTEMP -DHAVE_SA_RESTART -DHAVE_SETVBUF -DHAVE_SIGACTION -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRDUP -DHAVE_STRERROR -DHAVE_STRINGS_H -DHAVE_STRING_H -DHAVE_STRTOLL -DHAVE_SYS_FILE_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_WAIT_H -DHAVE_TTYNAME -DHAVE_UMASK -DHAVE_UNISTD_H -DHAVE_WAITPID -DSTDC_HEADERS -DPATH_SEPARATOR_CHAR=';'"
+
+CC -o ar.o src/ar.c
+CC -o arscan.o src/arscan.c
+CC -o commands.o src/commands.c
+CC -o default.o src/default.c
+CC -o dir.o src/dir.c
+CC -o expand.o src/expand.c
+CC -o file.o src/file.c
+CC -o function.o src/function.c
+CC -o getopt.o src/getopt.c
+CC -o getopt1.o src/getopt1.c
+CC -o guile.o src/guile.c
+CC -o hash.o src/hash.c
+CC -o implicit.o src/implicit.c
+CC -o job.o src/job.c
+CC -o load.o src/load.c
+CC -o loadapi.o src/loadapi.c
+CC -o main.o src/main.c
+CC -o misc.o src/misc.c
+CC -o output.o src/output.c
+CC -o read.o src/read.c
+CC -o remake.o src/remake.c
+CC -o rule.o src/rule.c
+CC -o shuffle.o src/shuffle.c
+CC -o signame.o src/signame.c
+CC -o strcache.o src/strcache.c
+CC -o variable.o src/variable.c
+CC -o version.o src/version.c
+CC -o vpath.o src/vpath.c
+CC -o fnmatch.o lib/fnmatch.c
+CC -o glob.o lib/glob.c
+CC -o remote-stub.o src/remote-stub.c
+CC -o posixos.o src/posixos.c
+
+# -nostdlib, crt1.o and -lc/-lntdll named outright: a PE-target tcc adds
+# neither a startup object nor a default C library the way the ELF side
+# does, and the default it does reach for (msvcrt, kernel32) is not what
+# this bootstrap has.  ntdll.def is the import library ntlibc programs
+# resolve their kernel calls through.
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o make.exe ar.o arscan.o commands.o default.o dir.o expand.o file.o function.o getopt.o getopt1.o guile.o hash.o implicit.o job.o load.o loadapi.o main.o misc.o output.o read.o remake.o rule.o shuffle.o signame.o strcache.o variable.o version.o vpath.o fnmatch.o glob.o remote-stub.o posixos.o -L ${ntlibc}/lib -lc -lntdll
+
+# Run it before installing it: a make that cannot say what it is is not a
+# make worth handing to the next stage.
+./make.exe --version
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} make.exe ${out}/bin/make.exe

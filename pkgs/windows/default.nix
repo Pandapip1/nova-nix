@@ -69,6 +69,10 @@ let
     # default.nix for the difference that matters.
     ntlibc = callPackage ./bootstrap/ntlibc { };
 
+    # The first program above the compiler and the C library, and what
+    # everything above it is built with.
+    gnumake = callPackage ./bootstrap/gnumake { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
