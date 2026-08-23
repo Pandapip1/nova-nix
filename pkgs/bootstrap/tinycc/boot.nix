@@ -461,9 +461,27 @@ let
 
       # Appended to the generated macros: this tcc targets the Mes C library,
       # so its configuration has to be predefined too.
+      #
+      # Windows takes the same line by absolute path instead, through the
+      # template below.  CONFIG_TCC_PREDEFS puts this into every translation
+      # unit the compiler ever reads, including ones belonging to another C
+      # library entirely: ntlibc compiles -nostdinc, so there is no include
+      # path for <mes/config.h> to be found on, and none can be added --
+      # ntlibc's build archives with CC followed by -ar, and tcc reads -ar
+      # only as its own first argument, so CC has to stay the compiler and
+      # nothing else.  An absolute path needs no search and costs the Mes
+      # side nothing.
+      #
+      # Written by replace rather than by builtins.toFile, which refuses a
+      # file that mentions a derivation: the template carries a placeholder
+      # and tccdefs-windows.kaem substitutes the real path into it.
       configLine = builtins.toFile "tccdefs-config.h" ''
         "#include <mes/config.h>\n"
       '';
+      configTemplate = builtins.toFile "tccdefs-config.h.in" ''
+        "#include \"@MESCONFIG@/mes/config.h\"\n"
+      '';
+      mesConfigInclude = mes-libc.configInclude;
 
       builder = stage0.kaem;
       args = [

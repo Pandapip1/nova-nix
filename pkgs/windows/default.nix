@@ -64,6 +64,11 @@ let
     # Not a stage: the parser modules MesCC loads, which Mes does not vendor.
     nyacc = callPackage ../bootstrap/nyacc { };
 
+    # The C library everything above tcc is built against -- this side's
+    # musl, where Mes's own is only what the chain climbs on.  See its
+    # default.nix for the difference that matters.
+    ntlibc = callPackage ./bootstrap/ntlibc { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
