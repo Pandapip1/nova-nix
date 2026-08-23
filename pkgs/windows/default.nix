@@ -73,6 +73,10 @@ let
     # everything above it is built with.
     gnumake = callPackage ./bootstrap/gnumake { };
 
+    # And the second: what the packages above them are patched with, since
+    # a release tarball is not hermetic as it stands.
+    gnupatch = callPackage ./bootstrap/gnupatch { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };

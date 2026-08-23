@@ -1,0 +1,75 @@
+# GNU patch 2.5.9, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/gnupatch/build.kaem, and
+# the same shape: patch ships a ./configure nothing here can run, so what
+# configure would have discovered is asserted instead -- an empty config.h
+# and one -D per answer.  2.5.9 rather than anything newer because 2.6 and
+# later use gnulib pieces this bootstrap has no counterpart for.
+#
+# error.c is compiled although patch's own Makefile.in does not list it:
+# there is no error() in either C library this chain has had, so patch's
+# bundled copy stands in.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}: wine drops TMPDIR on the way into the
+# Windows environment, so it arrives empty and cd is left with no argument.
+#
+# Two -D that the Linux build does not need.  Its error.c falls back to
+# sys_errlist and sys_nerr, which Mes's C library has and ntlibc does not --
+# they are BSD-era globals that POSIX replaced with strerror, and a library
+# written this decade has no reason to carry them.  HAVE_STRERROR takes the
+# other branch; HAVE_DECL_STRERROR has to come with it, because error.c
+# deliberately fails to compile ("this configure-time declaration test was
+# not run") if it is told the one without the other.
+#
+# -I. is where config.h was just written; the second -I is the unpacked
+# source, because the objects are built in the directory above it and this
+# tcc does not search an included file's own directory for a quoted include.
+#
+# No -static, and no ${mesinc}: this links against ntlibc, whose headers are
+# the only ones in the include path, so there is no size_t disagreement to
+# order around the way the Mes side has.  A PE-target tcc adds neither a
+# startup object nor a default C library, so crt1.o and -lc/-lntdll are
+# named outright -- ntdll.def being the import library ntlibc resolves its
+# kernel calls through.
+
+cd ${NIX_BUILD_TOP}
+
+# Unpacked here rather than through an unpackTarball helper: nothing patches
+# this source, so a read-only store copy would have done -- but untar has to
+# write somewhere either way, and the build directory is where the objects
+# are going anyway.
+${bin_ungz} --file ${tarball} --output patch.tar
+${bin_untar} --file patch.tar
+
+# What ./configure would have written.  Empty: every answer is a -D below.
+${bin_catm} config.h
+
+alias CC="${tcc} -c -B ${ntlibc}/lib -I. -I${NIX_BUILD_TOP}/patch-${version} -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -DHAVE_STRERROR -DHAVE_DECL_STRERROR=1 -DHAVE_DECL_GETENV -DHAVE_DECL_MALLOC -DHAVE_DIRENT_H -DHAVE_LIMITS_H -DHAVE_GETEUID -DHAVE_MKTEMP -DPACKAGE_BUGREPORT= -Ded_PROGRAM=\"/nullop\" -Dmbstate_t=int -DRETSIGTYPE=int -DHAVE_MKDIR -DHAVE_RMDIR -DHAVE_FCNTL_H -DPACKAGE_NAME=\"patch\" -DPACKAGE_VERSION=\"${version}\" -DHAVE_MALLOC -DHAVE_REALLOC -DSTDC_HEADERS -DHAVE_STRING_H -DHAVE_STDLIB_H -DHAVE_VPRINTF"
+
+CC -o addext.o ${NIX_BUILD_TOP}/patch-${version}/addext.c
+CC -o argmatch.o ${NIX_BUILD_TOP}/patch-${version}/argmatch.c
+CC -o backupfile.o ${NIX_BUILD_TOP}/patch-${version}/backupfile.c
+CC -o basename.o ${NIX_BUILD_TOP}/patch-${version}/basename.c
+CC -o dirname.o ${NIX_BUILD_TOP}/patch-${version}/dirname.c
+CC -o getopt.o ${NIX_BUILD_TOP}/patch-${version}/getopt.c
+CC -o getopt1.o ${NIX_BUILD_TOP}/patch-${version}/getopt1.c
+CC -o inp.o ${NIX_BUILD_TOP}/patch-${version}/inp.c
+CC -o maketime.o ${NIX_BUILD_TOP}/patch-${version}/maketime.c
+CC -o partime.o ${NIX_BUILD_TOP}/patch-${version}/partime.c
+CC -o patch.o ${NIX_BUILD_TOP}/patch-${version}/patch.c
+CC -o pch.o ${NIX_BUILD_TOP}/patch-${version}/pch.c
+CC -o quote.o ${NIX_BUILD_TOP}/patch-${version}/quote.c
+CC -o quotearg.o ${NIX_BUILD_TOP}/patch-${version}/quotearg.c
+CC -o quotesys.o ${NIX_BUILD_TOP}/patch-${version}/quotesys.c
+CC -o util.o ${NIX_BUILD_TOP}/patch-${version}/util.c
+CC -o version.o ${NIX_BUILD_TOP}/patch-${version}/version.c
+CC -o xmalloc.o ${NIX_BUILD_TOP}/patch-${version}/xmalloc.c
+CC -o error.o ${NIX_BUILD_TOP}/patch-${version}/error.c
+
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o patch.exe addext.o argmatch.o backupfile.o basename.o dirname.o getopt.o getopt1.o inp.o maketime.o partime.o patch.o pch.o quote.o quotearg.o quotesys.o util.o version.o xmalloc.o error.o -L ${ntlibc}/lib -lc -lntdll
+
+# Run it before installing it.
+./patch.exe --version
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} patch.exe ${out}/bin/patch.exe
