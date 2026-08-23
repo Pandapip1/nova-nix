@@ -20,13 +20,18 @@
 # boot-mes builds: see pkgs/bootstrap/mes and the mes/M2-Planet forks for
 # the three bugs that were stacked underneath the crash this comment used
 # to describe (an unreported assertion failure, hiding an M2-Planet
-# short-circuit bug, hiding a genuine arena exhaustion). What's left of
-# that story: TCC_TARGET_PE is deliberately absent from
-# extraTargetDefines below. MesCC cannot compile tccpe.c's own
-# `#pragma pack(push, 1)`, so it never went in the round that MesCC
-# itself compiles -- laterTargetDefines carries it instead, reaching
-# every round from boot0 up, where a real (if still bootstrapping) tcc is
-# doing the compiling and #pragma pack is no longer MesCC's problem.
+# short-circuit bug, hiding a genuine arena exhaustion).
+#
+# TCC_TARGET_PE is in extraTargetDefines, so PE32 is the target from the
+# first round rather than from boot0. It was the other way round while
+# MesCC could not compile tccpe.c, and that was not survivable: the round
+# MesCC compiles is the only one in the chain that emits an executable at
+# all, so a boot-mes that did not know PE emitted ELF, and boot0 came out
+# as Windows code -- PEB reads, ntdll calls -- inside an ELF wrapper, which
+# neither system will load. Four MesCC bugs stood in the way, all fixed in
+# the mes fork and none of them Windows-specific; tccpe.c is simply the
+# first file in the bootstrap to ask for any of them, being #ifdef'd out
+# of the Linux chain entirely.
 #
 # boot-mes.exe used to crash on every invocation, including with no
 # arguments at all -- see baseAddress below for what that was and the
@@ -42,15 +47,27 @@ callPackage ../../../bootstrap/tinycc {
   inherit stage0 mes nyacc;
   tccTarget = "I386";
   mesArchInclude = "windows/x86";
-  # See the comment above: MesCC can't compile tccpe.c, so PE32 starts one
-  # round later than the target itself does.
+  # Every round from boot0 up needs telling too: extraTargetDefines reaches
+  # only the round MesCC compiles.
   laterTargetDefines = [ "TCC_TARGET_PE=1" ];
-  # mes-libc's own crt1, not recompiled: it isn't C on this side
-  # (lib/windows/x86-mes-mescc/crt1.M1, hand-assembled), and there is
-  # nothing round-specific about it to justify redoing that work at every
-  # round -- it is cdecl, the same calling convention every round's own
-  # tcc uses, so the one mes-libc already built serves every round alike.
+  # See the comment above. The four MesCC bugs, for the record: #pragma
+  # pack, a typedef naming more than one thing, offsetof of a nested field,
+  # and a struct initialised from another struct -- that last one silently,
+  # which is what makes it worth naming here.
+  extraTargetDefines = [ "TCC_TARGET_PE=1" ];
+  # tcc.h makes PATHSEP a semicolon under TCC_TARGET_PE: see boot.nix.
+  pathSep = ";";
+  # mes-libc's own crt1, for bootMes's library only: it isn't C on this side
+  # (lib/windows/x86-mes-mescc/crt1.M1, hand-assembled, meant to be handed
+  # straight to hex2's own linker the way boot-mes.exe's own build already
+  # is), so it is copied rather than recompiled -- see boot.nix's own
+  # crt1Object.
   crt1Object = mes.libc.crt1;
+  # Every round from boot0 up has a real tcc doing the compiling instead,
+  # which can build a real crt1 from C source the ordinary way -- see
+  # boot.nix's own crt1Source and lib/windows/x86-mes-gcc/crt1.c for what
+  # this file does that lib/linux/${arch}-mes-gcc/crt1.c did not need to.
+  windowsCrt1Src = "${mes.src}/lib/windows/x86-mes-gcc/crt1.c";
   # mescc's linker defaults to 0x1000000, matching Linux's own ELF header;
   # PE32-i386.hex2 hardcodes ImageBase 0x400000 instead, the same way
   # mes-m2.nix already tells hex2-new for the round before this one.

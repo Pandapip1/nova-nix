@@ -37,10 +37,24 @@
   # MesCC cannot compile tccpe.c's own #pragma pack, because a real tcc
   # compiling tcc.c can.
   laterTargetDefines ? [ ],
-  # A pre-built crt1 object, for a kernel whose crt1 is not C -- threaded
-  # into every recompileLibc call (bootMes's own and every round's) the
-  # same way; see recompileLibc's own crt1Object for what this changes.
+  # A pre-built crt1 object -- unused by any call below now that bootMes's
+  # own library compiles crt1Source instead (see there for why), but kept
+  # as the signal round's own compiler build still reads to pick between
+  # boot-round.kaem and boot-round-windows.kaem.
   crt1Object ? null,
+  # A crt1.c for round's own library, from boot0 up: unlike bootMes, every
+  # round after it has a real tcc doing the compiling, which can build a
+  # real crt1 from C source the ordinary way -- see recompileLibc's own
+  # crt1Source, and lib/windows/x86-mes-gcc/crt1.c for why one exists on
+  # this side at all where lib/linux/${arch}-mes-gcc/crt1.c already did.
+  windowsCrt1Src ? null,
+  # What separates the entries of CONFIG_TCC_SYSINCLUDEPATHS, which tcc splits
+  # on PATHSEP.  tcc.h defines that as ';' under TCC_TARGET_PE and ':'
+  # everywhere else -- so once this chain's tcc is a PE one, a colon-joined
+  # list is not several paths but a single nonexistent one, and the very first
+  # #include of the round below fails with "include file 'stdlib.h' not
+  # found".  Defaults to the ELF chain's colon.
+  pathSep ? ":",
   # The ImageBase/e_entry base mescc's linker (hex2 --base-address) should
   # assume when it resolves an absolute address -- a string literal's, a
   # global's -- into the bytes it writes.  null keeps mescc's own default,
@@ -164,7 +178,7 @@ let
       "-D"
       "CONFIG_TCC_LIBPATHS=\"{B}\""
       "-D"
-      "CONFIG_TCC_SYSINCLUDEPATHS=\"${src}/include:${mesSrc}/include\""
+      "CONFIG_TCC_SYSINCLUDEPATHS=\"${src}/include${pathSep}${mesSrc}/include\""
       "-D"
       "TCC_LIBGCC=\"libc.a\""
       "-D"
@@ -227,6 +241,11 @@ let
       # only exist as source for a kernel that has them at all) from
       # mes-libc.gnuSource the way libs.kaem always has.
       crt1Object ? null,
+      # A crt1.c to recompile with this call's own tcc instead -- see
+      # libs-windows-src.kaem.  Windows has no crti/crtn (PE has no
+      # .init/.fini to bracket), so this and crt1Object are the only two
+      # shapes a non-null crt1 comes in; a caller sets at most one.
+      crt1Source ? null,
     }:
     derivationWithMeta (
     {
@@ -270,20 +289,29 @@ let
         "--verbose"
         "--strict"
         "--file"
-        (if crt1Object == null then ./libs.kaem else ./libs-windows.kaem)
+        (
+          if crt1Object != null then
+            ./libs-windows.kaem
+          else if crt1Source != null then
+            ./libs-windows-src.kaem
+          else
+            ./libs.kaem
+        )
       ];
     }
     // (
-      if crt1Object == null then
+      if crt1Object != null then
+        {
+          bin_cp = cp;
+          crt1_o = crt1Object;
+        }
+      else if crt1Source != null then
+        { crt1_c = crt1Source; }
+      else
         {
           crt1_c = mes-libc.gnuSource.crt1;
           crti_c = mes-libc.gnuSource.crti;
           crtn_c = mes-libc.gnuSource.crtn;
-        }
-      else
-        {
-          bin_cp = cp;
-          crt1_o = crt1Object;
         }
     )
     );
@@ -334,7 +362,7 @@ let
           # substituted verbatim, escapes and all, so the quotes this C string
           # literal needs have to already be quotes.  The escape is only for
           # quotes written in the script text itself.
-          sysIncludePaths = "\"${src}/include:${mesSrc}/include:${mes-libc.configInclude}\"";
+          sysIncludePaths = "\"${src}/include${pathSep}${mesSrc}/include${pathSep}${mes-libc.configInclude}\"";
 
           builder = stage0.kaem;
           args = [
@@ -368,9 +396,9 @@ let
           tcc
           src
           runtimeSecond
-          crt1Object
           ;
         targetDefines = laterTargetDefines;
+        crt1Source = windowsCrt1Src;
       };
     };
 
@@ -383,7 +411,15 @@ let
       name = "tinycc-boot-mes";
       tcc = boot-mes;
       libtccOptions = [ ];
-      inherit crt1Object;
+      # Not crt1Object: nothing reads bootMes.libs's own crt1.o in the raw
+      # hex2-source form -- boot-mes.exe's own link already happened,
+      # straight from mes.libc.crt1, entirely separately from this
+      # library. What DOES read this crt1.o is boot0's own compiler link,
+      # via prevLibs, and that is a real tcc linker: it needs a real
+      # object file, which boot-mes.exe can already compile from crt1.c
+      # the same ordinary way it compiles libtcc1.c and libc.c for this
+      # same library.
+      crt1Source = windowsCrt1Src;
     };
   };
   # Mainline tcc compiles its predefined macros in rather than reading them
