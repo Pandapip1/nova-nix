@@ -13,7 +13,7 @@ rec {
   # 0.27.1 with a backend upstream does not carry yet.
   version = "0.27.1-unstable-2026-08-22";
 
-  rev = "6c25928e146fd1d4fe81b6cf5aa5f1cfb44d7d79";
+  rev = "9add5ae717c676109e49064b1f23c7b18ba22891";
   ref = "windows-pe32-ntcall";
 
   src = builtins.fetchGit {
