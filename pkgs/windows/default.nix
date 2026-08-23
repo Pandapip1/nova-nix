@@ -95,6 +95,11 @@ let
     # times.  Its own regex, since ntlibc has none.
     gnugrep = callPackage ./bootstrap/gnugrep { };
 
+    # And the decompressor, so a release tarball above here is opened by a
+    # program this bootstrap built rather than by the unpacker
+    # mescc-tools-extra supplied to get it started.
+    gzip = callPackage ./bootstrap/gzip { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };

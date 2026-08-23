@@ -1,0 +1,197 @@
+# gzip 1.2.4, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/gzip/build.sh, which drives
+# gzip's own ./configure under bash.  There is no configure here.  gzip 1.2.4
+# is a 1993 program with no config.h and no gnulib: everything configure
+# decides it hands to the compiler as -D, and the whole list is documented at
+# the top of gzip's own Makefile.in.  So the -D wall below IS the configure
+# run, the way gnugrep and gnupatch do it, and the build is fourteen commands
+# that kaem can name directly.  That also keeps gzip off make, which on this
+# side loses roughly one child in a hundred and fifty to a bad exec.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}: wine drops TMPDIR on the way into the
+# Windows environment, so it arrives empty and cd is left with no argument.
+#
+#
+# WIN32, _WIN32 and MSDOS
+# -----------------------
+# gzip is the first package on this side with genuine DOS/Windows support of
+# its own, so this needed deciding rather than inheriting.  Measured first:
+# this tcc predefines _WIN32 and NOTHING ELSE of interest -- not WIN32, not
+# MSDOS, not unix, not even __STDC__.  gzip's tailor.h tests bare `WIN32' and
+# bare `MSDOS'; the string `_WIN32' does not appear anywhere in the gzip
+# sources.  So no -U is needed, and none is passed: coreutils had to take
+# _WIN32 away because gnulib reads it as "the Win32 API is here", but nothing
+# in gzip ever looks at it.
+#
+# Defining WIN32 would have been the tempting move and it is the wrong one.
+# tailor.h's `#ifdef WIN32' block is a block about the Microsoft C runtime,
+# not about the operating system: it includes <io.h>, <malloc.h> and
+# <sys/utime.h>, none of which ntlibc has, and it defines SET_BINARY_MODE as
+# setmode(fd, O_BINARY), which ntlibc has no setmode for -- and would not need
+# one, because ntlibc is the NT system-call layer and does no CRLF translation
+# in the first place.  There is no text mode here to escape from.  Verified by
+# round-tripping two megabytes of /dev/urandom through `gzip -c' and
+# `gzip -dc' as a pipe and getting the same sha256 back.
+#
+# Three further things follow from leaving WIN32 undefined, and all three are
+# the answer this port wants:
+#
+#   OS_CODE stays 0x03, "Unix", the value tailor.h falls back to -- rather
+#   than 0x0b, "NTFS".  This is the byte at offset 9 of every gzip header this
+#   program writes, so it is real archive metadata and not a detail.  0x03 is
+#   the honest answer: what this gzip is running on is a POSIX surface
+#   (utime, chown, lstat, opendir, all of them real ntlibc calls), not the
+#   Win32 file API that 0x0b describes.  It also means a .gz produced here and
+#   one produced by the Linux half of this bootstrap are byte-identical, which
+#   is worth having in a bootstrap that builds the same sources twice.
+#   Checked against the host's own gzip: same sixteen header bytes, same OS
+#   byte, same stored name, same mtime.
+#
+#   Z_SUFFIX stays ".gz" and NO_MULTIPLE_DOTS stays undefined, so names are
+#   not truncated to 8.3 and `foo.tar.gz' is a name this gzip will make.  The
+#   WIN32 block only forces those under NTFAT, which is a FAT filesystem, not
+#   this one.
+#
+#   NO_CHOWN stays undefined, so gzip calls chown() to copy ownership.  ntlibc
+#   has chown; gzip ignores its return value, so a failure on a filesystem
+#   with no ownership to copy is not an error here any more than it is on
+#   Linux.
+#
+# What IS wanted out of that block is PATH_SEP2 and PATH_SEP3, and those are
+# in config.h -- see the head of that file for why they are load-bearing and
+# why they cannot be -D on a kaem command line.
+#
+# One more define arrives by omission rather than by choice: tailor.h ends
+# with `#ifndef unix / #define NO_ST_INO', and this tcc does not define unix.
+# So gzip does not trust st_ino to tell whether the input and output files are
+# the same, and falls back to comparing names.  That is the right answer for a
+# library whose st_ino comes from an NT file id that need not be stable.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output gzip.tar
+${bin_untar} --file gzip.tar
+
+# Everything is built in the source directory, so that gzip's quoted includes
+# -- "tailor.h", "gzip.h", "lzw.h", "crypt.h" -- are found by -I. ; this tcc
+# does not search an included file's own directory.
+cd ${NIX_BUILD_TOP}/gzip-${version}
+
+${bin_cp} ${configH} config.h
+
+# The four answers a ./configure would have reached on this system, and
+# nothing else.  Every one of them is a plain "the library has this":
+#
+#   STDC_HEADERS    gzip.h reads it as "<string.h> and <stdlib.h> exist".
+#                   Without it gzip.h includes <strings.h> INSTEAD and defines
+#                   strchr to index, memcpy to bcopy and memzero to bzero --
+#                   the same trap sed met from the other direction.  ntlibc's
+#                   <strings.h> has bcopy and bzero, so this would even link;
+#                   it would just be the 1980s spelling of a library that has
+#                   the real one.
+#   HAVE_UNISTD_H   ntlibc has it, and util.c and gzip.c want read/write/close
+#                   declared.
+#   DIRENT          picks <dirent.h> for the -r recursion, over the three
+#                   pre-POSIX spellings gzip also knows.  ntlibc has opendir,
+#                   readdir and closedir.  Verified by running `gzip -r' over
+#                   a two-level tree.
+#   VERSION/REVDATE are not passed: revision.h carries them, unlike sed.
+#
+# Four things live-bootstrap's Linux recipe does that are NOT done here:
+#
+#   -Dstrlwr=unused is dropped.  gzip DEFINES strlwr in util.c, so that -D
+#                   renames the definition and its three call sites together;
+#                   it is there because Mes's C library declares a strlwr of
+#                   its own that the definition then contradicts.  ntlibc has
+#                   no strlwr at all -- checked with nm over libc.a -- so
+#                   there is nothing to collide with and gzip's own is used.
+#                   This is the usual shape: the Linux workaround would have
+#                   been carried here for a problem this side does not have.
+#   ./configure     is not run.  See the head of this file.
+#   the clock tick  the Linux script busy-waits for a second before running
+#                   configure, because untar restores no mtimes there and
+#                   configure compares them.  Nothing here compares them.
+#   match.S         is not assembled.  configure adds -DASMV and match.o when
+#                   it can assemble gzip's hand-written i386 longest_match;
+#                   that file is AT&T syntax for gas, this chain has no gas,
+#                   and deflate.c's C longest_match is what is compiled
+#                   instead.  It is slower and it is identical in output.
+#
+# A PE-target tcc adds neither a startup object nor a default C library, and
+# the default it would reach for (msvcrt, kernel32) is not what this bootstrap
+# has, so crt1.o and -lc/-lntdll are named outright -- ntdll.def being the
+# import library ntlibc resolves its kernel calls through.  The Linux build's
+# -static has no meaning here.
+alias CC="${tcc} -c -B ${ntlibc}/lib -I. -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -include config.h -DSTDC_HEADERS=1 -DHAVE_UNISTD_H=1 -DDIRENT=1"
+
+alias LINK="${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o"
+
+CC -o gzip.o gzip.c
+CC -o zip.o zip.c
+CC -o deflate.o deflate.c
+CC -o trees.o trees.c
+CC -o bits.o bits.c
+CC -o unzip.o unzip.c
+CC -o inflate.o inflate.c
+CC -o util.o util.c
+CC -o crypt.o crypt.c
+CC -o lzw.o lzw.c
+CC -o unlzw.o unlzw.c
+CC -o unpack.o unpack.c
+CC -o unlzh.o unlzh.c
+
+# getopt.o is the fourteenth object the Makefile builds and it is not built
+# here, for the reason gnugrep drops the same two files: ntlibc has getopt,
+# getopt_long and getopt_long_only, and its struct option has the same four
+# members in the same order that gzip's own getopt.h declares -- so gzip's
+# header still describes what it links against, and building gzip's copy would
+# make this linker, which resolves archives in one pass, see the symbol
+# defined twice.
+#
+# The collision that goes the OTHER way is left alone deliberately.  util.c
+# defines basename(), and ntlibc has a basename() too, in its own libc.a
+# member.  gzip's objects come first on the link line, so gzip's definition
+# wins and basename.o is never pulled in -- which is what is wanted: gzip's
+# basename strips a version suffix and lowercases on case-folding systems,
+# and POSIX basename does neither.  It is silent rather than an error, which
+# is exactly why it is written down here.
+#
+# -lc -lntdll come last, after gzip's own objects, which is what a linker
+# that resolves archives in one pass needs.
+LINK -o gzip.exe gzip.o zip.o deflate.o trees.o bits.o unzip.o inflate.o util.o crypt.o lzw.o unlzw.o unpack.o unlzh.o -L ${ntlibc}/lib -lc -lntdll
+
+# Run it before installing it, and on real data rather than --version.
+#
+# The strong check is `-t' on gzip's own release tarball: half a megabyte of
+# deflate stream produced by some other gzip years ago, whose CRC32 and length
+# trailer this inflate has to reproduce exactly.  Then the same check on this
+# gzip's own output, over the 700K tar the unpacker left lying about, which is
+# large enough to run the 32K window and the whole Huffman path rather than a
+# stored block.  A CRC mismatch either way is a non-zero exit and kaem is
+# --strict, so the build fails.
+#
+# The cases that cannot be run here are run outside and reported in
+# default.nix: pipes and redirection (kaem has neither), and the deliberate
+# failures -- a corrupted file, a bad magic number -- which exit 1 on purpose.
+cd ${NIX_BUILD_TOP}
+${NIX_BUILD_TOP}/gzip-${version}/gzip.exe --version
+${NIX_BUILD_TOP}/gzip-${version}/gzip.exe -t ${tarball}
+${NIX_BUILD_TOP}/gzip-${version}/gzip.exe -9 gzip.tar
+${NIX_BUILD_TOP}/gzip-${version}/gzip.exe -t gzip.tar.gz
+${NIX_BUILD_TOP}/gzip-${version}/gzip.exe -d gzip.tar.gz
+
+# gunzip and zcat are the same program under two more names.  On Unix the
+# makefile's install target makes them hard links; there are none to make
+# here, so they are copies -- three times 150K, which is not worth a
+# indirection this bootstrap would have to invent.  gzip works out which of
+# the three it is from argv[0], which is why config.h exists at all.
+#
+# All three keep the .exe suffix, as bash, make, patch, sed and grep do --
+# ntlibc's PATH search tries the bare name before name.exe, so a script asking
+# for `gzip' still finds it.  gzip itself strips a trailing ".exe" from
+# progname before deciding its mode, so gunzip.exe is gunzip.
+${bin_mkdir} -p ${out}/bin
+${bin_cp} ${NIX_BUILD_TOP}/gzip-${version}/gzip.exe ${out}/bin/gzip.exe
+${bin_cp} ${NIX_BUILD_TOP}/gzip-${version}/gzip.exe ${out}/bin/gunzip.exe
+${bin_cp} ${NIX_BUILD_TOP}/gzip-${version}/gzip.exe ${out}/bin/zcat.exe
