@@ -1,0 +1,29 @@
+paste uses two file-scope FILE objects purely as sentinel addresses in its
+array of open streams -- they are never read, written, or handed to stdio.
+That needs FILE to be a complete type, which it is in glibc and in the Mes C
+library and is not in ntlibc: like musl, ntlibc keeps the stdio object
+opaque, so `static FILE dummy_closed;' has no size and does not compile.
+
+Two chars serve the same purpose: the macros only ever produce a pointer
+compared for equality against the entries of the array.
+
+--- src/paste.c
++++ src/paste.c
+@@ -52,13 +52,13 @@
+ /* Indicates that no delimiter should be added in the current position. */
+ #define EMPTY_DELIM '\0'
+ 
+-static FILE dummy_closed;
++static char dummy_closed;
+ /* Element marking a file that has reached EOF and been closed. */
+-#define CLOSED (&dummy_closed)
++#define CLOSED ((FILE *) &dummy_closed)
+ 
+-static FILE dummy_endlist;
++static char dummy_endlist;
+ /* Element marking end of list of open files. */
+-#define ENDLIST (&dummy_endlist)
++#define ENDLIST ((FILE *) &dummy_endlist)
+ 
+ /* Name this program was run with. */
+ char *program_name;

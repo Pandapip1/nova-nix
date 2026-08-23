@@ -81,6 +81,11 @@ let
     # the chain this far, and kaem has no loops, conditionals or pipelines.
     bash = callPackage ./bootstrap/bash { };
 
+    # The programs every build script above here assumes -- cp, mv, rm,
+    # mkdir, cat, ls, sort.  The first package on this side that make drives
+    # rather than kaem.
+    coreutils = callPackage ./bootstrap/coreutils { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
