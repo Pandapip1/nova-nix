@@ -1,0 +1,30 @@
+--- src/system.h
++++ src/system.h
+@@ -143,6 +143,27 @@
+ 
+ #include <sys/stat.h>
+ 
++/* On NT there are no symbolic links to speak of, and the three calls that
++   would work with them do not.  ntlibc declares symlink, readlink and lstat
++   and defines S_ISLNK, so every configure-style test says yes; what actually
++   happens is that symlink() reports success and leaves a zero-length regular
++   file behind whose name has a stray byte appended, lstat() cannot tell a
++   link from the file it points at, and readlink() answers about the wreckage.
++   Taking the answer at face value means tar quietly extracts junk.
++
++   S_ISLNK is therefore withdrawn here, which is a configuration tar already
++   supports: create dereferences links (which is what lstat can do anyway),
++   extract warns once and falls through to hard links, and compare and
++   demangle refuse the symbolic cases outright.  Every one of those is a
++   visible answer rather than a wrong file.
++
++   S_IFLNK goes with it so that the S_IS* reconstruction further down this
++   file does not put S_ISLNK back.
++
++   This comes out when ntlibc's symlink layer works.  */
++#undef S_ISLNK
++#undef S_IFLNK
++
+ #ifndef S_ISLNK
+ # define lstat stat
+ #endif

@@ -100,6 +100,12 @@ let
     # mescc-tools-extra supplied to get it started.
     gzip = callPackage ./bootstrap/gzip { };
 
+    # And the archiver every source tarball above here arrives in.  The first
+    # package on this side that has to answer for NT's filesystem rather than
+    # for its C library: no symbolic links, no owner, and one read-only bit
+    # where POSIX has nine mode bits.
+    gnutar = callPackage ./bootstrap/gnutar { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
