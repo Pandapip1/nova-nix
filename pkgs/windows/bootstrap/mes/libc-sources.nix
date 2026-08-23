@@ -343,7 +343,7 @@
     "lib/x86-mes-mescc/setjmp.c"
   ];
 
-  # 259 files
+  # 271 files
   libc_gnu_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -590,7 +590,19 @@
     "lib/stub/setgrent.c"
     "lib/stub/setlocale.c"
     "lib/windows/x86-mes-gcc/chkstk.c"
+    "lib/stub/getegid.c"
+    "lib/stub/geteuid.c"
+    "lib/stub/getgid.c"
+    "lib/stub/getrusage.c"
+    "lib/stub/getuid.c"
+    "lib/stub/ioctl.c"
+    "lib/stub/mknod.c"
+    "lib/stub/readlink.c"
+    "lib/stub/setgid.c"
     "lib/stub/settimer.c"
+    "lib/stub/setuid.c"
+    "lib/stub/signal.c"
+    "lib/stub/sigprogmask.c"
     "lib/stub/setvbuf.c"
     "lib/stub/sigaddset.c"
     "lib/stub/sigblock.c"

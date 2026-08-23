@@ -319,10 +319,20 @@ let
   # kaem substitutes a variable as one argument, so an option list has to be
   # one variable per option.  There is no way to loop in the script either, so
   # the slots are fixed and a round fills what it needs.
-  optionSlotCount = 8;
+  # Ten, not eight: mainline's own buildOptions came to exactly eight, so the
+  # -D TCC_TARGET_PE=1 that round appends after them fell off the end and the
+  # whole chain built a tcc that said "i386 Linux" and meant it. Unused slots
+  # are harmless -- each holds a -D BOOTSTRAP=1 that is already true.
+  optionSlotCount = 10;
 
   optionSlots =
     options:
+    # Refuse rather than truncate. Dropping the tail of this list produces a
+    # tcc built for the wrong target, or without a define it needed, with
+    # nothing said at any point -- which is how the PE32 chain came to build
+    # every round and end in a Linux-targeting compiler.
+    assert builtins.length options <= optionSlotCount
+      || throw "tinycc boot: ${toString (builtins.length options)} options for ${toString optionSlotCount} slots -- raise optionSlotCount and add the matching \${optN} to boot-round.kaem and boot-round-windows.kaem";
     builtins.listToAttrs (
       map (i: {
         name = "opt${toString (i + 1)}";
@@ -460,7 +470,8 @@ let
         "--verbose"
         "--strict"
         "--file"
-        ./tccdefs.kaem
+        # The same signal round uses to pick its own kaem file: see there.
+        (if crt1Object == null then ./tccdefs.kaem else ./tccdefs-windows.kaem)
       ];
     };
 
