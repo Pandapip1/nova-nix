@@ -31,4 +31,11 @@ ${bin_replace} --file ${out}/tccdefs-1.h --output ${out}/tccdefs-2.h --match-on 
 # Not straight to ${out}/tccdefs_.h: catm below reads this and writes that,
 # and they cannot be the same file.
 ${out}/c2str ${out}/tccdefs-2.h ${out}/tccdefs-3.h
-${bin_catm} ${out}/tccdefs_.h ${out}/tccdefs-3.h ${configLine}
+
+# The Mes configuration line the predefined macros end with, by absolute
+# path -- see boot.nix's own configTemplate for why it cannot be the
+# <mes/config.h> the Linux side writes, and why `replace' rather than nix
+# puts the path in.
+${bin_replace} --file ${configTemplate} --output ${out}/config-line.h --match-on @MESCONFIG@ --replace-with ${mesConfigInclude}
+
+${bin_catm} ${out}/tccdefs_.h ${out}/tccdefs-3.h ${out}/config-line.h

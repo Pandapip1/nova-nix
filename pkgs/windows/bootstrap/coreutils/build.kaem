@@ -1,0 +1,89 @@
+# GNU coreutils 5.0, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/coreutils/build.kaem, and
+# the same shape: unpack, patch, write out what ./configure would have found,
+# hand the whole thing to make.  What differs is below, and in default.nix.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}.  They name the same directory, but wine
+# drops TMPDIR on the way into the Windows environment, so it arrives empty
+# and cd is left with no argument.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output coreutils.tar
+${bin_untar} --file coreutils.tar
+
+cd ${NIX_BUILD_TOP}/coreutils-${version}
+
+${patch} -Np0 -i ${patchGetdate}
+${patch} -Np0 -i ${patchPaste}
+
+# What ./configure would have written, and the headers it would have named.
+# config.h is a file of this package's own rather than an empty one plus a
+# wall of -D on the command line, because make here has no shell to do the
+# quoting -- see the head of config.h.
+${bin_cp} ${configH} config.h
+${bin_cp} lib/fnmatch_.h lib/fnmatch.h
+${bin_cp} lib/ftw_.h lib/ftw.h
+${bin_cp} lib/search_.h lib/search.h
+
+# The two headers ntlibc does not have.  They are last on the include path,
+# so a real ntlibc header always wins; only a name ntlibc has no file for
+# reaches these.
+${bin_mkdir} -p shim/sys
+${bin_cp} ${shimGrp} shim/grp.h
+${bin_cp} ${shimIoctl} shim/sys/ioctl.h
+
+# Four one-line edits to live-bootstrap's makefile, chained because replace
+# does one substitution per run.
+#
+#   1. It archives with `$(AR) cr', and this tcc refuses that: mainline tcc
+#      scans every argument for the operations it does not support --
+#      habdiopN -- and "-ar" itself contains an 'a', so the flag cluster
+#      reads as a conflicting operation and it prints its usage instead.
+#      With no cluster it creates the archive, which is what `cr' asked for.
+#      The Linux build makes the same edit.
+#
+#   2-4. Three files leave the library that the Linux build keeps in it, and
+#      for the same reason in each case: ntlibc already defines the function,
+#      so keeping coreutils' copy makes the linker see the symbol twice --
+#      getline (with getdelim behind it), strtoimax and strtoumax, and dirfd.
+#      dirfd is worse than a duplicate: ntlibc declares it taking a DIR *,
+#      gnulib defines it taking a DIR const *, and the two do not agree.
+#      Nothing that stays behind calls them by any other name.
+${bin_replace} --file ${makefile} --output mk-ar.mk --match-on ${arPattern} --replace-with ${arReplacement}
+${bin_replace} --file mk-ar.mk --output mk-getline.mk --match-on ${getlinePattern} --replace-with ${getlineReplacement}
+${bin_replace} --file mk-getline.mk --output mk-strtoimax.mk --match-on ${strtoimaxPattern} --replace-with ${strtoimaxReplacement}
+${bin_replace} --file mk-strtoimax.mk --output main.mk --match-on ${dirfdPattern} --replace-with ${dirfdReplacement}
+
+# Three passes, and only the last one is allowed to fail.
+#
+# make on this side loses a child now and then -- roughly one exec in a
+# hundred and fifty comes back as "Bad address" or "Bad file descriptor",
+# reported as exit 127 -- and which one it is differs from run to run.  It is
+# not tcc: two hundred tcc runs driven by make from a generated makefile
+# never lost one, and neither did three hundred runs of a one-line program.
+# Whatever it is lives below this package, in ntlibc's exec or in wine, and
+# it is not this package's to fix.
+#
+# What it means here is that a single `make' has about an even chance of
+# stopping somewhere in the six hundred commands this build takes.  -k
+# carries on past a lost child instead, so the first pass builds all but a
+# file or two, the second pass has only those left to do, and the third has
+# nothing to do at all and is the one that decides whether the build
+# succeeded.  Every pass is the same command; make skips what is already
+# made, so this costs nothing when nothing was lost.
+${make} -k -f main.mk ${ccflag} ${ldflag} ${arflag} ${cflags} ${ldflags} PREFIX=${out}
+${make} -k -f main.mk ${ccflag} ${ldflag} ${arflag} ${cflags} ${ldflags} PREFIX=${out}
+${make} -f main.mk ${ccflag} ${ldflag} ${arflag} ${cflags} ${ldflags} PREFIX=${out}
+
+# Run one of the programs just built before installing any of them.
+./src/echo "Hello coreutils!"
+
+# The makefile installs with the install it just built, as on Linux; the
+# directory has to exist first.  The programs land without a .exe suffix,
+# which is what the makefile names them and what tcc wrote -- ntlibc's PATH
+# search tries the bare name before it tries name.exe, and wine and the NT
+# loader both run a PE image whatever it is called.
+${bin_mkdir} -p ${out}/bin
+${make} -f main.mk install ${ccflag} ${ldflag} ${arflag} ${cflags} ${ldflags} PREFIX=${out}

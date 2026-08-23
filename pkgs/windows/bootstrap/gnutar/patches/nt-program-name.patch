@@ -1,0 +1,24 @@
+--- src/tar.c
++++ src/tar.c
+@@ -1110,7 +1110,20 @@
+ int
+ main (int argc, char *const *argv)
+ {
+-  program_name = argv[0];
++  /* The NT loader hands argv[0] over as a full path -- drive letter,
++     backslashes and a .exe suffix -- and program_name is what prefixes every
++     diagnostic tar prints.  In a bootstrap those diagnostics are the only
++     debugging channel there is, so the leading path comes off here.  ':' is
++     in the set for the drive letter, since a path may have no separator
++     after it.  POSIX basename() cannot do this: it splits on '/' only.  */
++  {
++    char *cursor;
++
++    program_name = argv[0];
++    for (cursor = argv[0]; *cursor; cursor++)
++      if (*cursor == '/' || *cursor == '\\' || *cursor == ':')
++	program_name = cursor + 1;
++  }
+   setlocale (LC_ALL, "");
+   bindtextdomain (PACKAGE, LOCALEDIR);
+   textdomain (PACKAGE);

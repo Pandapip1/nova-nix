@@ -1,0 +1,52 @@
+The NT loader hands argv[0] over as a full path -- drive letter,
+backslashes and a .exe suffix -- and gnulib's program_name is what prefixes
+every diagnostic find, xargs and their shared lib/ print.  Left alone, an
+unknown option reads
+
+    Z:\nix\store\...-findutils-4.10.0\bin\find.exe: unknown predicate `-foo'
+
+which in a bootstrap, where a diagnostic is the only debugging channel there
+is, is worse than useless: the store path is longer than the message.  It
+was measured that way before this patch was written, not assumed.
+
+gnulib strips a directory here ON PURPOSE, and its own comment says why -- a
+user who runs /some/hidden/place/bin/cp wants to be told which cp it was.
+That reasoning is sound on a system where argv[0] is what the user typed.
+It is not this system: here argv[0] is always the loader's fully-qualified
+NT path whatever the user typed, so the information gnulib is preserving is
+never the information the argument was chosen for.
+
+POSIX basename() cannot do this -- it splits on '/' only -- which is the
+same reason tar, gzip and both gawks on this side carry a patch of their own
+rather than calling it.  This is the counterpart of gnutar's
+nt-program-name.patch, moved onto gnulib's set_program_name; putting it
+there rather than in each main() is what makes one patch serve find, xargs
+and locate.
+
+The `.exe' suffix is deliberately LEFT ON, as it is for tar, gzip and gawk:
+the file really is called find.exe, and a diagnostic that names a file which
+does not exist would be a second small lie in place of the large one.
+
+--- gl/lib/progname.c
++++ gl/lib/progname.c
+@@ -81,7 +81,19 @@
+          cp: `foo' and `foo' are the same file
+    */
+ 
+-  program_name = argv0;
++  /* ... except on this target, where argv[0] is not what the user typed:
++     the NT loader always hands over its own fully-qualified path.  See
++     patches/nt-program-name.patch for why that makes gnulib's reasoning
++     above inapplicable here.  ':' is in the set for the drive letter, since
++     a path may have no separator after it.  */
++  {
++    const char *cursor;
++
++    program_name = argv0;
++    for (cursor = argv0; *cursor; cursor++)
++      if (*cursor == '/' || *cursor == '\\' || *cursor == ':')
++        program_name = cursor + 1;
++  }
+ 
+   /* On glibc systems, the error() function comes from libc and uses the
+      variable program_invocation_name, not program_name.  So set this variable

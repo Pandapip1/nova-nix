@@ -1,0 +1,170 @@
+# GNU awk 3.0.6, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/gawk/mes-build.sh, which
+# drives gawk's own ./configure under bash and then make.  There is neither
+# here: the answers are asserted in config.h, as grep, sed, gzip and tar
+# assert theirs, and kaem names the sixteen compiles and the one link
+# directly.  See the head of default.nix for why.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}: wine drops TMPDIR on the way into the
+# Windows environment, so it arrives empty and cd is left with no argument.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output gawk.tar
+${bin_untar} --file gawk.tar
+
+cd ${NIX_BUILD_TOP}/gawk-${version}
+
+# One patch, and it is not about the C library.  gawk_name() strips the
+# leading path off argv[0], which the NT loader hands over as a full
+# backslashed store path; ispath() and isdirpunct() are the same character
+# set in the two other places gawk assumes '/'.  See the patch's own header.
+#
+# The Linux build's no-stamp.patch is NOT carried over.  That patch deletes a
+# `date > stamp-h' from configure, so that two builds of the same source do
+# not differ by a timestamp.  Nothing here runs configure, so there is no
+# stamp-h and nothing to make reproducible.
+${patch} -Np0 -i ${patchProgramName}
+
+# What ./configure would have written.  It lands in the tree root, where -I.
+# finds it, and awk.h includes it under HAVE_CONFIG_H.
+${bin_cp} ${configH} config.h
+
+# gawk 3.0.6 is a flat tree -- every source file is in the root -- so one -I
+# list serves the lot and there is no ordering question of the kind tar had.
+# gawk's own directory comes first all the same, and one header there has to
+# win:
+#
+#   regex.h  ntlibc grew a <regex.h> and a POSIX regcomp/regexec in the pin
+#            this package is built against.  gawk must not use it.  awk.h
+#            reaches into `struct re_pattern_buffer' and `struct re_registers'
+#            directly (RESTART, REEND, SUBPATSTART, SUBPATEND are macros over
+#            regs.start[] and regs.end[]), and re.c calls re_compile_pattern,
+#            re_search and re_set_syntax -- the GNU interface underneath the
+#            POSIX one, which ntlibc does not have and which is where gawk's
+#            regex syntax bits (RE_SYNTAX_AWK and the interval, backslash and
+#            character-class flags gawk toggles for --posix and --re-interval)
+#            live.  So regex.c below is compiled and gawk's regex.h is the one
+#            on the include path.  Because regex.o is a plain object and not
+#            an archive member, its regcomp/regexec/regfree satisfy those
+#            names before libc.a is consulted at all, and ntlibc's copies are
+#            never pulled in -- a choice, not a collision.  Checked with nm.
+#
+#   getopt.h gawk's declares the same struct option as ntlibc's -- same four
+#            members, same order, same three has_arg constants -- so gawk's
+#            header still describes what it links against.  Only main.c
+#            includes it, and it is included quoted.
+#
+# One -D, and no more: HAVE_CONFIG_H, which is what makes awk.h, regex.c and
+# dfa.c include <config.h> at all.  Everything else configure would have put
+# on the command line is in config.h instead, because kaem runs a command
+# line without a shell and DEFPATH's value contains quotes.
+#
+# gawk's own Makefile.in also passes -DGAWK on every compile, and this build
+# does NOT.  Nothing in the 3.0.6 tree reads it -- the string only appears in
+# copyright headers and in one comment in random.c -- and that was checked by
+# building the whole thing both ways: the two gawk.exe are byte for byte the
+# same file.  It becomes a real switch in gawk 3.1, where dfa.c uses it to
+# take gawk's fatal() and xmalloc(); here it would be cargo.
+#
+# _WIN32 is left alone, siding with grep, gzip and tar rather than with
+# coreutils: the string does not appear anywhere in the gawk 3.0.6 sources.
+# What gawk actually branches on is bare WIN32 (three places) and MSDOS, and
+# this tcc defines neither -- measured, not assumed.  That is the answer this
+# port wants.  gawkmisc.c and io.c both switch on
+# `MSDOS || OS2 || WIN32', and taking that branch would mean gawkmisc.pc
+# (drive letters, 8.3 names, <io.h>, setmode) and PIPES_SIMULATED, which
+# replaces gawk's fork/exec pipelines with temporary files.  ntlibc has fork,
+# popen, pclose, waitpid and system, so the POSIX branch is the true one.
+alias CC="${tcc} -c -I. -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -B ${ntlibc}/lib -DHAVE_CONFIG_H"
+
+# The twelve files of gawk proper, as Makefile.in's AWKOBJS names them.
+CC -o array.o array.c
+CC -o builtin.o builtin.c
+CC -o eval.o eval.c
+CC -o field.o field.c
+CC -o gawkmisc.o gawkmisc.c
+CC -o io.o io.c
+CC -o main.o main.c
+CC -o missing.o missing.c
+CC -o msg.o msg.c
+CC -o node.o node.c
+CC -o re.o re.c
+CC -o version.o version.c
+
+# The parser.  awk.y is bison input and there is no bison in this chain --
+# nor will there be until long after gawk exists, since bison's own configure
+# needs an awk.  The 3.0.6 release tarball ships awktab.c, the pre-generated
+# output of `bison -y awk.y' (Bison 1.25, 1996), so it is compiled as an
+# ordinary C file and awk.y is never looked at.  Had it not shipped, this
+# package could not exist at this point in the chain at all -- it is the one
+# thing about gawk 3.0.6 that had to be checked before anything else.
+CC -o awktab.o awktab.c
+
+# And three of the five files Makefile.in's LIBOBJS names.
+#
+#   regex.c   gawk's own GNU regex.  See the -I note above for why ntlibc's
+#             is not used.
+#   dfa.c     the deterministic first pass gawk runs before the backtracking
+#             matcher.  It has no counterpart in any C library.
+#   random.c  gawk ships its own random() on purpose, and random.h renames it
+#             to gawk_random() so that it cannot collide with the library's.
+#             ntlibc has random(), srandom() and initstate(), but using them
+#             would make `rand()' in an awk program produce a different
+#             sequence here than on the Linux half of this bootstrap; gawk's
+#             own comment in builtin.c says the same thing.  So this is the
+#             one file kept for reproducibility rather than for necessity,
+#             and thanks to the renaming it is not even a shadowing.
+#
+# The two NOT compiled are getopt.c and getopt1.c.  ntlibc has getopt,
+# getopt_long and getopt_long_only, and its struct option is gawk's struct
+# option member for member -- so main.c's getopt_long call and its optarg,
+# optind, opterr and optopt all resolve into libc.a.  This is grep's decision
+# and the same one for the same reason.
+#
+# alloca.c is not compiled either: it is Makefile.in's $(ALLOCA), which
+# configure leaves empty when the system has alloca, and ntlibc does.
+CC -o regex.o regex.c
+CC -o dfa.o dfa.c
+CC -o random.o random.c
+
+# One link.  A PE-target tcc adds neither a startup object nor a default C
+# library, and the default it would reach for (msvcrt, kernel32) is not what
+# this bootstrap has, so crt1.o and -lc/-lntdll are named outright --
+# ntdll.def being the import library ntlibc resolves its kernel calls
+# through.  -lc -lntdll come last, after gawk's own objects, which is what a
+# linker that resolves archives in one pass needs.
+#
+# There is no -lm.  gawk's configure looks for one because eval.c and
+# builtin.c want fmod, pow, sin, cos, atan2, log, sqrt and int; ntlibc keeps
+# all of those in libc.a.
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o gawk.exe array.o builtin.o eval.o field.o gawkmisc.o io.o main.o missing.o msg.o node.o re.o version.o awktab.o regex.o dfa.o random.o -L ${ntlibc}/lib -lc -lntdll
+
+# Run it before installing it, on awk's real job rather than on --version.
+# kaem is --strict, so a non-zero exit from any of these fails the build.
+#
+# The self-test is written as an awk program that checks its own answers and
+# exits 1 if any of them is wrong, because kaem has no pipelines, no
+# comparisons and no conditionals -- the checking has to happen inside the
+# program being checked.  Between them its checks cover the things a configure
+# script actually does with awk: field splitting under a non-default FS, an
+# END block with an accumulator, associative arrays and `for (k in a)',
+# regexp match, sub/gsub, printf, and NR/FNR across more than one input file.
+${bin_cp} ${selfTest} selftest.awk
+${bin_cp} ${selfTestData} data1.txt
+${bin_cp} ${selfTestData2} data2.txt
+./gawk.exe -F : -f selftest.awk data1.txt data2.txt
+
+# It lands as gawk.exe, as tar, bash, make, patch, sed and grep land as
+# name.exe -- ntlibc's PATH search tries the bare name before name.exe, so a
+# configure script asking for `gawk' still finds it.
+#
+# awk.exe is a COPY rather than a symlink, for two reasons that both hold:
+# the store path is read-only by the time anything would follow the link, and
+# NT's symbolic links need a privilege this build does not have and a
+# reparse point ntlibc does not create (see gnutar's nt-no-symlinks patch).
+# The Linux package copies for the first reason alone.
+${bin_mkdir} -p ${out}/bin
+${bin_cp} gawk.exe ${out}/bin/gawk.exe
+${bin_cp} gawk.exe ${out}/bin/awk.exe

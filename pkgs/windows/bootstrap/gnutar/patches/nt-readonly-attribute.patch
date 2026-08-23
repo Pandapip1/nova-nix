@@ -1,0 +1,25 @@
+--- src/extract.c
++++ src/extract.c
+@@ -568,7 +568,21 @@
+ 	      WARN ((0, 0, _("Extracting contiguous files as regular files")));
+ 	    }
+ 	}
+-      fd = open (CURRENT_FILE_NAME, openflag, current_stat.st_mode);
++      /* 0200 forced on, where a Unix tar hands the archived mode straight to
++	 open().  NT has no permission bits; what it has is a single read-only
++	 attribute, and a file created without owner write gets it.  A file
++	 that carries it cannot then have its timestamps or its attributes
++	 changed -- so set_stat's utime and chmod, three lines further on,
++	 would both fail with EACCES on every 0444 file in the archive, which
++	 is most of the files in most source tarballs.  Creating the file
++	 writable and letting set_mode's chmod put the real mode on last
++	 leaves the same file on disk by a route NT permits.  tar already
++	 does exactly this for directories a few hundred lines below, for the
++	 Unix version of the same problem: a directory it cannot write to is
++	 a directory it cannot extract into.
++
++	 This comes out if ntlibc ever grows real permissions.  */
++      fd = open (CURRENT_FILE_NAME, openflag, current_stat.st_mode | 0200);
+ 
+ #endif /* not O_CTG */
+ 
