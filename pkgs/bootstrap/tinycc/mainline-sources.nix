@@ -15,17 +15,27 @@
 #
 # Fetched by git rather than from repo.or.cz's snapshot service, which now
 # answers an anti-bot challenge page instead of a tarball -- what comes back
-# is HTML, and no hash of it means anything.  The git protocol against the
-# same host is unaffected.
+# is HTML, and no hash of it means anything.  The git protocol is unaffected.
+#
+# The fork's ntlibc-toolchain branch, not repo.or.cz's mob (the fork's own
+# mob is a plain mirror of it).  It is upstream mob plus six commits:
+# -Wl,--delay-all and the delay-load import emission behind it, the split
+# between delay-load and ordinary imports, and a tccasm fix for an "=m"
+# operand on an array struct member reached through a pointer.  ntlibc needs
+# all of it -- its Makefile links the delay-load tests with --delay-all, and
+# its own $ORIGIN-style resolution (src/internal/rpath.c, delayload.c) works
+# by intercepting imports that a delay-load thunk, not the loader, resolves.
+# Without the flag those two tests are the only ones in its suite that
+# cannot even be built.
 { }:
 rec {
-  version = "unstable-2026-08-04";
+  version = "unstable-2026-08-23";
 
-  rev = "2ba12e83b3599ca8f5d50c179fe5138fe956f0c9";
-  ref = "mob";
+  rev = "69eed4d346f31dea12d61b99f60298d2f59f66be";
+  ref = "ntlibc-toolchain";
 
   src = builtins.fetchGit {
-    url = "https://repo.or.cz/tinycc.git";
+    url = "https://github.com/Pandapip1/tinycc.git";
     inherit rev ref;
   };
 }

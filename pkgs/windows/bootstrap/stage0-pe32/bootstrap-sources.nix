@@ -21,9 +21,9 @@
 # `rev`/`narHash`, there is nothing to prefetch by hand.
 { }:
 rec {
-  version = "0-unstable-2026-08-22";
+  version = "0-unstable-2026-08-23";
 
-  rev = "599c553bf4661ff61551357db29a6fd5aad64e02";
+  rev = "ce81886d737c9d293ec59b1f933b65e58710a134";
   ref = "main";
 
   src = builtins.fetchGit {

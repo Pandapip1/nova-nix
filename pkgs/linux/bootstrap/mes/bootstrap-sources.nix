@@ -17,10 +17,10 @@
 rec {
   # 0.27.1 plus what the branch adds; the same string the Windows set uses,
   # because it is the same source.
-  version = "0.27.1-unstable-2026-08-22";
+  version = "0.27.1-unstable-2026-08-23";
 
-  rev = "582949b7ba15fda163db84ef5fe4a4e308f3e48d";
-  ref = "windows-pe32";
+  rev = "ba9b38b6bef2ac100e3697c9c305cd9ff0fd2c1c";
+  ref = "windows-pe32-ntcall";
 
   src = builtins.fetchGit {
     url = "https://github.com/Pandapip1/mes.git";
