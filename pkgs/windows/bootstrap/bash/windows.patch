@@ -1,0 +1,174 @@
+Windows/ntlibc changes to bash 2.05b, on top of live-bootstrap's three
+makefiles and three patches.  Everything here is a difference between the
+Mes C library live-bootstrap targets and ntlibc, or between an ELF linker
+and a PE one.  Nothing in it is Windows-specific by choice.
+
+common.mk -- three deletions, no additions.  live-bootstrap's flags are
+tuned for a C library that has none of this, and against one that does they
+are actively harmful, because each -D turns a real declaration into syntax
+garbage the next time its header is read:
+
+  -DLC_ALL=\"C\"       comes with no -DHAVE_SETLOCALE, so together they
+                       make every setlocale() call expand to nothing.
+                       ntlibc has locale; build.kaem passes the real
+                       -DHAVE_LOCALE_H -DHAVE_SETLOCALE instead.
+  -DHAVE_SYS_SIGLIST   makes bash define sys_siglist itself.  ntlibc has no
+                       such array but does have strsignal(), so build.kaem
+                       says -DHAVE_STRSIGNAL.  Left as it was, siglist.h
+                       also defines strsignal(sig) as a function-like
+                       macro, and <string.h>'s own `char *strsignal(int);'
+                       then expands to `char *(char *)sys_siglist[int];'.
+  -Dendpwent\(x\)=0     turns ntlibc's `void endpwent(void);' into
+                       `void (void);'.
+
+Makefile (live-bootstrap's mk/main.mk) -- four kinds of change.
+
+  strtoimax/strtoumax dropped from SHLIB_FILES, strtoumax from
+  SHLIB_ODD_FILES.  ntlibc has both, and bash's two live in one object, so
+  compiling either drags the other in and the link ends in a duplicate
+  symbol.
+
+  $(AR) cr -> $(AR).  This tcc's -ar takes no flag cluster: it scans every
+  argument for operations it does not support, and finds an 'a' in "-ar"
+  itself.  With no cluster it creates the archive, which is what `cr'
+  asked for.
+
+  $(EXTRALIBS) appended to every link rule, and -lgetopt dropped from two
+  of them.  The C libraries cannot go in LDFLAGS, because a PE tcc resolves
+  archives in a single pass in the order given and LDFLAGS lands before
+  bash's own -lsh -lbuiltins -lglob -ltilde -- with -lc first, getcwd,
+  chdir and iscntrl go unresolved.  EXTRALIBS is the same list at the end
+  of the line instead.  -lgetopt was mes-libc's separate getopt archive;
+  ntlibc's getopt is in libc.
+
+  compat added to FILES, so compat.o joins $(OBJS) and is built and linked
+  like any other bash source.  It is the one shim function this build needs
+  (ioctl); see the file itself.
+
+builtins/Makefile (mk/builtins.mk) -- the same $(AR) change, and
+../mkbuiltins -> ./mkbuiltins.  make runs a recipe without a shell when the
+command line holds no shell metacharacters, and executing a path beginning
+with `..' fails through ntlibc with EFAULT where the identical file run as
+./mkbuiltins from the directory above works.  build.kaem copies the binary
+down into builtins/ to suit.  This hunk goes away if ntlibc's process layer
+learns to resolve `..'.
+
+lib/sh/strftime.c -- ntlibc declares timezone and altzone `long', as POSIX
+does; bash's fallback declaration says `int', and tcc refuses the
+redeclaration.
+
+--- a/common.mk
++++ b/common.mk
+@@ -38,7 +38,6 @@
+ 	-DDISTVERSION=\"2.05b\" \
+ 	-DBUILDVERSION=\"0\" \
+ 	-DSCCSVERSION=\"2.05b\" \
+-	-DLC_ALL=\"C\" \
+ 	-DHAVE_STRERROR \
+ 	-DHAVE_MEMSET \
+ 	-DHAVE_DUP2 \
+@@ -50,8 +49,6 @@
+ 	-DHAVE_POSIX_SIGNALS \
+ 	-DHAVE_GETCWD \
+ 	-DHAVE_RENAME \
+-	-DHAVE_SYS_SIGLIST \
+-	-Dendpwent\(x\)=0 \
+ 	-Denable_hostname_completion\(on_or_off\)=0
+ 
+ BUILTINS_DEF_FILES = alias bind break builtin cd colon command complete declare \
+--- a/Makefile
++++ b/Makefile
+@@ -20,11 +20,11 @@
+ 	vprint itos rename zread zwrite shtty inet_aton netopen \
+ 	strpbrk timeval clock makepath pathcanon pathphys stringlist stringvec \
+ 	tmpfile spell strtrans strindex shquote snprintf mailstat fmtulong \
+-	fmtullong strtoll strtoull strtoimax strtoumax fmtumax netconn mktime \
++	fmtullong strtoll strtoull fmtumax netconn mktime \
+ 	strftime xstrchr zcatfd
+ # FIXME: for some reason these don't get picked up correctly in the
+ # final linking cmd
+-SHLIB_ODD_FILES = zcatfd strtoumax spell pathphys
++SHLIB_ODD_FILES = zcatfd spell pathphys
+ SHLIB_OBJS = $(addprefix lib/sh/, $(addsuffix .o, $(SHLIB_FILES)))
+ SHLIB_ODD_OBJS = $(addprefix lib/sh/, $(addsuffix .o, $(SHLIB_ODD_FILES)))
+ 
+@@ -43,7 +43,7 @@
+ 	variables copy_cmd error expr flags nojobs subst hashcmd hashlib mailcheck \
+ 	trap input unwind_prot pathexp sig test version alias array arrayfunc \
+ 	braces bracecomp bashhist bashline list stringlib locale findcmd redir \
+-	pcomplete pcomplib syntax xmalloc siglist
++	pcomplete pcomplib syntax xmalloc siglist compat
+ OBJS = $(addsuffix .o, $(FILES))
+ 
+ all: bash
+@@ -51,34 +51,34 @@
+ # Builtins
+ 
+ mkbuiltins: $(MKBUILTINS_OBJS)
+-	$(CC) $(CFLAGS) $(MKBUILTINS_OBJS) $(LDFLAGS) -o $@
++	$(CC) $(CFLAGS) $(MKBUILTINS_OBJS) $(LDFLAGS) -o $@ $(EXTRALIBS)
+ 	./mkbuiltins -externfile builtins/builtext.h -structfile builtins/builtins.c -noproduction $(BUILTINS_DEFS)
+ 
+ # libsh
+ 
+ libsh.a: $(SHLIB_OBJS)
+-	$(AR) cr $@ $^
++	$(AR) $@ $^
+ 
+ # libglob
+ 
+ libglob.a: $(GLOB_OBJS)
+-	$(AR) cr $@ $^
++	$(AR) $@ $^
+ 
+ # libtilde
+ 
+ libtilde.a: $(TILDE_OBJS)
+-	$(AR) cr $@ $^
++	$(AR) $@ $^
+ 
+ # The actual program
+ 
+ mksyntax: $(MKSYNTAX_OBJS)
+-	$(CC) $^ $(LDFLAGS) -o $@ -lgetopt
++	$(CC) $^ $(LDFLAGS) -o $@ $(EXTRALIBS)
+ 
+ syntax.c: mksyntax
+ 	./mksyntax -o $@
+ 
+ mksignames: $(MKSIGNAMES_OBJS)
+-	$(CC) $^ $(LDFLAGS) -o $@ -lgetopt
++	$(CC) $^ $(LDFLAGS) -o $@ $(EXTRALIBS)
+ 
+ signames.h: mksignames
+ 	./mksignames $@
+@@ -89,4 +89,4 @@
+ trap.c: signames.h
+ 
+ bash: libsh.a libglob.a libtilde.a $(OBJS)
+-	$(CC) -o bash $(LIBRARIES) $(OBJS) $(SHLIB_ODD_OBJS) $(LDFLAGS) -lsh -lbuiltins -lglob -ltilde
++	$(CC) -o bash $(LIBRARIES) $(OBJS) $(SHLIB_ODD_OBJS) $(LDFLAGS) -lsh -lbuiltins -lglob -ltilde $(EXTRALIBS)
+--- a/builtins/Makefile
++++ b/builtins/Makefile
+@@ -20,8 +20,8 @@
+ BUILTINS_OBJS = $(BUILTINS_DEF_OBJS) $(BUILTINS_STATIC_OBJS)
+ 
+ %.o: %.def
+-	../mkbuiltins $<
++	./mkbuiltins $<
+ 	$(CC) -c $(CFLAGS) -o $@ $*.c
+ 
+ libbuiltins.a: $(BUILTINS_OBJS) builtins.o
+-	$(AR) cr $@ $^
++	$(AR) $@ $^
+--- a/lib/sh/strftime.c
++++ b/lib/sh/strftime.c
+@@ -98,7 +98,7 @@
+ #if defined(SOLARIS) || defined(mips)
+ extern long int timezone, altzone;
+ #else
+-extern int timezone, altzone;
++extern long int timezone, altzone;
+ #endif
+ #endif
+ 

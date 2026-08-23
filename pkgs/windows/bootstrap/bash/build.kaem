@@ -1,0 +1,96 @@
+# GNU bash 2.05b, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/bash/build.kaem, and the
+# same shape: unpack, patch, drop in live-bootstrap's three makefiles, make
+# the headers configure would have generated empty, build the builtins table
+# generator first because the builtins are compiled from what it writes, then
+# the builtins, then bash.  What differs:
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}.  They name the same directory, but wine
+# drops TMPDIR on the way into the Windows environment, so it arrives empty
+# and cd is left with no argument.
+#
+# Three of live-bootstrap's five patches, not five.  See default.nix.
+#
+# One more patch of our own, and the archive rule is inside it rather than
+# being rewritten by mescc-tools-extra's replace the way the Linux script
+# does it -- there is a real `patch' on this side now, which is why it was
+# built one package ago.
+#
+# Four shim headers and one shim C file, copied into the source tree because
+# the makefiles already look in `.' (and, from builtins/, in `..'), so no
+# store path has to reach the compiler for them.  Each one says in its own
+# header comment what it stands in for.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output bash.tar
+${bin_untar} --file bash.tar
+
+cd ${NIX_BUILD_TOP}/bash-${version}
+
+${bin_patch} -Np0 -i ${patchTinycc}
+${bin_patch} -Np0 -i ${patchDevTty}
+${bin_patch} -Np0 -i ${patchMissingDefines}
+
+# The makefiles come in before our patch, because our patch changes them.
+${bin_cp} ${mainmk} Makefile
+${bin_cp} ${commonmk} common.mk
+${bin_cp} ${builtinsmk} builtins/Makefile
+
+${bin_patch} -Np1 -i ${patchWindows}
+
+# What configure would have written, all three empty: every answer it would
+# have filled in is a -D on the CC line instead.
+${bin_catm} config.h
+${bin_catm} include/version.h
+${bin_catm} include/pipesize.h
+
+# The shims.  termio.h and compat.c sit at the top of the tree; the three
+# sys/ headers need the directory made first, since bash's source has no
+# sys/ of its own.
+${bin_cp} ${shimTermio} termio.h
+${bin_cp} ${shimCompat} compat.c
+${bin_mkdir} -p sys
+${bin_cp} ${shimSysFile} sys/file.h
+${bin_cp} ${shimSysTimes} sys/times.h
+${bin_cp} ${shimSysIoctl} sys/ioctl.h
+
+# mkbuiltins first: it generates the tables the builtins are compiled from.
+# ${ccflag} is a whole compiler command in one argument -- kaem substitutes a
+# variable whole and make is what splits it again -- which is why nothing is
+# compiled here directly.
+${bin_make} ${ccflag} ${arflag} ${ldflag} ${xlibflag} mkbuiltins
+
+# And then it is copied down into builtins/, where the rule that runs it
+# calls it as ./mkbuiltins rather than ../mkbuiltins.  make executes a
+# recipe without a shell when the command line has no shell metacharacters,
+# and executing a path that starts with `..' through ntlibc fails with
+# EFAULT -- "Bad address" -- where the same file run as ./mkbuiltins from
+# the directory above works.  A copy costs 85K and keeps the workaround in
+# one place; it goes away if ntlibc's process layer learns to resolve `..'.
+${bin_cp} mkbuiltins builtins/mkbuiltins
+
+cd builtins
+${bin_make} ${ccflag} ${arflag} ${ldflag} ${xlibflag} libbuiltins.a
+cd ..
+
+${bin_make} ${ccflag} ${arflag} ${ldflag} ${xlibflag}
+
+# Check it runs, and check it is a shell, before installing it: a bash that
+# cannot expand a variable inside a loop is no use to the ./configure scripts
+# that are the whole reason for building it.
+./bash --version
+./bash ${selftest}
+
+# Installed as bash.exe although the makefile linked it as `bash': tcc takes
+# -o literally and does not add the suffix, and everything above here finds
+# its programs by name on PATH, where NT wants one.  The other PE32 packages
+# in this bootstrap install a .exe for the same reason.
+${bin_mkdir} -p ${out}/bin
+${bin_cp} bash ${out}/bin/bash.exe
+
+# sh is a copy rather than a symlink, as on the Linux side: a store path is
+# read-only by the time anything would follow it, and copying costs nothing
+# at this size.
+${bin_cp} bash ${out}/bin/sh.exe

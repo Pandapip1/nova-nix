@@ -77,6 +77,10 @@ let
     # a release tarball is not hermetic as it stands.
     gnupatch = callPackage ./bootstrap/gnupatch { };
 
+    # And the shell every ./configure above here is written in.  kaem got
+    # the chain this far, and kaem has no loops, conditionals or pipelines.
+    bash = callPackage ./bootstrap/bash { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
