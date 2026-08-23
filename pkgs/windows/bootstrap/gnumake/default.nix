@@ -39,9 +39,6 @@ derivationWithMeta {
   inherit ntlibc;
   ntlibcSrc = ntlibcSources.src;
 
-  # A <pwd.h> for a system with no passwd database; see the file itself.
-  pwdshim = ./.;
-
   # The one patch this build still needs, as a replace: kaem splits a quoted
   # string on spaces, so both the pattern and the replacement arrive as
   # variables rather than written into the script.

@@ -29,10 +29,9 @@
 # -DNO_ARCHIVES because make's archive support wants <ar.h>, a Unix-ism
 # ntlibc has no counterpart for and a bootstrap has no use for.
 #
-# -I${pwdshim} supplies a <pwd.h>: read.c and gnulib's glob.c include it
-# unconditionally off the WINDOWS32 path, to expand `~user'.  NT has no
-# passwd database, so its getpwnam answers "no such user" and `~user'
-# declines rather than expanding.
+# read.c and gnulib's glob.c include <pwd.h> unconditionally off the
+# WINDOWS32 path, to expand `~user'.  ntlibc has one; before it did, this
+# build carried a shim whose getpwnam answered "no such user".
 
 cd ${NIX_BUILD_TOP}
 
@@ -54,7 +53,7 @@ ${bin_cp} lib/fnmatch.in.h lib/fnmatch.h
 ${bin_replace} --file src/job.c --output job-patched.c --match-on ${shellAbs} --replace-with ${shellRel}
 ${bin_cp} job-patched.c src/job.c
 
-alias CC="${tcc} -c -std=c99 -nostdinc -B ${ntlibc}/lib -I./src -I./lib -I${pwdshim} -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -DHAVE_CONFIG_H -DMAKE_MAINTAINER_MODE -DPOSIX=1 -DNO_ARCHIVES -DFILE_TIMESTAMP_HI_RES=0 -DSCCS_GET=\"get\" -DLOCALEDIR=\"/fake-locale\" -DLIBDIR=\"${out}/lib\" -DHAVE_DECL_BSD_SIGNAL=1 -DHAVE_DECL_GETLOADAVG=0 -DHAVE_ALLOCA -DHAVE_ALLOCA_H -DHAVE_ATEXIT -DHAVE_DIRENT_H -DHAVE_DUP2 -DHAVE_FCNTL_H -DHAVE_FDOPEN -DHAVE_GETCWD -DHAVE_GETTIMEOFDAY -DHAVE_INTTYPES_H -DHAVE_ISATTY -DHAVE_LIMITS_H -DHAVE_LOCALE_H -DHAVE_MKTEMP -DHAVE_SA_RESTART -DHAVE_SETVBUF -DHAVE_SIGACTION -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRDUP -DHAVE_STRERROR -DHAVE_STRINGS_H -DHAVE_STRING_H -DHAVE_STRTOLL -DHAVE_SYS_FILE_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_WAIT_H -DHAVE_TTYNAME -DHAVE_UMASK -DHAVE_UNISTD_H -DHAVE_WAITPID -DSTDC_HEADERS -DPATH_SEPARATOR_CHAR=';'"
+alias CC="${tcc} -c -std=c99 -nostdinc -B ${ntlibc}/lib -I./src -I./lib -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -DHAVE_CONFIG_H -DMAKE_MAINTAINER_MODE -DPOSIX=1 -DNO_ARCHIVES -DFILE_TIMESTAMP_HI_RES=0 -DSCCS_GET=\"get\" -DLOCALEDIR=\"/fake-locale\" -DLIBDIR=\"${out}/lib\" -DHAVE_DECL_BSD_SIGNAL=1 -DHAVE_DECL_GETLOADAVG=0 -DHAVE_ALLOCA -DHAVE_ALLOCA_H -DHAVE_ATEXIT -DHAVE_DIRENT_H -DHAVE_DUP2 -DHAVE_FCNTL_H -DHAVE_FDOPEN -DHAVE_GETCWD -DHAVE_GETTIMEOFDAY -DHAVE_INTTYPES_H -DHAVE_ISATTY -DHAVE_LIMITS_H -DHAVE_LOCALE_H -DHAVE_MKTEMP -DHAVE_SA_RESTART -DHAVE_SETVBUF -DHAVE_SIGACTION -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRDUP -DHAVE_STRERROR -DHAVE_STRINGS_H -DHAVE_STRING_H -DHAVE_STRTOLL -DHAVE_SYS_FILE_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_WAIT_H -DHAVE_TTYNAME -DHAVE_UMASK -DHAVE_UNISTD_H -DHAVE_WAITPID -DSTDC_HEADERS -DPATH_SEPARATOR_CHAR=';'"
 
 CC -o ar.o src/ar.c
 CC -o arscan.o src/arscan.c
