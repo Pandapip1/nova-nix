@@ -86,6 +86,10 @@ let
     # rather than kaem.
     coreutils = callPackage ./bootstrap/coreutils { };
 
+    # And the pattern matcher every ./configure above here runs a hundred
+    # times.  Its own regex, since ntlibc has none.
+    gnugrep = callPackage ./bootstrap/gnugrep { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };

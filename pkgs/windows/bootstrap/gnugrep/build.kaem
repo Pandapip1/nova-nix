@@ -1,0 +1,99 @@
+# GNU grep 2.4, compiled by the tcc this chain built, against ntlibc.
+#
+# grep ships a ./configure nothing here can run, so what configure would have
+# discovered is asserted instead -- one -D per answer, as gnupatch does.  No
+# config.h at all: every one of grep's sources reaches for it only under
+# HAVE_CONFIG_H, and that is not defined, so the file would be dead weight.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}: wine drops TMPDIR on the way into the
+# Windows environment, so it arrives empty and cd is left with no argument.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output grep.tar
+${bin_untar} --file grep.tar
+
+# Everything is built in the source directory, so that grep's quoted includes
+# -- "system.h", "grep.h", "regex.h" -- are found by -I. ; this tcc does not
+# search an included file's own directory.
+cd ${NIX_BUILD_TOP}/grep-${version}/src
+
+# The five answers the Linux build gives, and four more.
+#
+# Shared with Linux: PACKAGE, VERSION, HAVE_DIRENT_H, HAVE_UNISTD_H,
+# HAVE_STRERROR, STDC_HEADERS.  HAVE_STRERROR is what stops system.h
+# declaring sys_nerr and sys_errlist, which are BSD-era globals that POSIX
+# replaced with strerror and that ntlibc has no reason to carry.
+#
+# Four that Linux does not need, each because Mes's C library lacked the
+# function and ntlibc has it.  In every case the fallback is what breaks, not
+# the feature:
+#
+#   HAVE_MEMCHR      without it system.h writes its own `ptr_t memchr();',
+#                    which contradicts the real declaration in <string.h>.
+#   HAVE_MEMMOVE     without it memmove becomes bcopy, and there is no bcopy.
+#                    grep.c calls memmove when it slides the read buffer.
+#   HAVE_GETPAGESIZE without it getpagesize.h guesses via _SC_PAGESIZE, and
+#                    ntlibc has the function outright.
+#   HAVE_SETLOCALE   without it <locale.h> is never included and main's
+#                    setlocale(LC_ALL, "") has no declaration.  ntlibc has a
+#                    setlocale; it only ever answers "C", which is the only
+#                    locale this bootstrap has, and that is the right answer.
+#
+# _WIN32 and WIN32, which a PE-target tcc defines, are left alone here -- and
+# that is the one place this package parts company with coreutils, which has
+# to take both away.  There they mean "use the Win32 API", and gnulib acts on
+# that by including <windows.h> and calling GetACP; ntlibc is the NT
+# system-call layer, not Win32, so the tests are wrong for it.  grep 2.4
+# predates gnulib and tests _WIN32 in exactly one compiled line, grep.c's
+# derivation of the program name, where all it asks is whether a path may be
+# separated by backslashes and end in `.exe'.  That is true here: the loader
+# hands argv[0] over as a full NT path, so without the branch every
+# diagnostic is prefixed with `Z:\...\grep.exe' instead of `grep'.  The one
+# file that would reach for <windows.h> on this define, getopt.c, is not
+# compiled here at all.  ntlibc's own headers test neither name.
+#
+# A PE-target tcc adds neither a startup object nor a default C library, and
+# the default it would reach for (msvcrt, kernel32) is not what this
+# bootstrap has, so crt1.o and -lc/-lntdll are named outright -- ntdll.def
+# being the import library ntlibc resolves its kernel calls through.  The
+# Linux build's -static has no meaning here.
+alias CC="${tcc} -c -B ${ntlibc}/lib -I. -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -DPACKAGE=\"grep\" -DVERSION=\"${version}\" -DHAVE_DIRENT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_STRERROR=1 -DSTDC_HEADERS=1 -DHAVE_MEMCHR=1 -DHAVE_MEMMOVE=1 -DHAVE_GETPAGESIZE=1 -DHAVE_SETLOCALE=1"
+
+alias LINK="${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o"
+
+CC -o grep.o grep.c
+CC -o dfa.o dfa.c
+CC -o kwset.o kwset.c
+CC -o obstack.o obstack.c
+CC -o regex.o regex.c
+CC -o savedir.o savedir.c
+CC -o search.o search.c
+
+# The three programs differ in exactly one global: grepmat.c leaves `matcher'
+# null, egrepmat.c sets it to "egrep", fgrepmat.c to "fgrep", and search.c's
+# matchers vector does the rest.  There is no separate egrep source.
+CC -o grepmat.o grepmat.c
+CC -o egrepmat.o egrepmat.c
+CC -o fgrepmat.o fgrepmat.c
+
+# -lc -lntdll come last, after grep's own objects, which is what a linker
+# that resolves archives in one pass needs.
+LINK -o grep.exe grep.o dfa.o kwset.o obstack.o regex.o savedir.o search.o grepmat.o -L ${ntlibc}/lib -lc -lntdll
+LINK -o egrep.exe grep.o dfa.o kwset.o obstack.o regex.o savedir.o search.o egrepmat.o -L ${ntlibc}/lib -lc -lntdll
+LINK -o fgrep.exe grep.o dfa.o kwset.o obstack.o regex.o savedir.o search.o fgrepmat.o -L ${ntlibc}/lib -lc -lntdll
+
+# Run them before installing them, and on real input rather than --version:
+# search.c is the file that names all three matchers, so counting the lines
+# of it that mention one exercises the whole path from getopt through the
+# dfa to the output.  kaem is --strict, so a wrong exit status fails the
+# build; the interesting cases that exit 1 on purpose are tested outside.
+./grep.exe --version
+./grep.exe -c matcher search.c
+./egrep.exe -c "Gcompile|Fcompile" search.c
+./fgrep.exe -c matchers search.c
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} grep.exe ${out}/bin/grep.exe
+${bin_cp} egrep.exe ${out}/bin/egrep.exe
+${bin_cp} fgrep.exe ${out}/bin/fgrep.exe
