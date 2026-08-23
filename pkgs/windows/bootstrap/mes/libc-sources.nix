@@ -16,12 +16,14 @@
 # one translation unit before compiling, so a definition has to come before
 # whatever uses it.
 #
-# libc_gnu_SOURCES names lib/windows/x86-mes-gcc/, and that directory does not
-# exist yet.  It is the fuller set a real C compiler builds -- TinyCC
-# recompiles the library from it once TinyCC exists -- and the six per-compiler
-# files in it are _exit, _write, filetime, ntlow, ntcall and iosb: the ones
-# whose bodies are assembly, and so are written once per compiler that has to
-# emit it.  Nothing asks for that list until there is a TinyCC on this side.
+# libc_gnu_SOURCES names lib/windows/x86-mes-gcc/: the fuller set a real C
+# compiler builds, which TinyCC recompiles the library from once TinyCC
+# exists.  The six per-compiler files in it are _exit, _write, filetime,
+# ntlow, ntcall and iosb -- the ones whose bodies are assembly for the two
+# compilers below this one, and so are written once per compiler.  For this
+# one three of them stop being assembly at all: TinyCC knows stdcall, so
+# ntcall.c is a function-pointer attribute, and it has long long, so
+# filetime.c is a division.  See the mes fork for what each says.
 #
 # Eighteen of the files below are lib/stub/.  That is not a Windows fact so
 # much as a not-yet fact: stat, mkdir, rename and readdir all have an ntdll
@@ -48,7 +50,7 @@
     "lib/mes/globals.c"
   ];
 
-  # 115 files
+  # 114 files
   libc_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -166,7 +168,7 @@
     "lib/windows/ntdll.c"
   ];
 
-  # 167 files
+  # 171 files
   libc_tcc_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -288,10 +290,12 @@
     "lib/ctype/toupper.c"
     "lib/mes/abtod.c"
     "lib/mes/dtoab.c"
+    "lib/mes/fdgets.c"
     "lib/mes/search-path.c"
     "lib/posix/execvp.c"
     "lib/stdio/fclose.c"
     "lib/stdio/fdopen.c"
+    "lib/stdio/fgets.c"
     "lib/stdio/ferror.c"
     "lib/stdio/fflush.c"
     "lib/stdio/fopen.c"
@@ -319,9 +323,12 @@
     "lib/stdlib/strtoul.c"
     "lib/stdlib/strtoull.c"
     "lib/string/memmem.c"
+    "lib/string/strcasecmp.c"
     "lib/string/strcat.c"
     "lib/string/strchr.c"
+    "lib/string/strerror.c"
     "lib/string/strlwr.c"
+    "lib/string/strncasecmp.c"
     "lib/string/strncpy.c"
     "lib/string/strrchr.c"
     "lib/string/strstr.c"
@@ -336,7 +343,7 @@
     "lib/x86-mes-mescc/setjmp.c"
   ];
 
-  # 256 files
+  # 259 files
   libc_gnu_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -458,10 +465,12 @@
     "lib/ctype/toupper.c"
     "lib/mes/abtod.c"
     "lib/mes/dtoab.c"
+    "lib/mes/fdgets.c"
     "lib/mes/search-path.c"
     "lib/posix/execvp.c"
     "lib/stdio/fclose.c"
     "lib/stdio/fdopen.c"
+    "lib/stdio/fgets.c"
     "lib/stdio/ferror.c"
     "lib/stdio/fflush.c"
     "lib/stdio/fopen.c"
@@ -489,9 +498,12 @@
     "lib/stdlib/strtoul.c"
     "lib/stdlib/strtoull.c"
     "lib/string/memmem.c"
+    "lib/string/strcasecmp.c"
     "lib/string/strcat.c"
     "lib/string/strchr.c"
+    "lib/string/strerror.c"
     "lib/string/strlwr.c"
+    "lib/string/strncasecmp.c"
     "lib/string/strncpy.c"
     "lib/string/strrchr.c"
     "lib/string/strstr.c"
@@ -515,7 +527,6 @@
     "lib/math/ceil.c"
     "lib/math/fabs.c"
     "lib/math/floor.c"
-    "lib/mes/fdgets.c"
     "lib/posix/alarm.c"
     "lib/posix/execl.c"
     "lib/posix/execlp.c"
@@ -526,7 +537,6 @@
     "lib/posix/unsetenv.c"
     "lib/stdio/clearerr.c"
     "lib/stdio/feof.c"
-    "lib/stdio/fgets.c"
     "lib/stdio/fileno.c"
     "lib/stdio/freopen.c"
     "lib/stdio/fscanf.c"
@@ -547,7 +557,6 @@
     "lib/string/rindex.c"
     "lib/string/strcspn.c"
     "lib/string/strdup.c"
-    "lib/string/strerror.c"
     "lib/string/strncat.c"
     "lib/string/strpbrk.c"
     "lib/string/strspn.c"
@@ -580,6 +589,8 @@
     "lib/stub/setbuf.c"
     "lib/stub/setgrent.c"
     "lib/stub/setlocale.c"
+    "lib/windows/x86-mes-gcc/chkstk.c"
+    "lib/stub/settimer.c"
     "lib/stub/setvbuf.c"
     "lib/stub/sigaddset.c"
     "lib/stub/sigblock.c"

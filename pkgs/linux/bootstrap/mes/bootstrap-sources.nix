@@ -19,7 +19,7 @@ rec {
   # because it is the same source.
   version = "0.27.1-unstable-2026-08-22";
 
-  rev = "dd07771bd8588823115d4f358c1a91f220a89e09";
+  rev = "582949b7ba15fda163db84ef5fe4a4e308f3e48d";
   ref = "windows-pe32";
 
   src = builtins.fetchGit {

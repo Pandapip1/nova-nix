@@ -13,8 +13,8 @@ rec {
   # 0.27.1 with a backend upstream does not carry yet.
   version = "0.27.1-unstable-2026-08-22";
 
-  rev = "dd07771bd8588823115d4f358c1a91f220a89e09";
-  ref = "windows-pe32";
+  rev = "a837e37c341d1c539ca00bf8b4ebd0e100a5fc2b";
+  ref = "windows-pe32-ntcall";
 
   src = builtins.fetchGit {
     url = "https://github.com/Pandapip1/mes.git";
