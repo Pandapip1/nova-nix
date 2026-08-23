@@ -1,0 +1,3 @@
+alpha:10:x
+beta:20:yy
+gamma:30:zzz

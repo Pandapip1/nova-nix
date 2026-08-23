@@ -76,6 +76,67 @@ let
     # Not a stage: the parser modules MesCC loads, which Mes does not vendor.
     nyacc = callPackage ../bootstrap/nyacc { };
 
+    # The C library everything above tcc is built against -- this side's
+    # musl, where Mes's own is only what the chain climbs on.  See its
+    # default.nix for the difference that matters.
+    ntlibc = callPackage ./bootstrap/ntlibc { };
+
+    # The first program above the compiler and the C library, and what
+    # everything above it is built with.
+    gnumake = callPackage ./bootstrap/gnumake { };
+
+    # And the second: what the packages above them are patched with, since
+    # a release tarball is not hermetic as it stands.
+    gnupatch = callPackage ./bootstrap/gnupatch { };
+
+    # And the shell every ./configure above here is written in.  kaem got
+    # the chain this far, and kaem has no loops, conditionals or pipelines.
+    bash = callPackage ./bootstrap/bash { };
+
+    # The programs every build script above here assumes -- cp, mv, rm,
+    # mkdir, cat, ls, sort.  The first package on this side that make drives
+    # rather than kaem.
+    coreutils = callPackage ./bootstrap/coreutils { };
+
+    # The stream editor every ./configure above here runs on its own output.
+    # One build, not two: the Linux side needs a second sed against musl
+    # because Mes's stdio mishandles a pipe, and ntlibc's does not.
+    gnused = callPackage ./bootstrap/gnused { };
+
+    # And the pattern matcher every ./configure above here runs a hundred
+    # times.  Its own regex, since ntlibc has none.
+    gnugrep = callPackage ./bootstrap/gnugrep { };
+
+    # And the decompressor, so a release tarball above here is opened by a
+    # program this bootstrap built rather than by the unpacker
+    # mescc-tools-extra supplied to get it started.
+    gzip = callPackage ./bootstrap/gzip { };
+
+    # And the archiver every source tarball above here arrives in.  The first
+    # package on this side that has to answer for NT's filesystem rather than
+    # for its C library: no symbolic links, no owner, and one read-only bit
+    # where POSIX has nine mode bits.
+    gnutar = callPackage ./bootstrap/gnutar { };
+
+    # And the awk every ./configure above here runs from its first hundred
+    # lines.  3.0.6 is the seed awk: old enough and small enough to build
+    # with no awk in the picture, and its release tarball ships the
+    # pre-generated parser, so it needs no bison either.
+    gawk = callPackage ./bootstrap/gawk { };
+
+    # And the awk everything above here actually uses.  The seed above is
+    # what a modern config.status is too new for; this is the one it needs.
+    # It is built with the seed rather than by it -- there is no configure
+    # here to run an awk script -- so the edge to it is a declared input
+    # that nothing in the build executes.  See its default.nix.
+    gawk5 = callPackage ./bootstrap/gawk5 { bootGawk = self.gawk; };
+
+    # And the directory walker binutils and gcc run over their own trees.
+    # The first package on this side to carry a modern gnulib import, and so
+    # the first to have to answer for gnulib's generated headers -- which it
+    # does by not needing them.  See its default.nix.
+    findutils = callPackage ./bootstrap/findutils { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };

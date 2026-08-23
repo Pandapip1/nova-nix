@@ -1,0 +1,78 @@
+-execdir and -okdir refused to run at all on this target, and the reason is
+a path-syntax assumption rather than anything missing.
+
+find's check_path_safety() exists because -execdir runs a command from
+inside the directory it is examining, so a $PATH entry that is relative --
+"." , "", or "bin" -- would let a directory being searched supply the
+program.  GNU find refuses rather than take the risk.  The check splits
+$PATH on ':' and calls an entry absolute if it starts with '/'.
+
+Neither half holds here.  NT's PATH separator is ';', which it has to be on
+a system where every absolute path contains a ':' after the drive letter,
+and ntlibc's execvp splits it that way -- src/process/find_program.c says
+so in as many words, and its own path search would therefore look in
+entirely different places from the ones find is vetting.  Measured before
+this patch was written: with wine's ordinary environment,
+
+    find.exe a -name '*.txt' -execdir echo {} ';'
+
+exits with
+
+    find.exe: The relative path 'C' is included in the PATH environment
+    variable, which is insecure in combination with the -execdir action of
+    find.  Please remove that entry from $PATH
+
+-- the 'C' being the drive letter of C:\windows\system32, cut off at the
+colon.  Every $PATH on this platform fails that way, so the feature was not
+degraded, it was unreachable.
+
+The patch is guarded by NT_PATH_SYNTAX, defined in config.h, rather than by
+_WIN32: this build compiles with -U_WIN32 on purpose (gnulib reads _WIN32 as
+"the Microsoft C runtime is underneath", which is not true here), so _WIN32
+is not available to key a decision on, and a decision about path SYNTAX is
+in any case a different question from which C runtime is underneath.
+
+The security property the check exists to protect is preserved, not waived:
+after the patch a relative entry -- "bin", "." or an empty field -- is still
+rejected, and so is a bare "C:", which on NT means "the current directory on
+drive C" and is exactly the case the check is about.  What is accepted is a
+leading separator or a drive letter followed by one.
+
+--- find/parser.c
++++ find/parser.c
+@@ -2716,7 +2716,17 @@
+ check_path_safety (const char *action)
+ {
+   const char *path = getenv ("PATH");
++#ifdef NT_PATH_SYNTAX
++  /* NT's PATH is ';'-separated, and ntlibc's execvp splits it that way
++     (src/process/find_program.c).  ':' cannot be the separator on a system
++     whose absolute paths begin "C:", and splitting on it here made every
++     ordinary $PATH look like a list of one-letter RELATIVE directories --
++     so -execdir and -okdir refused to run at all.  See
++     patches/nt-execdir-path-syntax.patch.  */
++  const char *path_separators = ";";
++#else
+   const char *path_separators = ":";
++#endif
+   size_t pos, len;
+ 
+   if (NULL == path)
+@@ -2744,7 +2754,17 @@
+ 		   "or leading or trailing colons)"),
+ 		 action);
+ 	}
++#ifdef NT_PATH_SYNTAX
++      /* Absolute on this target means a leading separator OR a drive
++	 letter followed by one -- "C:\\windows" is not a relative path.  A
++	 bare "C:" IS relative (it means the current directory on drive C),
++	 and is correctly rejected here.  */
++      else if (! (path[pos] == '/' || path[pos] == '\\'
++		  || (2 < len && path[pos + 1] == ':'
++		      && (path[pos + 2] == '/' || path[pos + 2] == '\\'))))
++#else
+       else if (path[pos] != '/')
++#endif
+ 	{
+ 	  char *relpath = strndup (&path[pos], len);
+ 	  error (EXIT_FAILURE, 0,

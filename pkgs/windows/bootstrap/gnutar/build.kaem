@@ -1,0 +1,197 @@
+# GNU tar 1.12, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/gnutar/build.sh, and a
+# different shape: that one runs tar's own ./configure under bash, this one
+# asserts the answers and names the compiles.  See the head of default.nix for
+# why -- in short, tar 1.12's configure asks about tape drives and remote
+# shells, and would get three of its answers wrong here.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}: wine drops TMPDIR on the way into the
+# Windows environment, so it arrives empty and cd is left with no argument.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output tar.tar
+${bin_untar} --file tar.tar
+
+cd ${NIX_BUILD_TOP}/tar-${version}
+
+# Three patches, none of them about the C library and none of them from
+# live-bootstrap, which has no tar recipe.  Two of the three are the same
+# observation from opposite ends -- NT does not have the filesystem tar was
+# written for -- and the third is cosmetic but earns its place in a bootstrap
+# where a diagnostic is the only debugging channel there is.
+#
+#   nt-no-symlinks       ntlibc's symlink() works, and that is the problem.
+#                        Under Wine it produces something Wine reads back as
+#                        a symbolic link and nothing else does -- a
+#                        zero-length file with '?' on the end of its name --
+#                        and on real NT it needs a privilege the build may
+#                        not hold.  Withdrawing S_ISLNK puts tar into a
+#                        configuration it already supports, and decides that
+#                        once rather than per host.
+#   nt-readonly-attribute
+#                        a file created without owner write picks up NT's
+#                        read-only attribute, after which its timestamps and
+#                        attributes can no longer be set -- so extracting any
+#                        archive containing a 0444 file, which is nearly every
+#                        source tarball, failed on both the utime and the
+#                        chmod.  Create writable, chmod last.  Still
+#                        load-bearing -- do not remove it.
+#
+#                        A measurement here said otherwise and was too
+#                        narrow.  Under wine, the ntlibc pinned here does
+#                        clear the attribute itself: on a 0444 file utime()
+#                        and chmod() go from EACCES to success, so the patch
+#                        looks like belt-and-braces.  That evidence is
+#                        wine-only.  On the real Windows loader the same
+#                        ntlibc revision FAILS utimensat()/utime()/futimesat()
+#                        on ORDINARY files -- the read-only path was repaired
+#                        and the normal one broken -- so a tar that leaned on
+#                        the library instead of this patch would set no
+#                        timestamps at all where it matters most.
+#
+#                        The general point, which outlives this revision:
+#                        wine agreeing is not evidence about NT, and here it
+#                        was not merely weaker but INVERTED -- green precisely
+#                        because the target environment differs.  Creating
+#                        writable and applying the real mode last is right
+#                        whatever the C library does, which is why it stays
+#                        regardless of how that bug is resolved.
+#   nt-program-name      argv[0] arrives as a full NT path.
+#
+# Each file says the rest in its own header.
+${patch} -Np0 -i ${patchSymlinks}
+${patch} -Np0 -i ${patchReadonly}
+${patch} -Np0 -i ${patchProgramName}
+
+# What ./configure would have written -- see the head of config.h.  It lands
+# in the tree root, which is where -I. finds it.
+${bin_cp} ${configH} config.h
+
+# Everything is compiled from the tree root rather than from src/ and lib/ in
+# turn, so that one -I list serves both: this tcc does not search an included
+# file's own directory, so src/*.c need -I src for "system.h" and "common.h",
+# and lib/*.c need -I lib for "error.h" and "backupfile.h".  The twenty-six
+# basenames are distinct across the two directories, so the objects can all
+# land here without colliding.
+#
+# The order of the -I list is load-bearing, and this is the one place this
+# package differs from grep in how it is spelled.  tar's own lib comes BEFORE
+# ntlibc's include directory, because two of the headers there have to win:
+#
+#   fnmatch.h  ntlibc's is POSIX and stops at FNM_PATHNAME, FNM_NOESCAPE and
+#              FNM_PERIOD.  names.c and buffer.c ask for FNM_LEADING_DIR, the
+#              GNU flag that makes a pattern match everything beneath a
+#              directory it names; without it `tar -xf a.tar dir' extracts
+#              the directory and nothing in it, and --exclude excludes one
+#              entry rather than a subtree.  lib/fnmatch.c is compiled below
+#              and implements the flag.  Because it is a plain object and not
+#              an archive member, it satisfies the reference before libc.a is
+#              consulted at all and ntlibc's fnmatch.o is never pulled in --
+#              so there is no duplicate definition, only a choice.
+#   getopt.h   tar's declares the same struct option as ntlibc's, in the same
+#              order, with the same three has_arg constants; but tar.c reads
+#              it for nothing else, and taking tar's keeps the include list
+#              from depending on which header happens to come first.
+#
+# HAVE_CONFIG_H is the only -D: system.h and the lib/*.c files include
+# <config.h> only when told to.  Everything else configure would have put on
+# the command line is in config.h instead, because make and kaem here run a
+# command line without a shell and a -D whose value contains a quote cannot
+# be written on one.
+alias CC="${tcc} -c -I. -Ilib -Isrc -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -B ${ntlibc}/lib -DHAVE_CONFIG_H"
+
+# The fifteen files of tar proper, as src/Makefile.am names them.
+CC -o arith.o src/arith.c
+CC -o buffer.o src/buffer.c
+CC -o compare.o src/compare.c
+CC -o create.o src/create.c
+CC -o delete.o src/delete.c
+CC -o extract.o src/extract.c
+CC -o incremen.o src/incremen.c
+CC -o list.o src/list.c
+CC -o mangle.o src/mangle.c
+CC -o misc.o src/misc.c
+CC -o names.o src/names.c
+CC -o open3.o src/open3.c
+CC -o rtapelib.o src/rtapelib.c
+CC -o tar.o src/tar.c
+CC -o update.o src/update.c
+
+# And eleven of libtar.  lib/Makefile.am names twelve; getopt.c and getopt1.c
+# are gone because ntlibc has getopt, getopt_long and getopt_long_only, and
+# fnmatch.c is here although lib/Makefile.am lists it only as EXTRA_DIST --
+# configure adds it when the system fnmatch does not work, and by tar's
+# standard ntlibc's does not.  See the -I note above.
+#
+# getdate.c is compiled from the pre-generated parser the tarball ships.
+# That is worth naming because the Linux coreutils on this chain had to give
+# up its copy: coreutils 5.0's getdate.c is a modern bison output that
+# nothing here can compile, and touch lost its -d parser as a result.  tar
+# 1.12's is fifteen years older and compiles clean, so `tar --newer DATE'
+# keeps its argument parser.  What it parses it in is the C locale and, with
+# no timezone database under this library, in UTC.
+#
+# The eight files NOT compiled from lib/ are the AC_REPLACE_FUNCS set --
+# alloca.c, basename.c, dirname.c, execlp.c, fileblocks.c, ftruncate.c,
+# gmalloc.c, memset.c, mkdir.c, rename.c, rmdir.c, stpcpy.c and strstr.c.
+# ntlibc has every one of those functions, and this is the point where the
+# decision is made; config.h does not bother to say HAVE_STPCPY because
+# nothing would read it.  This is also the safe way round: had any of these
+# been compiled and put in an archive ahead of libc.a, tar's version would
+# have won silently rather than colliding.
+CC -o argmatch.o lib/argmatch.c
+CC -o backupfile.o lib/backupfile.c
+CC -o error.o lib/error.c
+CC -o fnmatch.o lib/fnmatch.c
+CC -o getdate.o lib/getdate.c
+CC -o getversion.o lib/getversion.c
+CC -o modechange.o lib/modechange.c
+CC -o msleep.o lib/msleep.c
+CC -o xgetcwd.o lib/xgetcwd.c
+CC -o xmalloc.o lib/xmalloc.c
+CC -o xstrdup.o lib/xstrdup.c
+
+# One link, and no libtar.a at all: the Linux build archives lib/*.o and puts
+# libtar.a on the link line, which on this side would be an archive ahead of
+# libc.a and so a place for tar's copy of something to win by accident.
+# Twenty-six plain objects have no such ordering to get wrong.
+#
+# A PE-target tcc adds neither a startup object nor a default C library, and
+# the default it would reach for (msvcrt, kernel32) is not what this bootstrap
+# has, so crt1.o and -lc/-lntdll are named outright -- ntdll.def being the
+# import library ntlibc resolves its kernel calls through.  -lc -lntdll come
+# last, after tar's own objects, which is what a linker that resolves archives
+# in one pass needs.  The Linux build's -static has no meaning here.
+#
+# src/rmt.c is not built.  It is the remote-tape server, and configure only
+# builds it where <sys/mtio.h> and <sys/socket.h> both exist; there is neither
+# here, and no rsh for rtapelib to reach it with either.
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o tar.exe arith.o buffer.o compare.o create.o delete.o extract.o incremen.o list.o mangle.o misc.o names.o open3.o rtapelib.o tar.o update.o argmatch.o backupfile.o error.o fnmatch.o getdate.o getversion.o modechange.o msleep.o xgetcwd.o xmalloc.o xstrdup.o -L ${ntlibc}/lib -lc -lntdll
+
+# Run it before installing it, on tar's real job rather than on --version.
+#
+# The archive is tar's own source: forty-odd files over two directories, a
+# range of sizes, and -- the case that made the read-only patch necessary --
+# a handful of files the tarball ships mode 0444.
+#
+# The check at the end is `tar -d', which is the strongest one available with
+# no diff, no cmp and no shell in the picture: it re-reads the archive and
+# compares every member against the extracted copy, byte for byte, and
+# reports size, contents, mode and modification-time differences separately.
+# kaem is --strict, so any of those fails the build.  Between them the four
+# commands cover create, list, extract into a fresh tree, and verify.
+./tar.exe -cf self.tar lib src
+./tar.exe -tf self.tar
+${bin_mkdir} -p verify
+cd verify
+../tar.exe -xf ../self.tar
+../tar.exe -df ../self.tar
+cd ..
+
+# It lands as tar.exe, as bash, make, patch, sed and grep do -- ntlibc's PATH
+# search tries the bare name before name.exe, so a script asking for `tar'
+# still finds it.
+${bin_mkdir} -p ${out}/bin
+${bin_cp} tar.exe ${out}/bin/tar.exe

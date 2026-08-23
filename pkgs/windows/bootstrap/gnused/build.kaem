@@ -1,0 +1,85 @@
+# GNU sed 4.0.9, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/gnused/build.sh, and the
+# same shape: unpack, write out what ./configure would have found, hand the
+# whole thing to make.  What differs is here and in default.nix.
+#
+# kaem rather than a shell.  The Linux build is a bash script because it
+# wanted CC to be one variable holding a compiler and its flags; here each
+# make variable is its own kaem variable, so there is nothing for a shell to
+# do and bash is not a dependency of sed on this side.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}.  They name the same directory, but wine
+# drops TMPDIR on the way into the Windows environment, so it arrives empty
+# and cd is left with no argument.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_ungz} --file ${tarball} --output sed.tar
+${bin_untar} --file sed.tar
+
+cd ${NIX_BUILD_TOP}/sed-${version}
+
+# What ./configure would have written -- see the head of config.h.
+${bin_cp} ${configH} config.h
+
+# The makefile generates lib/regex.h from lib/regex_.h with a bare `cp',
+# which would be looked up on a PATH this build does not set.  Copying it
+# here leaves the rule already satisfied: untar restores the tarball's own
+# 2003 timestamps, so anything written now is newer than its prerequisite
+# and make has nothing to do.
+${bin_cp} lib/regex_.h lib/regex.h
+
+# Three one-line edits to live-bootstrap's makefile, chained because replace
+# does one substitution per run.
+#
+#   1. It archives with `$(AR) cr', and this tcc refuses that: mainline tcc
+#      scans every argument for the operations it does not support --
+#      habdiopN -- and "-ar" itself contains an 'a', so the flag cluster
+#      reads as a conflicting operation and it prints its usage instead.
+#      With no cluster it creates the archive, which is what `cr' asked for.
+#      The Linux build makes the same edit.
+#
+#   2-3. Five of the eight files in libsed leave it, because ntlibc already
+#      has all five: alloca, getopt, getopt1, strverscmp and mkstemp.  None
+#      of these is a link error waiting to happen -- libsed comes before
+#      libc on the link line, so sed's copy would simply win -- which is
+#      exactly why they are worth removing by hand.  ntlibc's alloca is the
+#      arch's own stack adjustment where sed's is the 1980s portable one
+#      that keeps a list of blocks and guesses which way the stack grows,
+#      and ntlibc's mkstemp is the one that has to work for `sed -i'.
+#      Taking the whole ifeq branch out would leave a variable assigned an
+#      empty string, which is more than replace can write cleanly, so the
+#      branch is pointed at `utils' instead and `utils' comes off the other
+#      line: the two edits together leave utils, regex and obstack, which
+#      are sed's own and have no counterpart in any C library.
+${bin_replace} --file ${makefile} --output mk-ar.mk --match-on ${arPattern} --replace-with ${arReplacement}
+${bin_replace} --file mk-ar.mk --output mk-alloca.mk --match-on ${allocaPattern} --replace-with ${allocaReplacement}
+${bin_replace} --file mk-alloca.mk --output main.mk --match-on ${libsrcPattern} --replace-with ${libsrcReplacement}
+
+# Three passes, and only the last one is allowed to fail -- the same pattern
+# as coreutils, for the same reason.  make on this side loses a child now and
+# then, roughly one exec in a hundred and fifty coming back as "Bad address"
+# and reported as exit 127; which one it is differs from run to run.  -k
+# carries on past it, so a lost child costs a second pass rather than the
+# build.  This build is only nine commands long, so it will usually get
+# through on the first pass and the other two do nothing at all.
+${make} -k -f main.mk ${ccflag} ${arflag} ${libcflag} ${cppflags} ${cflags} ${ldflags}
+${make} -k -f main.mk ${ccflag} ${arflag} ${libcflag} ${cppflags} ${cflags} ${ldflags}
+${make} -f main.mk ${ccflag} ${arflag} ${libcflag} ${cppflags} ${cflags} ${ldflags}
+
+# Run it before installing it, and on something that exercises the engine
+# rather than the version string: a character class, a closure, a
+# substitution and -n with p, reading a file rather than a pipe.  It stays
+# free of backslashes and spaces because kaem has no quoting to speak of --
+# the harder cases (backreferences, address ranges, `$' on a pipe) were run
+# by hand against this binary and are what the package comment reports.
+./sed/sed -n -e s/HAVE_STR[A-Z]*_H/found/p config.h
+
+# The makefile's install target runs `install -D', which is a coreutils
+# program this package does not otherwise need; the binary is copied here
+# instead.  It lands as sed.exe, as bash, make and patch do -- ntlibc's PATH
+# search tries the bare name before name.exe, so a script asking for `sed'
+# still finds it.
+${bin_mkdir} -p ${out}/bin
+${bin_cp} sed/sed ${out}/bin/sed.exe

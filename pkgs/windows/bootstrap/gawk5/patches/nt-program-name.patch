@@ -1,0 +1,69 @@
+# gawk 5.3.2 on NT: argv[0], and the two other places gawk assumes '/'.
+#
+# The same patch this package's 3.0.6 sibling carries, moved onto 5.3.2's
+# ANSI prototypes.  posix/gawkmisc.c is the file gawkmisc.c #includes once it
+# has decided it is on a POSIX system, and this build wants it to keep
+# deciding that -- ntlibc is a POSIX surface, and the alternative (pc/, which
+# 5.3.2 keeps in its own directory) is a body of code about the Microsoft C
+# runtime, DOS drive letters and 8.3 names.  What that file is NOT right
+# about is the path separator, because the NT loader is still the thing that
+# hands over argv[0]:
+#
+#   Z:\nix\store\...-gawk-5.3.2\bin\gawk.exe: cmd. line:1: syntax error
+#
+# gawk_name() is what turns that into `gawk'.  It splits on '/' only, so
+# without this every diagnostic gawk prints -- and both usage lines, and
+# ARGV[0] inside an awk program, since main.c assigns myname back over
+# argv[0] -- carries the whole store path.  In a bootstrap where a diagnostic
+# is the only debugging channel there is, that is worth fixing.  ':' is in
+# the set for the drive letter, since `Z:gawk.exe' has no separator after it.
+#
+# ispath() and isdirpunct() are the same observation in the two other places
+# it shows up, both in io.c's do_pathopen -- the AWKPATH search for `-f
+# progfile'.  ispath() decides "this is already a path, do not search"; with
+# only '/' in the set, `gawk -f C:\tmp\prog.awk' is taken for a bare name and
+# joined onto each AWKPATH element in turn, and is only found by the fallback
+# open at the bottom of that loop.  That happens to work, so this half is
+# tidiness rather than a bug fix; isdirpunct() is the same character set seen
+# from the other end, and is what stops a separator being doubled.
+#
+--- posix/gawkmisc.c
++++ posix/gawkmisc.c
+@@ -52,9 +52,14 @@
+ {
+ 	const char *p;
+ 
+-	/* "path/name" -> "name" */
+-	p = strrchr(filespec, '/');
+-	return (p == NULL ? (char *) filespec : p + 1);
++	/* "path/name" -> "name", and the same for the two separators the NT
++	   loader uses: argv[0] arrives as a full backslashed path with a
++	   drive letter on the front.  */
++	p = filespec;
++	for (; *filespec != '\0'; filespec++)
++		if (*filespec == '/' || *filespec == '\\' || *filespec == ':')
++			p = filespec + 1;
++	return p;
+ }
+ 
+ /* os_arg_fixup --- fixup the command line */
+@@ -158,7 +163,9 @@
+ int
+ ispath(const char *file)
+ {
+-	return (strchr(file, '/') != NULL);
++	return (strchr(file, '/') != NULL
++		|| strchr(file, '\\') != NULL
++		|| strchr(file, ':') != NULL);
+ }
+ 
+ /* isdirpunct --- return true if char is a directory separator */
+@@ -166,7 +173,7 @@
+ int
+ isdirpunct(int c)
+ {
+-	return (c == '/');
++	return (c == '/' || c == '\\' || c == ':');
+ }
+ 
+ /* os_close_on_exec --- set close on exec flag, print warning if fails */

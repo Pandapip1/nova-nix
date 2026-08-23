@@ -1,0 +1,45 @@
+--- src/system.h
++++ src/system.h
+@@ -143,6 +143,42 @@
+ 
+ #include <sys/stat.h>
+ 
++/* ntlibc's symbolic links are real, and under the Wine this package is built
++   with they work.  Measured, not assumed: a C program compiled by this same
++   tcc against the pinned library gets 0 from symlink(), S_IFLNK from lstat()
++   where stat() follows through to the target, and the target back from
++   readlink().  Nothing here is silently wrong.
++
++   What is wrong is the artefact.  Wine stores an NT reparse point as a Unix
++   file whose name has a '?' appended, with the link data in a
++   user.WINEREPARSE extended attribute -- dlls/ntdll/unix/file.c, the
++   XATTR_REPARSE define and the reparse_name that lookup_unix_name() builds.
++   Inside Wine that resolves perfectly.  Outside it -- to the store that
++   holds this build's output, to any tool that is not Wine, to a real Windows
++   machine the result is copied to -- it is a zero-length regular file under
++   a name nothing asked for.  And on real NT the call is not free either:
++   creating a reparse point needs SeCreateSymbolicLinkPrivilege or developer
++   mode, and without it ntlibc reports EPERM.  So whether a symbolic link
++   tar extracted is still a symbolic link afterwards depends on which host
++   and which loader ran the build.  A bootstrap must not leave that open.
++
++   S_ISLNK is therefore withdrawn, which is a configuration tar already
++   supports: create dereferences links, extract warns once and falls through
++   to hard links, and compare and demangle refuse the symbolic cases
++   outright.  The fallback is a fallback and not a rescue -- tar 1.12 hands
++   the archived target to link() verbatim, so it resolves against the working
++   directory rather than against the link's own, and an archive whose
++   symlinks are relative to their directory gets a diagnostic and exit 2.
++   A diagnostic and exit 2 is the point.
++
++   S_IFLNK goes with it so that the S_IS* reconstruction further down this
++   file does not put S_ISLNK back.
++
++   This comes out when a symbolic link extracted here would still be one
++   after it leaves.  */
++#undef S_ISLNK
++#undef S_IFLNK
++
+ #ifndef S_ISLNK
+ # define lstat stat
+ #endif

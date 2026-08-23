@@ -1,0 +1,76 @@
+# gawk 5.3.2's system() on NT: take the C library's, the way gawk itself does
+# on MinGW and VMS.
+#
+# This is a REGRESSION 5.3.2 introduces over the 3.0.6 sibling, not something
+# ntlibc lost.  3.0.6 implemented awk's system() as a plain call to the C
+# library's system(), which ntlibc has and which works here.  5.3.2 replaced
+# that with gawk_system(), which open-codes fork() + execl("/bin/sh", ...) so
+# that it can reap the child with gawk's own wait_any() -- except on VMS and
+# MinGW, where it still calls system().
+#
+# The problem is `/bin/sh'.  There is no such program on this target, and the
+# failure is not the one the string "/bin/sh" would lead you to expect.
+# Measured with a nine-line C program rather than through gawk, against the
+# ntlibc revision pinned here:
+#
+#   execl("/bin/sh", "sh", "-c", "echo ran", NULL)   -> errno = 9  (EBADF)
+#   execl("/no/such/thing", "x", NULL)               -> errno = 2  (ENOENT)
+#   execl("C:/windows/system32/cmd.exe", ...)        -> runs
+#   system("echo ran")                               -> runs, returns 0
+#
+# with no fork anywhere in that program: the exec fails on its own, so this
+# is NOT the fork/cloexec handle bug (ntlibc c18edaf), and moving the pin
+# past that fix does not change any of the four lines above.  What it is:
+# under wine, `/bin/sh' resolves to a real file -- open() on it returns a
+# descriptor -- but that file is the host's ELF shell, and ntlibc's __spawn
+# hands the path to NtCreateUserProcess, which loads PE images.  Hence a
+# failure that is neither ENOENT nor ENOEXEC.  On a real NT system the path
+# would simply not exist.
+#
+# So gawk_system()'s child falls through to `_exit(errno == ENOENT ? 127 :
+# 126)' and every system() call in an awk program returns 126 having done
+# nothing.  The C library's system() works because it does not use /bin/sh
+# at all: ntlibc's runs %ComSpec%, falling back to cmd.exe found on PATH,
+# which is what Windows' own C runtime does for the same call.
+#
+# That is below gawk and is not gawk's to fix, so this patch does not try:
+# it widens gawk's own existing escape hatch to cover this target, which is
+# exactly the branch gawk already takes on the other Windows C runtime it
+# supports.
+#
+# _WIN32 is the condition because it is the one macro this tcc predefines
+# that names this target, and because gawk 5.3.2 reads it nowhere else --
+# grep finds no other use of _WIN32, WIN32 or MSDOS in any file this package
+# compiles (they all live under pc/ and vms/, which it does not).  So there
+# is no -U_WIN32 here of the kind coreutils needed, and no other branch moves
+# when this one does.
+#
+# What is NOT fixed by this, and cannot be from inside gawk: `"cmd" | getline'
+# and `print | "cmd"'.  io.c's gawk_popen and gawk_popen_write are the same
+# fork-then-execl shape with a pipe across it, and there is no C library call
+# to fall back to that gives gawk the fd it needs.  See the head of
+# default.nix.
+#
+--- builtin.c
++++ builtin.c
+@@ -3332,9 +3332,9 @@
+ int
+ gawk_system(const char *command)
+ {
+-#if defined(VMS) || defined(__MINGW32__)
++#if defined(VMS) || defined(__MINGW32__) || defined(_WIN32)
+ 	return system(command);
+-#else /* ! (defined(VMS) || defined(__MINGW32__)) */
++#else /* ! (defined(VMS) || defined(__MINGW32__) || defined(_WIN32)) */
+ 	pid_t childpid;
+ 	int status;
+ 
+@@ -3349,7 +3349,7 @@
+ 
+ 		return status;
+ 	}
+-#endif /* defined(VMS) || defined(__MINGW32__) */
++#endif /* defined(VMS) || defined(__MINGW32__) || defined(_WIN32) */
+ }
+ 
+ #if 0

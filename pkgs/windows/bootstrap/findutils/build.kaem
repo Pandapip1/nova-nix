@@ -1,0 +1,470 @@
+# GNU findutils 4.10.0, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/findutils/build.sh, which
+# runs findutils' own ./configure under bash and then make.  There is neither
+# here: the answers are asserted in config.h, as grep, sed, gzip, tar and both
+# gawks assert theirs, and kaem names the hundred compiles and the two links.
+#
+# This is the first package on this side with a modern gnulib import, and the
+# head of default.nix is about why that did not force configure on it.  The
+# short version: gnulib's generated headers are the reason a package like this
+# normally cannot be built without configure, and findutils needs none of
+# them, because ntlibc is close enough to POSIX that no gnulib module it uses
+# has to rename an entry point to rpl_*.  What the generated headers WOULD
+# have added -- five prototypes, ten S_IS* macros, a timezone_t, O_SEARCH --
+# is in shim/gl-missing-decls.h with a note on each.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}: wine drops TMPDIR on the way into the
+# Windows environment, so it arrives empty and cd is left with no argument.
+
+cd ${NIX_BUILD_TOP}
+
+# .tar.xz, not .tar.gz -- findutils has shipped xz only since 4.7.0, and
+# mirrors.kernel.org has no .gz for 4.10.0 to prefer.  mescc-tools-extra's
+# unxz is what that is for, and the Linux sibling calls it exactly once.
+#
+# The tarball is CONCATENATED WITH ITSELF first, and that is a workaround for
+# a bug in unxz, not a trick.  Read this before removing it.
+#
+# mescc-tools-extra's unxz writes its output a byte at a time with fputc and
+# then returns from main() without fclose()ing or fflush()ing the stream, so
+# the last partial buffer is never written.  The output is silently truncated
+# to a multiple of 4096 bytes, and unxz exits 0.  Measured directly, on
+# random data of known length:
+#
+#     in=1      out=0        in=4096   out=4096   in=4097   out=4096
+#     in=10000  out=8192     in=65536  out=65536  in=100000 out=98304
+#
+# On this tarball it cost 2048 bytes off a 22251520-byte tar, which untar
+# reported as "Short read on findutils.tar: Expected 512, got" and then
+# carried on -- leaving xargs/xargs.c 621 bytes short, with the file ending
+# mid-string.  The compiler said "missing terminating \" character" at
+# xargs.c:1810, which is a long way from the cause.  unbz2 does NOT have this
+# bug (it writes with fwrite), which is why nothing below this package ever
+# hit it; every other tarball in this chain is .gz or .bz2.
+#
+# Doubling the input fixes it, and the argument is general rather than
+# arithmetic about this particular size.  .xz streams concatenate: unxz reads
+# both and emits 2N bytes.  It then truncates to floor(2N/4096)*4096, which
+# for any N >= 4096 is strictly greater than 2N - 4096 >= N, so the whole
+# first copy always survives.  The check below confirms it rather than
+# trusting it: the doubled decompression came out byte-identical to the
+# reference for all 2174 files.  untar reads the first archive and stops at
+# its end-of-archive marker, so the second copy is never unpacked; the cost
+# is one extra decompression and 22 MB of temporary space.
+#
+# This belongs in mescc-tools-extra, and the fix there is one fclose.  Until
+# that pin moves, EVERY .tar.xz in this bootstrap needs this -- which is
+# diffutils, binutils and gcc.
+${bin_catm} findutils-doubled.tar.xz ${tarball} ${tarball}
+${bin_unxz} --file findutils-doubled.tar.xz --output findutils.tar
+${bin_untar} --file findutils.tar
+
+cd ${NIX_BUILD_TOP}/findutils-${version}
+
+# Three patches.  None of them is about a function ntlibc lacks -- that class
+# is answered by compiling the gnulib file that supplies it -- and none of
+# them comes from the Linux build, whose one edit is a sed on save-cwd.c for
+# a chdir_long that configure got wrong, and configure does not run here.
+#
+#   nt-program-name        argv[0] arrives from the NT loader as a full
+#                          backslashed store path, and gnulib's
+#                          set_program_name deliberately keeps the directory.
+#                          One patch serves find, xargs and locate.
+#   nt-execdir-path-syntax -execdir and -okdir did not run AT ALL: find vets
+#                          $PATH by splitting it on ':' and calling an entry
+#                          absolute if it starts with '/', and on NT the
+#                          separator is ';' and every entry begins with a
+#                          drive letter, so every $PATH looked like a list of
+#                          relative directories.
+#   nt-xargs-child-atexit  xargs did not work at all: ntlibc's execve ends
+#                          with exit(), which runs the atexit handlers the
+#                          child inherited across fork(), and xargs asserts
+#                          that that cannot happen.  An ntlibc defect, worked
+#                          around here and reported there.
+#
+# Each states its own case at length in its own header, including what was
+# measured before it was written.
+${patch} -Np0 -i ${patchProgramName}
+${patch} -Np0 -i ${patchExecdir}
+${patch} -Np0 -i ${patchXargsAtexit}
+
+# What ./configure would have written.  It lands in the tree root, where -I.
+# finds it, and every findutils and gnulib file includes it under
+# HAVE_CONFIG_H.
+${bin_cp} ${configH} config.h
+
+# And this port's own headers, in a shim/ directory of their own so that it is
+# never in doubt which files are findutils' and which are ours.  -Ishim goes
+# on the include path AFTER -I. and BEFORE ntlibc's, which is what makes
+# shim/fnmatch.h win over ntlibc's POSIX one; see that file.
+#
+#   gl-common.h          gnulib's own _GL_ATTRIBUTE_* / _Noreturn / _GL_CMP
+#                        boilerplate, which its m4 writes into every config.h
+#   gl-missing-decls.h   what gnulib's GENERATED headers would have added
+#   error.h              ntlibc has none; gl/lib/error.c is compiled
+#   fnmatch.h            ntlibc's is POSIX and has no FNM_CASEFOLD
+#   langinfo.h           ntlibc has none, and gl/lib/regex_internal.h
+#                        includes it unconditionally
+#   uchar.h              ntlibc has none, and quotearg/mbswidth/mbsstr
+#                        include it unconditionally
+#   selinux/*.h          the stub gnulib's selinux-h module would generate
+#   nt-missing.c         getprogname, __fpending, freadahead, nl_langinfo
+${bin_mkdir} -p shim/selinux
+${bin_cp} ${shimCommon} shim/gl-common.h
+${bin_cp} ${shimDecls} shim/gl-missing-decls.h
+${bin_cp} ${shimError} shim/error.h
+${bin_cp} ${shimFnmatch} shim/fnmatch.h
+${bin_cp} ${shimLanginfo} shim/langinfo.h
+${bin_cp} ${shimUchar} shim/uchar.h
+${bin_cp} ${shimSelinux} shim/selinux/selinux.h
+${bin_cp} ${shimSeContext} shim/selinux/context.h
+${bin_cp} ${shimMissing} shim/nt-missing.c
+
+# Four of gnulib's own headers, which its Makefile generates from a .in.h by
+# running sed over it.  These four carry NO @...@ substitutions at all -- the
+# check is `grep -o '@[A-Z_0-9]\+@' gl/lib/NAME.in.h', which is empty for
+# exactly these four out of forty-six -- so what gnulib's rule produces is a
+# byte-for-byte copy, and a copy is what is made here.  The other forty-two
+# are the ones this build does without; see the head of default.nix.
+${bin_cp} gl/lib/stdckdint.in.h gl/lib/stdckdint.h
+${bin_cp} gl/lib/unitypes.in.h gl/lib/unitypes.h
+${bin_cp} gl/lib/uniwidth.in.h gl/lib/uniwidth.h
+${bin_cp} gl/lib/unistr.in.h gl/lib/unistr.h
+
+# Everything is compiled from the tree root so that one -I list serves find/,
+# lib/, xargs/ and gl/lib/: this tcc does not search an included file's own
+# directory.  The hundred basenames are distinct across the five directories
+# -- checked, because a collision would silently overwrite an object rather
+# than fail -- so every object can land here.
+#
+# The order of the -I list is load-bearing in one place only.  shim/ comes
+# before ntlibc's include directory so that shim/fnmatch.h wins over ntlibc's:
+# ntlibc HAS fnmatch and it is a correct POSIX one, but find's -iname needs
+# FNM_CASEFOLD and -path needs FNM_LEADING_DIR, so gl/lib/fnmatch.c is
+# compiled and shim/fnmatch.h is the header that describes it.  gl/lib comes
+# after shim/ for the same reason in reverse: gnulib's regex.h is a plain
+# file (not a .in.h) and must be found, but gnulib's uchar/langinfo/error
+# exist only as .in.h and must not shadow ours.
+#
+# Two -D and one -U.
+#
+#   HAVE_CONFIG_H  what makes every file include <config.h> at all.
+#   -U_WIN32       this tcc predefines _WIN32, and to gnulib that means "the
+#                  Microsoft C runtime is underneath", which is false: ntlibc
+#                  is POSIX-shaped and has no <windows.h>, no _get_osfhandle
+#                  and no _open_osfhandle.  Two files fail outright without
+#                  it -- gl/lib/error.c:98 and gl/lib/localcharset.c:60 both
+#                  #include <windows.h> under `defined _WIN32 &&
+#                  !defined __CYGWIN__' -- which is how the answer was
+#                  established rather than assumed.  This sides with
+#                  coreutils; grep, sed, gzip, tar and both gawks needed no
+#                  such thing, because none of them has a gnulib this new.
+#                  NT_PATH_SYNTAX in config.h carries the one decision that
+#                  really is about being on Windows, precisely so that it is
+#                  not tangled up with this one.
+alias CC="${tcc} -c -I. -Ishim -Igl/lib -Ilib -Ifind -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -B ${ntlibc}/lib -DHAVE_CONFIG_H -U_WIN32"
+
+# find proper: find_SOURCES plus libfindtools_a_SOURCES, as find/Makefile.am
+# names them.  4.10.0 has one find and not two -- oldfind is gone and
+# ftsfind.c is the only main() -- so there is no choice to make here.
+CC -o ftsfind.o find/ftsfind.c
+CC -o exec.o find/exec.c
+CC -o finddata.o find/finddata.c
+CC -o fstype.o find/fstype.c
+CC -o parser.o find/parser.c
+CC -o pred.o find/pred.c
+CC -o print.o find/print.c
+CC -o sharefile.o find/sharefile.c
+CC -o tree.o find/tree.c
+CC -o util.o find/util.c
+
+# xargs, which is one file.
+CC -o xargs.o xargs/xargs.c
+
+# libfind, shared by both: lib/Makefile.am's libfind_a_SOURCES.  Note what is
+# NOT here -- lib/regexprops.c and lib/test_splitstring.c are separate test
+# programs, and lib/qmark.c IS here although it looks like one, because
+# listfile.c calls it for -ls.
+CC -o bugreports.o lib/bugreports.c
+CC -o buildcmd.o lib/buildcmd.c
+CC -o dircallback.o lib/dircallback.c
+CC -o extendbuf.o lib/extendbuf.c
+CC -o fdleak.o lib/fdleak.c
+CC -o findutils-version.o lib/findutils-version.c
+CC -o listfile.o lib/listfile.c
+CC -o printquoted.o lib/printquoted.c
+CC -o qmark.o lib/qmark.c
+CC -o regextype.o lib/regextype.c
+CC -o safe-atoi.o lib/safe-atoi.c
+CC -o splitstring.o lib/splitstring.c
+
+# This port's own, which is not findutils' file at all.  See its header.
+CC -o nt-missing.o shim/nt-missing.c
+
+# And gl/lib -- findutils' gnulib import.  gl/lib has 267 .c files in it and
+# this list is 66 of them, which is the whole content of the deletion rule as
+# it applies to a gnulib: a module is compiled if and only if something
+# references it AND ntlibc does not already have it.  The set was not guessed:
+# it is the transitive closure of what the two programs actually reference,
+# started from what the same tarball's own libgnulib.a contributes to a glibc
+# link (`ld -M', 62 members for find and 31 for xargs) and then closed under
+# what ntlibc, unlike glibc, does not supply.
+#
+# The nine modules in that second group are the interesting half, because each
+# one is a place where a gnulib file is about to define a name that a C
+# library normally owns:
+#
+#   error.c          ntlibc has no error()/error_at_line().  Needs
+#                    getprogname, which gnulib's own getprogname.c cannot
+#                    supply here -- every branch of it is keyed to a platform
+#                    and ntlibc is none of them -- so shim/nt-missing.c does.
+#   euidaccess.c     ntlibc has neither euidaccess nor eaccess.  find's
+#                    -readable/-writable/-executable go through it.  What
+#                    those three MEAN on NT is a separate question, answered
+#                    in the head of default.nix.
+#   fnmatch.c        for FNM_CASEFOLD and FNM_LEADING_DIR; see the -I note.
+#   regex.c          ntlibc grew a <regex.h> and a POSIX regcomp/regexec, and
+#                    find must not use it: lib/regextype.c and find/parser.c
+#                    drive the GNU interface -- re_compile_pattern,
+#                    re_search, re_set_syntax and the syntax bits that make
+#                    -regextype work -- which is not in POSIX and not in
+#                    ntlibc.  regcomp.c, regexec.c and regex_internal.c come
+#                    in through regex.c's own #includes.
+#   rpmatch.c        ntlibc has no rpmatch; xargs -p and find -ok read it.
+#   wcwidth.c        ntlibc has no wcwidth.  uniwidth/width.c is the table
+#                    behind it, and lib/qmark.c is what wants it: find -ls
+#                    prints a column-aligned name.
+#   uniwidth/width.c ditto.
+#   nstrftime.c      gl/lib/parse-datetime.c calls nstrftime for its debug
+#                    output.  ntlibc HAS strftime, and find/print.c and
+#                    lib/listfile.c use that one; this is gnulib's parallel
+#                    entry point, not a replacement.
+#   c-strcasecmp.c, c-strncasecmp.c
+#                    locale-independent case folding, which is not the same
+#                    function as strcasecmp and is not in any C library.
+#
+# Everything else here has no counterpart in a C library at all: the safer-fd
+# wrappers, fts, the quoting machinery, xalloc, hash, human, modechange,
+# parse-datetime, and the five malloc/dynarray_*.c the last of those builds
+# on.
+#
+# And the ones deliberately NOT compiled although a glibc link pulls them in,
+# because ntlibc has the real thing and a gnulib copy linked ahead of libc.a
+# would win silently:
+#
+#   getopt.c, getopt1.c   ntlibc has getopt, getopt_long and getopt_long_only.
+#                         This is the OPPOSITE call from the gawk 5.3.2
+#                         sibling's, and the reason is that the question is a
+#                         different one: gawk includes gnulib's <getopt.h>
+#                         and depends on its leading '+' and its permutation,
+#                         while findutils includes the system's and uses
+#                         nothing beyond POSIX plus long options.  Confirmed
+#                         from the built binary: ntlibc's getopt message
+#                         "unrecognized option" is present in xargs.exe.
+#   fcntl.c, fflush.c, freadahead.c, fopen.c, fseeko.c, mbrtowc.c, mbrtoc32.c,
+#   the c32*.c family, mktime.c, strftime.c, canonicalize*.c, stat.c, lstat.c,
+#   fstatat.c, openat.c, fdopendir.c, readdir.c, getopt*.c
+#                         each because ntlibc has the function and it works;
+#                         see config.h, which says so one HAVE_ at a time.
+CC -o allocator.o gl/lib/allocator.c
+CC -o areadlinkat.o gl/lib/areadlinkat.c
+CC -o argmatch.o gl/lib/argmatch.c
+CC -o argv-iter.o gl/lib/argv-iter.c
+CC -o basename.o gl/lib/basename.c
+CC -o basename-lgpl.o gl/lib/basename-lgpl.c
+CC -o careadlinkat.o gl/lib/careadlinkat.c
+CC -o chdir-long.o gl/lib/chdir-long.c
+CC -o cloexec.o gl/lib/cloexec.c
+CC -o closein.o gl/lib/closein.c
+CC -o closeout.o gl/lib/closeout.c
+CC -o close-stream.o gl/lib/close-stream.c
+CC -o c-strcasecmp.o gl/lib/c-strcasecmp.c
+CC -o c-strncasecmp.o gl/lib/c-strncasecmp.c
+CC -o cycle-check.o gl/lib/cycle-check.c
+CC -o dirname-lgpl.o gl/lib/dirname-lgpl.c
+CC -o dup-safer.o gl/lib/dup-safer.c
+CC -o error.o gl/lib/error.c
+CC -o euidaccess.o gl/lib/euidaccess.c
+CC -o exitfail.o gl/lib/exitfail.c
+CC -o fd-safer.o gl/lib/fd-safer.c
+CC -o filemode.o gl/lib/filemode.c
+CC -o fnmatch.o gl/lib/fnmatch.c
+CC -o fopen-safer.o gl/lib/fopen-safer.c
+CC -o fts.o gl/lib/fts.c
+CC -o gettime.o gl/lib/gettime.c
+CC -o hard-locale.o gl/lib/hard-locale.c
+CC -o hash.o gl/lib/hash.c
+CC -o human.o gl/lib/human.c
+CC -o idcache.o gl/lib/idcache.c
+CC -o i-ring.o gl/lib/i-ring.c
+CC -o localcharset.o gl/lib/localcharset.c
+CC -o malloca.o gl/lib/malloca.c
+CC -o mbslen.o gl/lib/mbslen.c
+CC -o mbsstr.o gl/lib/mbsstr.c
+CC -o mbswidth.o gl/lib/mbswidth.c
+CC -o modechange.o gl/lib/modechange.c
+CC -o mountlist.o gl/lib/mountlist.c
+CC -o nstrftime.o gl/lib/nstrftime.c
+CC -o openat-die.o gl/lib/openat-die.c
+CC -o openat-proc.o gl/lib/openat-proc.c
+CC -o openat-safer.o gl/lib/openat-safer.c
+CC -o opendirat.o gl/lib/opendirat.c
+CC -o opendir-safer.o gl/lib/opendir-safer.c
+CC -o open-safer.o gl/lib/open-safer.c
+CC -o parse-datetime.o gl/lib/parse-datetime.c
+CC -o pipe-safer.o gl/lib/pipe-safer.c
+CC -o progname.o gl/lib/progname.c
+CC -o quotearg.o gl/lib/quotearg.c
+CC -o regex.o gl/lib/regex.c
+CC -o rpmatch.o gl/lib/rpmatch.c
+CC -o safe-read.o gl/lib/safe-read.c
+CC -o save-cwd.o gl/lib/save-cwd.c
+CC -o selinux-at.o gl/lib/selinux-at.c
+CC -o setlocale_null.o gl/lib/setlocale_null.c
+CC -o setlocale_null-unlocked.o gl/lib/setlocale_null-unlocked.c
+CC -o stripslash.o gl/lib/stripslash.c
+CC -o strnlen1.o gl/lib/strnlen1.c
+CC -o time_rz.o gl/lib/time_rz.c
+CC -o version-etc.o gl/lib/version-etc.c
+CC -o version-etc-fsf.o gl/lib/version-etc-fsf.c
+CC -o wcwidth.o gl/lib/wcwidth.c
+CC -o width.o gl/lib/uniwidth/width.c
+CC -o wmempcpy.o gl/lib/wmempcpy.c
+CC -o xalloc-die.o gl/lib/xalloc-die.c
+CC -o xmalloc.o gl/lib/xmalloc.c
+CC -o xstrtod.o gl/lib/xstrtod.c
+CC -o xstrtol.o gl/lib/xstrtol.c
+CC -o xstrtoul.o gl/lib/xstrtoul.c
+CC -o xstrtoumax.o gl/lib/xstrtoumax.c
+CC -o yesno.o gl/lib/yesno.c
+CC -o dynarray_at_failure.o gl/lib/malloc/dynarray_at_failure.c
+CC -o dynarray_emplace_enlarge.o gl/lib/malloc/dynarray_emplace_enlarge.c
+CC -o dynarray_finalize.o gl/lib/malloc/dynarray_finalize.c
+CC -o dynarray_resize.o gl/lib/malloc/dynarray_resize.c
+CC -o dynarray_resize_clear.o gl/lib/malloc/dynarray_resize_clear.c
+
+# Two links, and no libgnulib.a or libfind.a at all: the Linux build archives
+# them and puts the archives on the link line, which on this side would be an
+# archive ahead of libc.a and so a place for a gnulib copy of something to win
+# by accident.  Ninety-odd plain objects have no such ordering to get wrong.
+#
+# A PE-target tcc adds neither a startup object nor a default C library, and
+# the default it would reach for (msvcrt, kernel32) is not what this bootstrap
+# has, so crt1.o and -lc/-lntdll are named outright -- ntdll.def being the
+# import library ntlibc resolves its kernel calls through.  -lc -lntdll come
+# last, after findutils' own objects, which is what a linker that resolves
+# archives in one pass needs.
+#
+# There is no -lm, no -lselinux and no -lintl.  find wants fmod and modf for
+# -size and -used arithmetic; ntlibc keeps both in libc.a.  The other two do
+# not exist in this chain and config.h says so.
+#
+# Five names are defined both by an object on these lines and by a member of
+# ntlibc's libc.a -- fnmatch, regcomp, regerror, regexec, regfree -- and in
+# every case findutils' copy wins, being a named object rather than an
+# archive member, so ntlibc's fnmatch.o and regex.o are never pulled out at
+# all.  That is a choice, not a collision, and it was confirmed from the
+# other end too: ntlibc's regex carries the string "src/regex/regex.c" and it
+# appears zero times in find.exe, while gnulib's "Unmatched [, [^, [:, [., or
+# [=" appears ten times.  Of findutils' 373 global symbols and ntlibc's 868,
+# those five are the entire overlap.
+alias LINK="${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o"
+
+LINK -o find.exe ftsfind.o exec.o finddata.o fstype.o parser.o pred.o print.o sharefile.o tree.o util.o bugreports.o buildcmd.o dircallback.o extendbuf.o fdleak.o findutils-version.o listfile.o printquoted.o qmark.o regextype.o safe-atoi.o splitstring.o nt-missing.o allocator.o areadlinkat.o argmatch.o argv-iter.o basename.o basename-lgpl.o careadlinkat.o chdir-long.o cloexec.o closein.o closeout.o close-stream.o c-strcasecmp.o c-strncasecmp.o cycle-check.o dirname-lgpl.o dup-safer.o error.o euidaccess.o exitfail.o fd-safer.o filemode.o fnmatch.o fopen-safer.o fts.o gettime.o hard-locale.o hash.o human.o idcache.o i-ring.o localcharset.o malloca.o mbslen.o mbsstr.o mbswidth.o modechange.o mountlist.o nstrftime.o openat-die.o openat-proc.o openat-safer.o opendirat.o opendir-safer.o open-safer.o parse-datetime.o pipe-safer.o progname.o quotearg.o regex.o rpmatch.o safe-read.o save-cwd.o selinux-at.o setlocale_null.o setlocale_null-unlocked.o stripslash.o strnlen1.o time_rz.o version-etc.o version-etc-fsf.o wcwidth.o width.o wmempcpy.o xalloc-die.o xmalloc.o xstrtod.o xstrtol.o xstrtoul.o xstrtoumax.o yesno.o dynarray_at_failure.o dynarray_emplace_enlarge.o dynarray_finalize.o dynarray_resize.o dynarray_resize_clear.o -L ${ntlibc}/lib -lc -lntdll
+
+LINK -o xargs.exe xargs.o bugreports.o buildcmd.o dircallback.o extendbuf.o fdleak.o findutils-version.o listfile.o printquoted.o qmark.o regextype.o safe-atoi.o splitstring.o nt-missing.o allocator.o areadlinkat.o argmatch.o argv-iter.o basename.o basename-lgpl.o careadlinkat.o chdir-long.o cloexec.o closein.o closeout.o close-stream.o c-strcasecmp.o c-strncasecmp.o cycle-check.o dirname-lgpl.o dup-safer.o error.o euidaccess.o exitfail.o fd-safer.o filemode.o fnmatch.o fopen-safer.o fts.o gettime.o hard-locale.o hash.o human.o idcache.o i-ring.o localcharset.o malloca.o mbslen.o mbsstr.o mbswidth.o modechange.o mountlist.o nstrftime.o openat-die.o openat-proc.o openat-safer.o opendirat.o opendir-safer.o open-safer.o parse-datetime.o pipe-safer.o progname.o quotearg.o regex.o rpmatch.o safe-read.o save-cwd.o selinux-at.o setlocale_null.o setlocale_null-unlocked.o stripslash.o strnlen1.o time_rz.o version-etc.o version-etc-fsf.o wcwidth.o width.o wmempcpy.o xalloc-die.o xmalloc.o xstrtod.o xstrtol.o xstrtoul.o xstrtoumax.o yesno.o dynarray_at_failure.o dynarray_emplace_enlarge.o dynarray_finalize.o dynarray_resize.o dynarray_resize_clear.o -L ${ntlibc}/lib -lc -lntdll
+
+# ---------------------------------------------------------------------------
+# Run them before installing them, on find's and xargs' real jobs rather than
+# on --version, and in a way that CHECKS the answers rather than merely
+# exercising the code.
+#
+# kaem has no pipelines, no conditionals and no comparisons, so the checking
+# has to be done by the programs themselves.  Two properties measured on this
+# build make that possible, and neither is obvious:
+#
+#   `-exec CMD {} +' propagates the command's failure into find's own exit
+#   status (the `\;' form does NOT -- it makes the predicate false and leaves
+#   the exit status at 0), and
+#
+#   `xargs -a FILE' reads its list from a file rather than a pipe, and exits
+#   123 if any command it ran failed.
+#
+# Together with mescc-tools-extra's `match' -- which exits 0 if its two
+# arguments are the same string, 1 if not, and 2 if it was not given exactly
+# two -- that gives a real assertion: `find ... -exec match EXPECTED {} +'
+# fails the build unless find produced exactly the path expected.  kaem is
+# --strict, so any nonzero exit stops here.
+#
+# The tree is built from findutils' own sources, so the file contents are
+# real and the sizes vary.
+${bin_mkdir} -p t/a/b
+${bin_mkdir} -p t/empty
+${bin_cp} find/ftsfind.c t/a/one.c
+${bin_cp} lib/qmark.c t/a/b/two.c
+${bin_cp} xargs/xargs.c t/three.c
+${bin_catm} t/zero.bin
+
+# Traversal, and the four name tests.  Each of these matches exactly one file
+# in t/, so `match' gets exactly two arguments; if find returned two paths it
+# would get three and exit 2, and if it returned none the command would not
+# run and the check would be vacuous -- which is why the -fprint pair below
+# is here as well, since those cannot pass vacuously.
+./find.exe t -name two.c -exec ${bin_match} t/a/b/two.c {} +
+./find.exe t -iname TWO.C -exec ${bin_match} t/a/b/two.c {} +
+./find.exe t -path */a/b/* -exec ${bin_match} t/a/b/two.c {} +
+./find.exe t -regex .*/thr.*[.]c -exec ${bin_match} t/three.c {} +
+
+# The type, depth and size predicates, and the operators.
+./find.exe t -type d -name b -exec ${bin_match} t/a/b {} +
+./find.exe t -maxdepth 1 -type f -name *.c -exec ${bin_match} t/three.c {} +
+./find.exe t -mindepth 3 -type f -exec ${bin_match} t/a/b/two.c {} +
+./find.exe t -type f -empty -exec ${bin_match} t/zero.bin {} +
+./find.exe t -type d -empty -exec ${bin_match} t/empty {} +
+./find.exe t -type f -name *.c ! -name one.c ! -name two.c -exec ${bin_match} t/three.c {} +
+./find.exe t -path t/a -prune -o -type f -name *.c -exec ${bin_match} t/three.c {} +
+
+# -execdir, which runs from inside the directory it found the file in, so the
+# name it substitutes is relative.  This is the check that would have caught
+# the $PATH-syntax bug the second patch fixes: before it, this line exited
+# nonzero having run nothing.
+./find.exe t/a/b -name two.c -execdir ${bin_match} ./two.c {} +
+
+# find writing a list, and xargs reading it.  -fprint and -fprint0 are how
+# this is done without a pipe, and between them they cover the newline and
+# the NUL protocols; xargs -I{} covers substitution, and -n 2 covers batching
+# -- with -n 1 the second of these would hand `match' one argument and it
+# would exit 2.
+./find.exe t -name three.c -fprint list.txt
+./xargs.exe -a list.txt -I{} ${bin_match} t/three.c {}
+./find.exe t -name two.c -fprint0 list0.bin
+./xargs.exe -0 -a list0.bin -I{} ${bin_match} t/a/b/two.c {}
+${bin_catm} pair.txt list.txt list.txt
+./xargs.exe -a pair.txt -n 2 ${bin_match}
+
+# And the case that must run NOTHING: an empty input with -r.  If xargs ran
+# the command anyway, `match a b' would exit 1 and xargs would exit 123.
+${bin_catm} none.txt
+./xargs.exe -r -a none.txt ${bin_match} a b
+
+# Finally the two things whose absence would be a silent regression: that
+# find can be asked about a file that does not exist and say so (this is the
+# exit status the checks above rest on), and that both programs identify
+# themselves.  `find MISSING' exits 1, so it is run on a file that DOES
+# exist, which must exit 0.
+./find.exe t/three.c -maxdepth 0
+./find.exe --version
+./xargs.exe --version
+
+# They land as find.exe and xargs.exe, as tar, bash, make, patch, sed, grep
+# and both gawks land as name.exe -- ntlibc's PATH search tries the bare name
+# before name.exe, so a configure script asking for `find' still finds it.
+#
+# locate, updatedb and frcode are NOT built.  updatedb is a shell script full
+# of pipelines and `sort', locate needs a database that only updatedb builds,
+# and nothing above findutils in this chain -- binutils and gcc -- runs
+# either: what they run is find and xargs.  See the head of default.nix.
+${bin_mkdir} -p ${out}/bin
+${bin_cp} find.exe ${out}/bin/find.exe
+${bin_cp} xargs.exe ${out}/bin/xargs.exe
