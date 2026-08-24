@@ -1,0 +1,79 @@
+xargs did not work at all before this patch, and the cause is in the C
+library rather than in xargs.
+
+xargs forks, and the child execs.  It is scrupulous about calling _exit()
+rather than exit() everywhere on the child's error paths, precisely so that
+the atexit handler the PARENT registered -- wait_for_proc_all -- never runs
+in a child; the assertion this patch removes is there to catch a maintainer
+who forgets.  The comment above it says as much.
+
+On this target the child cannot obey that rule.  ntlibc has no call that
+replaces a running image, so its execve() starts the program as a child,
+waits for it and ends with exit(WEXITSTATUS(status)) -- src/process/exec.c
+explains the design in its own header comment, and it is the same thing
+every from-scratch Unix-on-Windows layer does.  But exit() runs the atexit
+handlers, and after fork() those are the parent's.  So in every xargs child,
+AFTER the command has already run and printed its output correctly,
+wait_for_proc_all runs with getpid() != parent, the assertion fails, and the
+child dies of SIGABRT.  The parent then reports
+
+    xargs.exe: /path/to/echo: terminated by signal 6
+
+and exits 125.  Measured on ten different invocations -- default, -n, -L,
+-0, -I{} -- all ten identical, and all ten with the command's own output
+already correct on stdout above the error.
+
+find is NOT affected, and the difference is instructive: find's launch()
+does fflush(stdout)/fflush(stderr) before forking, and its one atexit
+handler (close_stdout) is idempotent on an empty buffer, so the same
+inherited-handler run is harmless there.  It was checked rather than
+assumed: `find . -print -exec echo X {} ';'` redirected to a file -- fully
+buffered, where a double flush would show -- produces exactly the host's ten
+lines, each once.
+
+The fix here is to return rather than assert.  That is safe rather than
+merely quiet: the handler's only job is to reap children and adjust the exit
+status; a child has none to reap; and returning lets ntlibc's exit() go on
+to the remaining handler and then exit with the status the command really
+returned, which is what the parent's waitpid reads.  With the patch, all ten
+invocations above match the host's xargs byte for byte, including the empty
+input that must not run the command.
+
+This is an ntlibc defect and the real fix belongs there -- an exec emulation
+must not run the caller's atexit handlers, so that exit() should be _exit().
+The patch is harmless once that is fixed: getpid() will equal parent in the
+only process that reaches it.
+
+--- xargs/xargs.c
++++ xargs/xargs.c
+@@ -1645,7 +1645,29 @@
+    * Instead the child processes should call _exit ().  If someone
+    * forgets this rule, you may see the following assert () fail.
+    */
+-  assert (getpid () == parent);
++  /* ... and on this target the child cannot obey that rule, because it is
++     the C library that breaks it: ntlibc has no call that replaces a
++     running image, so execve() spawns the program, waits for it, and ends
++     with exit(WEXITSTATUS) -- src/process/exec.c says so in its own header
++     comment.  That exit() runs the atexit handlers this process inherited
++     across fork(), and this is one of them.  So the assertion below fires
++     in EVERY xargs child, after the command has already run correctly, and
++     aborts it with SIGABRT; xargs then reports its own child as "terminated
++     by signal 6" and exits 125.  Every invocation, not an edge case.
++
++     Returning instead of asserting is the whole fix, and it is safe rather
++     than merely quiet: this handler's only job is to reap children and
++     adjust the exit status, the child has none to reap, and leaving it
++     early lets ntlibc's exit() carry on to the remaining handler
++     (close_stdin, harmless on a child) and then exit with the status the
++     command really returned -- which is what the parent's waitpid reads.
++
++     This is an ntlibc defect and belongs there: an exec emulation must not
++     run the caller's atexit handlers, so that exit() should be _exit().
++     Reported; the patch stays until the pin moves past it, and is harmless
++     if it does.  */
++  if (getpid () != parent)
++    return;
+ 
+   if (waiting)
+     return;

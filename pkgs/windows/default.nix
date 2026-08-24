@@ -119,6 +119,12 @@ let
     # that nothing in the build executes.  See its default.nix.
     gawk5 = callPackage ./bootstrap/gawk5 { bootGawk = self.gawk; };
 
+    # And the directory walker binutils and gcc run over their own trees.
+    # The first package on this side to carry a modern gnulib import, and so
+    # the first to have to answer for gnulib's generated headers -- which it
+    # does by not needing them.  See its default.nix.
+    findutils = callPackage ./bootstrap/findutils { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
