@@ -1,0 +1,54 @@
+gcc/config/i386/winnt.c's own i386_pe_declare_function_type emits
+".def NAME; .scl N; .type N; .endef" around every function this target's
+cc1 compiles -- called unconditionally whenever write_symbols != SDB_DEBUG
+(i386_pe_start_function, this same file) for every ASM_DECLARE_FUNCTION_NAME,
+and unconditionally again for every external function reference
+(ASM_OUTPUT_EXTERNAL_LIBCALL, config/i386/cygming.h) -- not something a
+command-line flag turns off; PE/COFF's own MS-linker-compatibility
+convention, present for every function regardless of -g.
+
+This chain's own AS_FOR_TARGET is this chain's own tcc (9518ca7 --
+neither a real `as` nor tcc's linker can bridge the ELF/COFF split this
+package's own default.nix documents, so this chain's tcc is what
+actually assembles cc1's output). tcc's assembler (tccasm.c/i386-asm.c)
+has no .def/.scl/.type/.endef handling at all -- these are a GNU-as
+PE-COFF-specific extension for the symbol table a real Microsoft-
+compatible linker consults, not part of any assembler tcc was ever
+asked to be. Confirmed directly: this package's own functional test
+(a plain C program, hello.c, with no -g at all) fails to assemble with
+tcc's real error "unknown opcode '.def'" the moment cc1 emits its first
+function -- not a guess, the real, minimal failure.
+
+Neutralizing i386_pe_declare_function_type itself (rather than gating
+each of its three call sites separately) means every caller stays
+correct, real GCC source -- this is the one place PE-symbol-table
+markers actually get written to the assembler output, and this target
+has no consumer for them: nothing downstream of this bootstrap's own
+tcc-assembled, tcc-linked output is a Microsoft linker or anything else
+that reads a COFF symbol table's DT_FCN marking. Losing it costs
+nothing this chain's own as+ld (also tcc, see default.nix) or any
+target program built by this chain's own gcc will ever need.
+
+--- gcc/config/i386/winnt.c
++++ gcc/config/i386/winnt.c
+@@ -564,13 +564,14 @@
+    visible.  */
+ 
+ void
+-i386_pe_declare_function_type (FILE *file, const char *name, int pub)
++i386_pe_declare_function_type (FILE *file ATTRIBUTE_UNUSED,
++				const char *name ATTRIBUTE_UNUSED,
++				int pub ATTRIBUTE_UNUSED)
+ {
+-  fprintf (file, "\t.def\t");
+-  assemble_name (file, name);
+-  fprintf (file, ";\t.scl\t%d;\t.type\t%d;\t.endef\n",
+-	   pub ? (int) C_EXT : (int) C_STAT,
+-	   (int) DT_FCN << N_BTSHFT);
++  /* nova-nix Windows bootstrap: this target's own assembler (this
++     chain's tcc, not a real GNU as) has no .def/.scl/.type/.endef
++     handling -- see def-scl-type.patch's own header for why emitting
++     nothing here is correct, not a loss, for this target. */
+ }
+ 
+ /* Keep a list of external functions.  */

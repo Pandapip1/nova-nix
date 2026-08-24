@@ -1,0 +1,149 @@
+Windows/ntlibc changes to gcc-core-4.6.4's own bundled libiberty/ -- a
+different, older copy than ../binutils/windows.patch's (binutils 2.46's own
+libiberty), so a separate patch, same pattern: `#if defined(_WIN32)' written
+against a real Win32 CRT (MAX_PATH, DWORD, GetFullPathName, GetTempPath,
+GlobalMemoryStatus-equivalent) that ntlibc does not have, because ntlibc is
+a from-scratch POSIX layer over NT, not a port of the MSVC/mingw runtime.
+tcc predefines _WIN32 (TCC_TARGET_PE says so -- see conftest.c in the tcc
+fork), so every one of these branches is taken and fails to compile as-is.
+
+Same `&& !defined(__TINYC__)' guard as binutils' own patch, for the same
+reason: this chain has exactly one compiler, so naming it directly is more
+honest than pretending a real mingw distinction is being drawn. Every
+branch guarded off has a working POSIX alternative right next to it, and
+ntlibc satisfies it for real, checked directly against ntlibc's headers,
+not assumed:
+
+  libiberty/lrealpath.c       lrealpath()'s _WIN32 GetFullPathName method
+                               (line 137) is genuinely dead code for this
+                               target, not just guarded off: HAVE_REALPATH=1
+                               (ntlibc/include/stdlib.h has a real realpath())
+                               means Method 3 (pathconf/realpath, a few lines
+                               above) always returns first. The earlier
+                               `#if defined (_WIN32)' at line 69 needs no
+                               guard -- it lives inside `#else' of
+                               `#if defined(HAVE_REALPATH)', already false.
+  libiberty/make-temp-file.c  choose_tmpdir's GetTempPath route. The POSIX
+                               branch (TMPDIR/TMP/TEMP, P_tmpdir, /var/tmp,
+                               /usr/tmp, /tmp) is complete on its own --
+                               getenv/access, both real on ntlibc -- and,
+                               unlike lrealpath.c, this one is not just dead
+                               code: without the guard ntlibc's build would
+                               genuinely try to call GetTempPath at runtime.
+  libiberty/physmem.c         physmem_total/physmem_available's
+                               GlobalMemoryStatus-equivalent route, three
+                               call sites (the struct/typedef above and both
+                               functions). ntlibc's unistd.h defines
+                               _SC_PHYS_PAGES and _SC_PAGESIZE (checked
+                               directly), so physmem_total's sysconf()
+                               branch, already at the top of the function,
+                               is the one that runs. physmem_available finds
+                               no _SC_AVPHYS_PAGES in ntlibc (checked: not
+                               defined), so it falls through every guarded
+                               branch to the function's own final fallback
+                               -- an accepted, harmless degradation, same as
+                               every other unsupported-host case already in
+                               this file (HAVE_PSTAT_GETSTATIC,
+                               HAVE_SYSMP, HAVE_TABLE, HAVE_SYSCTL, all
+                               already undef for this target); nothing in
+                               this bootstrap reads physmem_available for
+                               correctness.
+
+libiberty/fnmatch.c needs no patch, a shim instead: `#include <fnmatch.h>'
+resolves against ntlibc's own real (but GNU-extension-free) fnmatch.h,
+which has no FNM_CASEFOLD -- same gap, same fix as binutils' own
+../binutils/shim/fnmatch.h (byte-for-byte copy, same reasoning: ntlibc's
+fnmatch() itself is a correct POSIX one and its three POSIX flag bit values
+already agree with gnulib's, checked before reusing the file verbatim).
+gcc-core's libiberty/fnmatch.c defines its own fnmatch() (not gnulib's
+rpl_fnmatch) but only needs the FNM_CASEFOLD constant from this header,
+same as before -- the object file, not the header, is what's actually
+linked.
+
+--- libiberty/lrealpath.c
++++ libiberty/lrealpath.c
+@@ -134,7 +134,7 @@
+      absolute paths, filling in current drive if one is not given
+      or using the current directory of a specified drive (eg, "E:foo").
+      It also converts all forward slashes to back slashes.  */
+-#if defined (_WIN32)
++#if defined (_WIN32) && !defined (__TINYC__)
+   {
+     char buf[MAX_PATH];
+     char* basename;
+--- libiberty/make-temp-file.c
++++ libiberty/make-temp-file.c
+@@ -37,7 +37,7 @@
+ #ifdef HAVE_SYS_FILE_H
+ #include <sys/file.h>   /* May get R_OK, etc. on some systems.  */
+ #endif
+-#if defined(_WIN32) && !defined(__CYGWIN__)
++#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__TINYC__)
+ #include <windows.h>
+ #endif
+ 
+@@ -60,7 +60,7 @@
+ #define TEMP_FILE "ccXXXXXX"
+ #define TEMP_FILE_LEN (sizeof(TEMP_FILE) - 1)
+ 
+-#if !defined(_WIN32) || defined(__CYGWIN__)
++#if !defined(_WIN32) || defined(__CYGWIN__) || defined(__TINYC__)
+ 
+ /* Subroutine of choose_tmpdir.
+    If BASE is non-NULL, return it.
+@@ -107,7 +107,7 @@
+ {
+   if (!memoized_tmpdir)
+     {
+-#if !defined(_WIN32) || defined(__CYGWIN__)
++#if !defined(_WIN32) || defined(__CYGWIN__) || defined(__TINYC__)
+       const char *base = 0;
+       char *tmpdir;
+       unsigned int len;
+@@ -146,7 +146,7 @@
+       tmpdir[len] = DIR_SEPARATOR;
+       tmpdir[len+1] = '\0';
+       memoized_tmpdir = tmpdir;
+-#else /* defined(_WIN32) && !defined(__CYGWIN__) */
++#else /* defined(_WIN32) && !defined(__CYGWIN__) && !defined(__TINYC__) */
+       DWORD len;
+ 
+       /* Figure out how much space we need.  */
+@@ -163,7 +163,7 @@
+       if (!memoized_tmpdir)
+ 	/* If all else fails, use the current directory.  */
+ 	memoized_tmpdir = xstrdup (".\\");
+-#endif /* defined(_WIN32) && !defined(__CYGWIN__) */
++#endif /* defined(_WIN32) && !defined(__CYGWIN__) && !defined(__TINYC__) */
+     }
+ 
+   return memoized_tmpdir;
+--- libiberty/physmem.c
++++ libiberty/physmem.c
+@@ -56,7 +56,7 @@
+ # include <sys/systemcfg.h>
+ #endif
+ 
+-#ifdef _WIN32
++#if defined(_WIN32) && !defined(__TINYC__)
+ # define WIN32_LEAN_AND_MEAN
+ # include <windows.h>
+ /*  MEMORYSTATUSEX is missing from older windows headers, so define
+@@ -149,7 +149,7 @@
+   return _system_configuration.physmem;
+ #endif
+ 
+-#if defined _WIN32
++#if defined _WIN32 && !defined (__TINYC__)
+   { /* this works on windows */
+     PFN_MS_EX pfnex;
+     HMODULE h = GetModuleHandle ("kernel32.dll");
+@@ -250,7 +250,7 @@
+   }
+ #endif
+ 
+-#if defined _WIN32
++#if defined _WIN32 && !defined (__TINYC__)
+   { /* this works on windows */
+     PFN_MS_EX pfnex;
+     HMODULE h = GetModuleHandle ("kernel32.dll");
