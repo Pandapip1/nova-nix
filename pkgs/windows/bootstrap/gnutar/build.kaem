@@ -36,14 +36,28 @@ cd ${NIX_BUILD_TOP}/tar-${version}
 #                        attributes can no longer be set -- so extracting any
 #                        archive containing a 0444 file, which is nearly every
 #                        source tarball, failed on both the utime and the
-#                        chmod.  Create writable, chmod last.  As of the
-#                        ntlibc pinned here chmod() and utimensat() clear the
-#                        attribute themselves and both calls succeed on a
-#                        0444 file, so this patch no longer carries the build;
-#                        it stays because creating writable and applying the
-#                        real mode last is right whatever the C library does,
-#                        and because it is what makes the order independent
-#                        of that library's version.
+#                        chmod.  Create writable, chmod last.  Still
+#                        load-bearing -- do not remove it.
+#
+#                        A measurement here said otherwise and was too
+#                        narrow.  Under wine, the ntlibc pinned here does
+#                        clear the attribute itself: on a 0444 file utime()
+#                        and chmod() go from EACCES to success, so the patch
+#                        looks like belt-and-braces.  That evidence is
+#                        wine-only.  On the real Windows loader the same
+#                        ntlibc revision FAILS utimensat()/utime()/futimesat()
+#                        on ORDINARY files -- the read-only path was repaired
+#                        and the normal one broken -- so a tar that leaned on
+#                        the library instead of this patch would set no
+#                        timestamps at all where it matters most.
+#
+#                        The general point, which outlives this revision:
+#                        wine agreeing is not evidence about NT, and here it
+#                        was not merely weaker but INVERTED -- green precisely
+#                        because the target environment differs.  Creating
+#                        writable and applying the real mode last is right
+#                        whatever the C library does, which is why it stays
+#                        regardless of how that bug is resolved.
 #   nt-program-name      argv[0] arrives as a full NT path.
 #
 # Each file says the rest in its own header.
