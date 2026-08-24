@@ -1,0 +1,47 @@
+gcc/config/i386/cygming.h's own USER_LABEL_PREFIX -- the string cc1
+prepends to every C-level symbol it emits (function names, global
+variable names) -- defaults to "_" for a 32-bit target, the traditional
+PE/COFF convention real mingw/cygwin runtimes actually export their
+symbols under.
+
+ntlibc is not a port of the mingw/cygwin runtime -- it is a from-scratch
+POSIX libc, and its own real symbol names are plain and undecorated,
+checked directly with nm against the actual built libc.a and crt1.o:
+libc.a exports `write` (not `_write`), and crt1.o's own startup code
+calls `main` (not `_main`) to invoke a compiled program's entry point.
+Left at the real GCC default, this package's own functional test (a
+plain hello.c compiled by this chain's own cc1.exe, then linked by this
+chain's own tcc against ntlibc) fails at link time wanting `_write`,
+`main` (present, but with `_main`'s callers looking for the wrong name)
+and `___main` (see the companion fix in this same commit, libgcc's own
+__main stub -- also affected by this same prefix) -- none of which
+ntlibc actually provides under those decorated names.
+
+TARGET_64BIT's own ternary is dropped rather than preserved (unlike
+LOCAL_LABEL_PREFIX just below it, left alone): this bootstrap is
+32-bit-only (i686-pc-pe), so the 64-bit branch is dead code here either
+way, and leaving a live ternary that still names a real convention (the
+64-bit branch's own "") would misstate why the 32-bit branch changed --
+it isn't becoming "like 64-bit', it's becoming "like ntlibc's own real
+ABI", a genuinely different reason.
+
+--- gcc/config/i386/cygming.h
++++ gcc/config/i386/cygming.h
+@@ -55,7 +55,16 @@
+
+ #if ! defined (USE_MINGW64_LEADING_UNDERSCORES)
+ #undef USER_LABEL_PREFIX
+-#define USER_LABEL_PREFIX (TARGET_64BIT ? "" : "_")
++/* nova-nix Windows bootstrap: real mingw/cygwin runtimes export their
++   32-bit C symbols with a leading underscore (the traditional PE/COFF
++   convention); ntlibc does not -- it is a from-scratch POSIX libc with
++   plain, undecorated names (`write`, `main`, ... -- checked directly
++   with nm against both ntlibc's own libc.a and crt1.o, see
++   user-label-prefix.patch's own header). Left at "_" for 32-bit, every
++   symbol cc1 emits for a call into ntlibc or into a target program's own
++   main() fails to link. "" unconditionally: TARGET_64BIT is not a real
++   possibility for this 32-bit-only bootstrap anyway. */
++#define USER_LABEL_PREFIX ""
+
+ #undef LOCAL_LABEL_PREFIX
+ #define LOCAL_LABEL_PREFIX (TARGET_64BIT ? "." : "")

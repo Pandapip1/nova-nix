@@ -672,7 +672,8 @@
 
 /* Define to 1 if you have the `clearerr_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_CLEARERR_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no clearerr_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_CLEARERR_UNLOCKED */
 #endif
 
 
@@ -737,7 +738,8 @@
 /* Define to 1 if we found a declaration for 'clearerr_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_CLEARERR_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no clearerr_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_CLEARERR_UNLOCKED */
 #endif
 
 
@@ -758,42 +760,48 @@
 /* Define to 1 if we found a declaration for 'feof_unlocked', otherwise define
    to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FEOF_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no feof_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FEOF_UNLOCKED */
 #endif
 
 
 /* Define to 1 if we found a declaration for 'ferror_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FERROR_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no ferror_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FERROR_UNLOCKED */
 #endif
 
 
 /* Define to 1 if we found a declaration for 'fflush_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FFLUSH_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fflush_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FFLUSH_UNLOCKED */
 #endif
 
 
 /* Define to 1 if we found a declaration for 'fgetc_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FGETC_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fgetc_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FGETC_UNLOCKED */
 #endif
 
 
 /* Define to 1 if we found a declaration for 'fgets_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FGETS_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fgets_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FGETS_UNLOCKED */
 #endif
 
 
 /* Define to 1 if we found a declaration for 'fileno_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FILENO_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fileno_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FILENO_UNLOCKED */
 #endif
 
 
@@ -807,21 +815,24 @@
 /* Define to 1 if we found a declaration for 'fputc_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FPUTC_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fputc_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FPUTC_UNLOCKED */
 #endif
 
 
 /* Define to 1 if we found a declaration for 'fputs_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FPUTS_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fputs_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FPUTS_UNLOCKED */
 #endif
 
 
 /* Define to 1 if we found a declaration for 'fread_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FREAD_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fread_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FREAD_UNLOCKED */
 #endif
 
 
@@ -834,7 +845,8 @@
 /* Define to 1 if we found a declaration for 'fwrite_unlocked', otherwise
    define to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_FWRITE_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fwrite_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_DECL_FWRITE_UNLOCKED */
 #endif
 
 
@@ -1031,37 +1043,43 @@
 
 /* Define to 1 if you have the `feof_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FEOF_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no feof_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FEOF_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `ferror_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FERROR_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no ferror_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FERROR_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `fflush_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FFLUSH_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fflush_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FFLUSH_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `fgetc_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FGETC_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fgetc_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FGETC_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `fgets_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FGETS_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fgets_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FGETS_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `fileno_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FILENO_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fileno_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FILENO_UNLOCKED */
 #endif
 
 
@@ -1079,25 +1097,29 @@
 
 /* Define to 1 if you have the `fputc_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FPUTC_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fputc_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FPUTC_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `fputs_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FPUTS_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fputs_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FPUTS_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `fread_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FREAD_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fread_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FREAD_UNLOCKED */
 #endif
 
 
 /* Define to 1 if you have the `fwrite_unlocked' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_FWRITE_UNLOCKED 1
+/* ntlibc audit: undef -- ntlibc's real libc.a (a9d3b48 pin) has no fwrite_unlocked symbol at all (checked directly with nm; only putc_unlocked/getc_unlocked/putchar_unlocked/getchar_unlocked exist), and its own stdio.h guards this declaration behind _GNU_SOURCE, which this build never defines -- gcc/system.h's own #ifdef HAVE_..._UNLOCKED macro-renaming (fputs()->fputs_unlocked() etc) would otherwise rewrite calls to a symbol that genuinely does not link. */
+/* #undef HAVE_FWRITE_UNLOCKED */
 #endif
 
 
