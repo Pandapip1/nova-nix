@@ -1,0 +1,186 @@
+Windows/ntlibc changes to binutils 2.46.0, on top of the same tarball and
+version the Linux side builds.  Six files, one pattern repeated six times:
+each is a `#if defined(_WIN32)' (or `#ifdef _WIN32') branch written against
+a real Win32 CRT -- windows.h, _get_osfhandle, GetTempPath, GlobalMemoryStatus
+-- none of which ntlibc has, because ntlibc is not a port of the MSVC/mingw
+runtime, it is its own from-scratch POSIX layer over NT.  tcc predefines
+_WIN32 (TCC_TARGET_PE says so), so every one of these branches is taken and
+fails to compile as it stands.
+
+Nothing here is a mes-libc-style lie (no -Dsig_atomic_t=int, no -DLC_ALL=
+turning a real call into nothing): every branch guarded off below has a
+working alternative right next to it -- an #elif or #else already written
+for a plain POSIX host -- and ntlibc satisfies that alternative for real
+(F_GETFD from a genuine fcntl(), TMPDIR/P_tmpdir from a genuine getenv()/
+access(), _SC_PHYS_PAGES from a genuine sysconf()).  The guard added is
+`&& !defined(__TINYC__)': this chain has exactly one compiler, so naming it
+directly is more honest than pretending a real mingw distinction is being
+drawn.
+
+  bfd/bfdio.c            bfd_fopen's PR-25713 long-path handling
+                         (GetCurrentDirectoryW, ...) and the codepage probe
+                         that follows it.  Falls through to the ordinary
+                         fopen64-or-fopen path already there for VMS/POSIX.
+  zlib/zconf.h           z_off64_t as MSVC's `__int64' when `!__GNUC__'.
+                         tcc isn't GNU either, so this would have picked
+                         the wrong branch regardless of _WIN32; the z_off_t
+                         (plain `long') fallback is exactly right since
+                         bfd/compress.c never calls the gz* file API this
+                         guards.
+  zlib/gzguts.h          <io.h>, MSVC's low-level open/read/lseek header,
+                         pulled in for the same gz* file API.
+  libiberty/filedescriptor.c
+                         is_valid_fd's _get_osfhandle route.  ntlibc has
+                         F_GETFD (include/fcntl.h), so the #elif right
+                         below does the real thing.
+  libiberty/make-temp-file.c
+                         choose_tmpdir's GetTempPath route, and the WIN32
+                         windows.h include above it.  The POSIX branch
+                         (TMPDIR/TMP/TEMP, P_tmpdir, /var/tmp, /tmp) is
+                         complete on its own -- getenv/access/stat, all
+                         real on ntlibc.
+  libiberty/physmem.c    physmem_total/physmem_available's GlobalMemoryStatus
+                         route, three call sites (the struct/typedef above
+                         and both functions).  ntlibc's unistd.h defines
+                         _SC_PHYS_PAGES and _SC_PAGESIZE, so the sysconf()
+                         branch already at the top of each function is the
+                         one that runs.
+
+--- bfd/bfdio.c
++++ bfd/bfdio.c
+@@ -27,7 +27,7 @@
+ #include "libbfd.h"
+ #include "aout/ar.h"
+ #include "libiberty.h"
+-#if defined (_WIN32)
++#if defined (_WIN32) && !defined (__TINYC__)
+ #include <windows.h>
+ #include <locale.h>
+ #endif
+@@ -117,7 +117,7 @@
+       return close_on_exec (fopen (filename, at[0], at[1], at[2]));
+     }
+ 
+-#elif defined (_WIN32)
++#elif defined (_WIN32) && !defined (__TINYC__)
+   /* PR 25713: Handle extra long path names possibly containing '..' and '.'.  */
+   wchar_t **      lpFilePart = {NULL};
+   const wchar_t   prefixDOS[] = L"\\\\?\\";
+--- zlib/zconf.h
++++ zlib/zconf.h
+@@ -516,7 +516,7 @@
+ #if !defined(_WIN32) && defined(Z_LARGE64)
+ #  define z_off64_t off64_t
+ #else
+-#  if defined(_WIN32) && !defined(__GNUC__)
++#  if defined(_WIN32) && !defined(__GNUC__) && !defined(__TINYC__)
+ #    define z_off64_t __int64
+ #  else
+ #    define z_off64_t z_off_t
+--- zlib/gzguts.h
++++ zlib/gzguts.h
+@@ -34,7 +34,7 @@
+ #  include <stddef.h>
+ #endif
+ 
+-#if defined(__TURBOC__) || defined(_MSC_VER) || defined(_WIN32)
++#if (defined(__TURBOC__) || defined(_MSC_VER) || defined(_WIN32)) && !defined(__TINYC__)
+ #  include <io.h>
+ #endif
+ 
+--- libiberty/filedescriptor.c
++++ libiberty/filedescriptor.c
+@@ -27,7 +27,7 @@
+ #include <fcntl.h>
+ #endif
+ 
+-#if defined (_WIN32)
++#if defined (_WIN32) && !defined (__TINYC__)
+ #define WIN32_LEAN_AND_MEAN
+ #include <windows.h> /* for GetFullPathName */
+ #endif
+@@ -36,7 +36,7 @@
+ int
+ is_valid_fd (int fd)
+ {
+-#if defined(_WIN32)
++#if defined(_WIN32) && !defined (__TINYC__)
+   HANDLE h = (HANDLE) _get_osfhandle (fd);
+   return h != (HANDLE) -1;
+ #elif defined(F_GETFD)
+--- libiberty/make-temp-file.c
++++ libiberty/make-temp-file.c
+@@ -36,7 +36,7 @@
+ #ifdef HAVE_SYS_FILE_H
+ #include <sys/file.h>   /* May get R_OK, etc. on some systems.  */
+ #endif
+-#if defined(_WIN32) && !defined(__CYGWIN__)
++#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__TINYC__)
+ #define WIN32_LEAN_AND_MEAN
+ #include <windows.h>
+ #endif
+@@ -64,7 +64,7 @@
+ #define TEMP_FILE "XXXXXX"
+ #define TEMP_FILE_LEN (sizeof(TEMP_FILE) - 1)
+ 
+-#if !defined(_WIN32) || defined(__CYGWIN__)
++#if !defined(_WIN32) || defined(__CYGWIN__) || defined(__TINYC__)
+ 
+ /* Subroutine of choose_tmpdir.
+    If BASE is non-NULL, return it.
+@@ -119,7 +119,7 @@
+ {
+   if (!memoized_tmpdir)
+     {
+-#if !defined(_WIN32) || defined(__CYGWIN__)
++#if !defined(_WIN32) || defined(__CYGWIN__) || defined(__TINYC__)
+       const char *base = 0;
+       char *tmpdir;
+       unsigned int len;
+@@ -157,7 +157,7 @@
+       tmpdir[len] = DIR_SEPARATOR;
+       tmpdir[len+1] = '\0';
+       memoized_tmpdir = tmpdir;
+-#else /* defined(_WIN32) && !defined(__CYGWIN__) */
++#else /* defined(_WIN32) && !defined(__CYGWIN__) && !defined(__TINYC__) */
+       DWORD len;
+ 
+       /* Figure out how much space we need.  */
+@@ -174,7 +174,7 @@
+       if (!memoized_tmpdir)
+ 	/* If all else fails, use the current directory.  */
+ 	memoized_tmpdir = xstrdup (".\\");
+-#endif /* defined(_WIN32) && !defined(__CYGWIN__) */
++#endif /* defined(_WIN32) && !defined(__CYGWIN__) && !defined(__TINYC__) */
+     }
+ 
+   return memoized_tmpdir;
+--- libiberty/physmem.c
++++ libiberty/physmem.c
+@@ -56,7 +56,7 @@
+ # include <sys/systemcfg.h>
+ #endif
+ 
+-#ifdef _WIN32
++#if defined(_WIN32) && !defined(__TINYC__)
+ # define WIN32_LEAN_AND_MEAN
+ # include <windows.h>
+ /*  MEMORYSTATUSEX is missing from older windows headers, so define
+@@ -149,7 +149,7 @@
+   return _system_configuration.physmem;
+ #endif
+ 
+-#if defined _WIN32
++#if defined _WIN32 && !defined (__TINYC__)
+   { /* this works on windows */
+     PFN_MS_EX pfnex;
+     HMODULE h = GetModuleHandle ("kernel32.dll");
+@@ -250,7 +250,7 @@
+   }
+ #endif
+ 
+-#if defined _WIN32
++#if defined _WIN32 && !defined (__TINYC__)
+   { /* this works on windows */
+     PFN_MS_EX pfnex;
+     HMODULE h = GetModuleHandle ("kernel32.dll");
