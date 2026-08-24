@@ -8,23 +8,35 @@
 # that it can reap the child with gawk's own wait_any() -- except on VMS and
 # MinGW, where it still calls system().
 #
-# execl() after fork() does not work against this ntlibc pin.  Measured, with
-# a nine-line C program rather than through gawk:
+# The problem is `/bin/sh'.  There is no such program on this target, and the
+# failure is not the one the string "/bin/sh" would lead you to expect.
+# Measured with a nine-line C program rather than through gawk, against the
+# ntlibc revision pinned here:
 #
-#   fork(); execl("/bin/sh", "sh", "-c", "echo child-ran", NULL)
-#       -> execl returns, errno = 9 (EBADF)
-#   system("echo system-ran")
-#       -> prints system-ran, returns 0
+#   execl("/bin/sh", "sh", "-c", "echo ran", NULL)   -> errno = 9  (EBADF)
+#   execl("/no/such/thing", "x", NULL)               -> errno = 2  (ENOENT)
+#   execl("C:/windows/system32/cmd.exe", ...)        -> runs
+#   system("echo ran")                               -> runs, returns 0
 #
-# so gawk_system()'s child falls through to `_exit(errno == ENOENT ? 127 :
+# with no fork anywhere in that program: the exec fails on its own, so this
+# is NOT the fork/cloexec handle bug (ntlibc c18edaf), and moving the pin
+# past that fix does not change any of the four lines above.  What it is:
+# under wine, `/bin/sh' resolves to a real file -- open() on it returns a
+# descriptor -- but that file is the host's ELF shell, and ntlibc's __spawn
+# hands the path to NtCreateUserProcess, which loads PE images.  Hence a
+# failure that is neither ENOENT nor ENOEXEC.  On a real NT system the path
+# would simply not exist.
+#
+# So gawk_system()'s child falls through to `_exit(errno == ENOENT ? 127 :
 # 126)' and every system() call in an awk program returns 126 having done
-# nothing.  EBADF out of exec-after-fork is the signature of the fork/cloexec
-# handle bug in ntlibc -- fork() marked only the non-O_CLOEXEC handles
-# OBJ_INHERIT, so the copied fd table named handles the child never got --
-# which is fixed upstream in ntlibc c18edaf but is not in the revision pinned
-# here.  It is below gawk either way, so this patch does not try to fix it:
-# it just widens gawk's own existing escape hatch to cover this target, which
-# is exactly the branch gawk takes on the other Windows C runtime it supports.
+# nothing.  The C library's system() works because it does not use /bin/sh
+# at all: ntlibc's runs %ComSpec%, falling back to cmd.exe found on PATH,
+# which is what Windows' own C runtime does for the same call.
+#
+# That is below gawk and is not gawk's to fix, so this patch does not try:
+# it widens gawk's own existing escape hatch to cover this target, which is
+# exactly the branch gawk already takes on the other Windows C runtime it
+# supports.
 #
 # _WIN32 is the condition because it is the one macro this tcc predefines
 # that names this target, and because gawk 5.3.2 reads it nowhere else --

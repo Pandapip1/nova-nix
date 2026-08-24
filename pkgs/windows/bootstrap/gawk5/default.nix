@@ -21,8 +21,9 @@
 # bison outputs (awkgram.c and command.c), so nothing has to be generated at
 # build time at all.  Against that, running configure would drag bash, sed,
 # grep and coreutils into gawk's closure and put a few hundred child
-# processes through an exec path with a known deterministic bug in it (see
-# the system() note below).  So the answers are asserted in config.h and kaem
+# processes through make's exec path, which had a deterministic
+# fork/close-on-exec bug in it for most of the time this package was being
+# written.  So the answers are asserted in config.h and kaem
 # names the thirty-seven compiles and the one link.  Both of the ac_cv_
 # answers the Linux build has to supply by hand are in config.h too, as
 # GETPGRP_VOID and HAVE_TZSET.
@@ -106,22 +107,31 @@
 #               ntlibc lost.  3.0.6 implemented awk's system() as a call to
 #               the C library's system(), which ntlibc has and which works.
 #               5.3.2 replaced it with gawk_system(), which open-codes
-#               fork() + execl("/bin/sh") except on VMS and MinGW.  Measured
-#               with a nine-line C program rather than through gawk: after
-#               fork(), execl("/bin/sh", ...) returns with errno 9, EBADF,
-#               while system("...") in the same program works.  So every
-#               system() call returned 126 having done nothing.  The patch
-#               widens gawk's own existing escape hatch to cover _WIN32.
-#               EBADF out of exec-after-fork is the signature of the
-#               fork/cloexec handle bug in ntlibc, fixed upstream in c18edaf
-#               but not in the revision pinned here.
+#               fork() + execl("/bin/sh") except on VMS and MinGW -- and
+#               there is no /bin/sh on this target.  Measured with a
+#               nine-line C program, no fork in it: execl("/bin/sh", ...)
+#               fails with errno 9, EBADF, while execl of a genuinely
+#               absent path gives ENOENT and execl of cmd.exe runs.  Under
+#               wine /bin/sh resolves to the host's ELF shell, which
+#               ntlibc's __spawn cannot load because NtCreateUserProcess
+#               loads PE images; on a real NT system the path is simply not
+#               there.  So every system() call returned 126 having done
+#               nothing.  This is NOT the fork/cloexec handle bug -- it
+#               reproduces with no fork, and it is unchanged across that
+#               fix.  The C library's system() works because ntlibc's runs
+#               %ComSpec% (cmd.exe), not /bin/sh.  The patch widens gawk's
+#               own escape hatch to cover _WIN32.
 #
 # One thing this awk cannot do, and it is the same gap the 3.0.6 sibling has:
 # `"cmd" | getline' and `print | "cmd"'.  io.c's gawk_popen and
-# gawk_popen_write are pipe() + fork() + execl("/bin/sh") and the child's end
-# of the pipe does not come back -- getline reads nothing and returns 0 with
-# ERRNO unset.  Unlike system(), there is no C library call to fall back to
-# that would give gawk the fd it needs, so this is not patched around.
+# gawk_popen_write are pipe() + fork() + execl("/bin/sh"), and it is the same
+# /bin/sh the system() patch is about -- the exec fails, the child exits, and
+# getline reads nothing and returns 0 with ERRNO unset.  Unlike system(),
+# there is no C library call to fall back to that would hand gawk the fd it
+# needs, and pointing gawk at cmd.exe instead is not a rename: cmd.exe does
+# not parse what follows /C the way a POSIX shell parses -c, and the command
+# strings come from awk programs that were written for a POSIX shell.  So
+# this is left broken rather than half-fixed.
 # system() and every file redirection DO work, including `getline < "file"'
 # and `print > "file"'.  It does not affect what this package exists for:
 # autoconf's config.status probes for exactly this with

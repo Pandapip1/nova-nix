@@ -25,10 +25,12 @@ cd ${NIX_BUILD_TOP}/gawk-${version}
 #                      carries the same patch; this is it moved onto 5.3.2's
 #                      ANSI prototypes.
 #   nt-system-via-libc awk's system() is gawk_system(), which open-codes
-#                      fork() + execl("/bin/sh") -- and execl after fork
-#                      fails with EBADF against this ntlibc pin.  gawk
-#                      already calls the C library's system() on VMS and
-#                      MinGW; this widens that condition to cover _WIN32.
+#                      fork() + execl("/bin/sh") -- and there is no /bin/sh
+#                      on this target, so the exec fails and system()
+#                      returns 126 having done nothing.  gawk already calls
+#                      the C library's system() on VMS and MinGW, and
+#                      ntlibc's runs %ComSpec% rather than a POSIX shell;
+#                      this widens that condition to cover _WIN32.
 #
 # Both have their reasoning in their own headers.  The Linux build's patches
 # are not carried over: they edit a configure this build never runs.
