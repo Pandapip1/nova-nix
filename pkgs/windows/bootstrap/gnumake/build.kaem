@@ -32,6 +32,18 @@
 # read.c and gnulib's glob.c include <pwd.h> unconditionally off the
 # WINDOWS32 path, to expand `~user'.  ntlibc has one; before it did, this
 # build carried a shim whose getpwnam answered "no such user".
+#
+# -DHAVE_DECL_BSD_SIGNAL=1 is load-bearing, not a leftover: main.c:619's
+# `#if !HAVE_DECL_BSD_SIGNAL && !defined bsd_signal' looks like a clean
+# fallback to plain signal() at a glance, but only when HAVE_SIGACTION is
+# also undefined -- and this build sets -DHAVE_SIGACTION.  Drop the flag and
+# main.c instead compiles its OWN static bsd_signal(), built on sigaction(),
+# right alongside ntlibc's already-declared one -- a static redefinition of
+# a name signal.h declared with external linkage, which C leaves undefined
+# and tcc lets through with a warning ("static storage ignored") rather than
+# an error.  The linker then sees two definitions and fails outright.
+# Measured, not inferred: this exact build.kaem, flag dropped, fails
+# `link symbol 'bsd_signal' defined twice' against ntlibc's libc.a.
 
 cd ${NIX_BUILD_TOP}
 
