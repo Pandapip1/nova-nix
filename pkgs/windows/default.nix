@@ -125,6 +125,14 @@ let
     # does by not needing them.  See its default.nix.
     findutils = callPackage ./bootstrap/findutils { };
 
+    # And the tool binutils' configure runs to check its own generated files
+    # against what it expects, and that a patch-based build takes its patches
+    # in.  The smallest gnulib import on this side yet, and the first where
+    # that smallness -- not needing configure's generated headers -- turned
+    # out to follow from the package's own age rather than from anything this
+    # port did differently.  See its default.nix.
+    diffutils = callPackage ./bootstrap/diffutils { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };

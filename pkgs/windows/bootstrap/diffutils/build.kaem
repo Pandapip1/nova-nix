@@ -1,0 +1,390 @@
+# GNU diffutils 3.8, compiled by the tcc this chain built, against ntlibc.
+#
+# The PE32 counterpart of ../../../linux/bootstrap/diffutils/build.sh, which
+# runs diffutils' own ./configure under bash and then make.  There is neither
+# here: the answers are asserted in config.h, as they are for grep, sed,
+# gzip, tar, both gawks and findutils, and kaem names the ninety-one compiles
+# and the four links.  See the head of default.nix for why this gnulib
+# import, like findutils', does not need configure's generated headers.
+#
+# ${NIX_BUILD_TOP}, not ${TMPDIR}: wine drops TMPDIR on the way into the
+# Windows environment, so it arrives empty and cd is left with no argument.
+
+cd ${NIX_BUILD_TOP}
+
+# .tar.xz.  mescc-tools-extra's unxz is what that is for, and the tarball is
+# CONCATENATED WITH ITSELF first -- a workaround for a real bug in unxz, not
+# a trick, and not specific to this package.  See findutils/build.kaem for
+# the full measurement (2048 bytes lost off a 22 MB tar there); the short
+# version is that unxz writes its output a byte at a time with fputc and
+# never fclose()s or fflush()es, so the last partial buffer never lands and
+# the output is silently truncated to a multiple of 4096 bytes while unxz
+# exits 0.  Doubling the input is safe because .xz streams concatenate and
+# untar stops at the first archive's own end-of-archive marker, so the
+# second copy is never unpacked.  This belongs in mescc-tools-extra, and the
+# fix there is one fclose; until that pin moves, every .tar.xz in this
+# bootstrap needs it, which after this package is only binutils and gcc.
+${bin_catm} diffutils-doubled.tar.xz ${tarball} ${tarball}
+${bin_unxz} --file diffutils-doubled.tar.xz --output diffutils.tar
+${bin_untar} --file diffutils.tar
+
+cd ${NIX_BUILD_TOP}/diffutils-${version}
+
+# One patch, and it is not about a function ntlibc lacks -- that class is
+# answered by compiling the gnulib file that supplies it, same as findutils.
+# It is the same patch findutils and tar carry, against gnulib's
+# lib/progname.c: the NT loader hands argv[0] over as a full backslashed
+# store path, and lib/progname.c's set_program_name is what every one of
+# diff, cmp, diff3 and sdiff's diagnostics is prefixed with -- both through
+# error() and through the eleven places those four mains read program_name
+# directly.  See the patch's own header for the measurement and for why
+# glibc's own full-path behaviour is not the same question.
+${patch} -Np0 -i ${patchProgramName}
+
+# What ./configure would have written, in lib/config.h where every file
+# that includes <config.h> under HAVE_CONFIG_H finds it -- diffutils, unlike
+# findutils, puts its own config.h under lib/ rather than the tree root, and
+# -Ilib is on the compile line for exactly that.
+${bin_cp} ${configH} lib/config.h
+
+# This port's own headers, standing in for what gnulib's generated
+# replacement headers would have added.  Each lands directly in lib/,
+# ALONGSIDE ntlibc's own real headers rather than in a directory of their
+# own ahead of it: -Ilib already precedes ntlibc's include path on the
+# compile line, and every one of these #include_next's the real header, so
+# putting them anywhere else would only have meant a second -I to explain.
+# See each file's own header for which gnulib .in.h it stands in for.
+${bin_cp} ${shimFnmatch} lib/fnmatch.h
+${bin_cp} ${shimLanginfo} lib/langinfo.h
+${bin_cp} ${shimLocale} lib/locale.h
+${bin_cp} ${shimString} lib/string.h
+${bin_cp} ${shimWchar} lib/wchar.h
+${bin_cp} ${shimTime} lib/time.h
+${bin_mkdir} -p lib/sys
+${bin_cp} ${shimSysStat} lib/sys/stat.h
+${bin_cp} ${shimMissing} lib/nt-missing.c
+
+# Three files ./configure would generate that the tarball ships no
+# un-substituted template for at all, unlike config.h.in and the .in.h
+# headers above -- see each one's own comment for why paths.h.in leaves no
+# copy in the tarball and version.c has no .in file at all.
+${bin_cp} ${shimPathsH} src/paths.h
+${bin_cp} ${shimVersionC} src/version.c
+${bin_cp} ${shimVersionH} src/version.h
+
+# One of gnulib's own headers, which its Makefile generates from a .in.h by
+# running sed over it -- and the check that this one is a byte-for-byte copy
+# rather than a substitution is the same as findutils': `grep -o
+# "@[A-Z_0-9]\+@" lib/sigsegv.in.h' is empty.  c-stack.c is the only file
+# that reads it.
+${bin_cp} lib/sigsegv.in.h lib/sigsegv.h
+
+# Everything is compiled from the tree root so that one -I list serves src/
+# and lib/ (and lib/malloc/, reached through its own path component): this
+# tcc does not search an included file's own directory.  The ninety-one
+# basenames are distinct across src/, lib/ and lib/malloc/ -- checked,
+# because a collision would silently overwrite an object rather than fail --
+# so every object can land here.
+#
+# Two -D and one -U, the last applied to three files individually rather
+# than to the whole build.
+#
+#   HAVE_CONFIG_H  what makes every file include <config.h> at all.
+#   -U_WIN32       this tcc predefines _WIN32, and to gnulib that means "the
+#                  Microsoft C runtime is underneath", which is false: ntlibc
+#                  is POSIX-shaped and has no <windows.h>.  Unlike findutils,
+#                  where this had to be a build-wide flag, only three of the
+#                  ninety-one files this package compiles ever test _WIN32 at
+#                  all -- lib/error.c, lib/localcharset.c and
+#                  lib/setlocale_null.c, each guarding a `#include
+#                  <windows.h>' the same way findutils' error.c and
+#                  localcharset.c do -- so -U_WIN32 is given to CC only on
+#                  those three compiles instead of on every one.
+alias CC="${tcc} -c -Ilib -Isrc -I. -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -B ${ntlibc}/lib -DHAVE_CONFIG_H"
+
+# src/: cmp_SOURCES, diff_SOURCES, diff3_SOURCES and sdiff_SOURCES, as
+# src/Makefile.am names them, plus version.c (shim/version.c above), shared
+# by all four.
+CC -o cmp.o src/cmp.c
+CC -o analyze.o src/analyze.c
+CC -o context.o src/context.c
+CC -o diff.o src/diff.c
+CC -o dir.o src/dir.c
+CC -o ed.o src/ed.c
+CC -o ifdef.o src/ifdef.c
+CC -o io.o src/io.c
+CC -o normal.o src/normal.c
+CC -o side.o src/side.c
+CC -o util.o src/util.c
+CC -o diff3.o src/diff3.c
+CC -o sdiff.o src/sdiff.c
+CC -o version.o src/version.c
+
+# lib/: diffutils' gnulib import, shared by all four programs.  lib has some
+# three hundred .c files in it and this list is seventy-seven of them --
+# seventy-two here plus the five lib/malloc/dynarray_*.c below -- which is
+# the whole content of the deletion rule as it applies to a gnulib: a module
+# is compiled if and only if something references it AND ntlibc does not
+# already have it.  The set was not guessed: it is what this package's own
+# `try.sh' found necessary by attempting the build with nothing else on the
+# list and following each missing symbol to the file that supplies it.
+#
+# The interesting half is where a gnulib file is about to define a name that
+# a C library normally owns:
+#
+#   error.c        ntlibc has no error()/error_at_line().  getprogname,
+#                  which gnulib's own getprogname.c cannot supply here (see
+#                  its #error branch in shim/nt-missing.c's comment), comes
+#                  from that file instead.
+#   fnmatch.c      diffutils needs FNM_CASEFOLD (--ignore-file-name-case) and
+#                  FNM_LEADING_DIR/FNM_EXTMATCH (lib/exclude.c); ntlibc's
+#                  fnmatch is POSIX-only.  See shim/fnmatch.h.
+#   regex.c        ntlibc has a POSIX <regex.h> and diffutils needs GNU's --
+#                  --context, -F and -I all compile a pattern through it.
+#                  regcomp.c and regexec.c come in through regex.c's own
+#                  #includes.
+#   nstrftime.c    src/context.c's -u/-c timestamps call it directly; ntlibc
+#                  HAS strftime but this is gnulib's own entry point, not a
+#                  replacement for it.
+#   wmempcpy.c     ntlibc has no wmempcpy; lib/fnmatch_loop.c calls it
+#                  case-folding a multibyte bracket expression.
+#   c-strcasecmp.c, c-strncasecmp.c
+#                  locale-independent case folding, not the same function as
+#                  strcasecmp and not in any C library.
+#   time_rz.c      lib/nstrftime.c calls mktime_z and localtime_rz
+#                  unconditionally; see shim/time.h.
+#   setlocale_null.c
+#                  lib/hard-locale.c's thread-safe `setlocale (cat, NULL)';
+#                  see shim/locale.h.
+#
+# nl_langinfo, wcwidth and getprogname have no gnulib .c file compiled for
+# them at all -- see shim/nt-missing.c for why each is a three-function file
+# of this port's own instead of a gnulib module.
+#
+# And the ones deliberately NOT compiled although a glibc link would want
+# them, because ntlibc has the real thing and a gnulib copy linked ahead of
+# libc.a would win silently: fstat.c, close.c, getpagesize.c, fcntl.c,
+# getopt.c, freopen.c, getdtablesize.c, getrandom.c, dup2.c, open.c,
+# mbrtowc.c, mkdir.c, mbsinit.c, stat.c, tzset.c, wcwidth.c (gnulib's, not
+# this port's) -- each because ntlibc has the function and it works; see
+# config.h, which says so one HAVE_ at a time.
+CC -o allocator.o lib/allocator.c
+CC -o areadlink.o lib/areadlink.c
+CC -o argmatch.o lib/argmatch.c
+CC -o basename.o lib/basename.c
+CC -o basename-lgpl.o lib/basename-lgpl.c
+CC -o binary-io.o lib/binary-io.c
+CC -o bitrotate.o lib/bitrotate.c
+CC -o careadlinkat.o lib/careadlinkat.c
+CC -o c-ctype.o lib/c-ctype.c
+CC -o cloexec.o lib/cloexec.c
+CC -o cmpbuf.o lib/cmpbuf.c
+CC -o c-stack.o lib/c-stack.c
+CC -o c-strcasecmp.o lib/c-strcasecmp.c
+CC -o c-strncasecmp.o lib/c-strncasecmp.c
+CC -o dirname.o lib/dirname.c
+CC -o dirname-lgpl.o lib/dirname-lgpl.c
+CC -o error.o lib/error.c -U_WIN32
+CC -o exclude.o lib/exclude.c
+CC -o exitfail.o lib/exitfail.c
+CC -o filenamecat.o lib/filenamecat.c
+CC -o filenamecat-lgpl.o lib/filenamecat-lgpl.c
+CC -o file-type.o lib/file-type.c
+CC -o fnmatch.o lib/fnmatch.c
+CC -o gettime.o lib/gettime.c
+CC -o hard-locale.o lib/hard-locale.c
+CC -o hash.o lib/hash.c
+CC -o ialloc.o lib/ialloc.c
+CC -o imaxtostr.o lib/imaxtostr.c
+CC -o inttostr.o lib/inttostr.c
+CC -o localcharset.o lib/localcharset.c -U_WIN32
+CC -o malloca.o lib/malloca.c
+CC -o mbchar.o lib/mbchar.c
+CC -o mbiter.o lib/mbiter.c
+CC -o mbscasecmp.o lib/mbscasecmp.c
+CC -o mbslen.o lib/mbslen.c
+CC -o mbsstr.o lib/mbsstr.c
+CC -o mbuiter.o lib/mbuiter.c
+CC -o nstrftime.o lib/nstrftime.c
+CC -o nt-missing.o lib/nt-missing.c
+CC -o offtostr.o lib/offtostr.c
+CC -o prepargs.o lib/prepargs.c
+CC -o progname.o lib/progname.c
+CC -o propername.o lib/propername.c
+CC -o quotearg.o lib/quotearg.c
+CC -o rawmemchr.o lib/rawmemchr.c
+CC -o regex.o lib/regex.c
+CC -o sh-quote.o lib/sh-quote.c
+CC -o stat-time.o lib/stat-time.c
+CC -o stdopen.o lib/stdopen.c
+CC -o stripslash.o lib/stripslash.c
+CC -o strnlen1.o lib/strnlen1.c
+CC -o setlocale_null.o lib/setlocale_null.c -U_WIN32
+CC -o time_rz.o lib/time_rz.c
+CC -o timespec.o lib/timespec.c
+CC -o trim.o lib/trim.c
+CC -o uinttostr.o lib/uinttostr.c
+CC -o umaxtostr.o lib/umaxtostr.c
+CC -o version-etc.o lib/version-etc.c
+CC -o version-etc-fsf.o lib/version-etc-fsf.c
+CC -o wmempcpy.o lib/wmempcpy.c
+CC -o xalloc-die.o lib/xalloc-die.c
+CC -o xasprintf.o lib/xasprintf.c
+CC -o xfreopen.o lib/xfreopen.c
+CC -o xmalloc.o lib/xmalloc.c
+CC -o xmalloca.o lib/xmalloca.c
+CC -o xreadlink.o lib/xreadlink.c
+CC -o xsize.o lib/xsize.c
+CC -o xstdopen.o lib/xstdopen.c
+CC -o xstrtoimax.o lib/xstrtoimax.c
+CC -o xstrtol.o lib/xstrtol.c
+CC -o xstrtoul.o lib/xstrtoul.c
+CC -o xvasprintf.o lib/xvasprintf.c
+CC -o dynarray_at_failure.o lib/malloc/dynarray_at_failure.c
+CC -o dynarray_emplace_enlarge.o lib/malloc/dynarray_emplace_enlarge.c
+CC -o dynarray_finalize.o lib/malloc/dynarray_finalize.c
+CC -o dynarray_resize.o lib/malloc/dynarray_resize.c
+CC -o dynarray_resize_clear.o lib/malloc/dynarray_resize_clear.c
+
+# Four links, and no libgnulib.a or libdiffutils.a at all -- the same choice
+# findutils and gnutar make and for the same reason: an archive ahead of
+# libc.a on the link line would be a place for a gnulib copy of something to
+# win by accident, where a plain object always does.
+#
+# A PE-target tcc adds neither a startup object nor a default C library, so
+# crt1.o and -lc/-lntdll are named outright, as they are for every other
+# package in this chain -- ntdll.def being the import library ntlibc resolves
+# its kernel calls through.  There is no -lm: diffutils does no floating
+# point.
+#
+# Five names are defined both by an object on these lines and by a member of
+# ntlibc's libc.a -- fnmatch, regcomp, regerror, regexec, regfree, the exact
+# same five findutils' link has -- and in every case diffutils' own copy
+# wins, being a named object rather than an archive member.  Confirmed from
+# the built binaries: ntlibc's own regex and fnmatch carry the string
+# "src/regex/regex.c" (from ntlibc's own source layout) and it appears zero
+# times in any of the four; gnulib's "Unmatched [, [^, [:, [., or [=" and
+# "Invalid back reference" do.  Of diffutils' 332 global symbols and
+# ntlibc's 878, those five are the entire overlap.
+alias LINK="${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o"
+
+alias LIBOBJS="allocator.o areadlink.o argmatch.o basename.o basename-lgpl.o binary-io.o bitrotate.o careadlinkat.o c-ctype.o cloexec.o cmpbuf.o c-stack.o c-strcasecmp.o c-strncasecmp.o dirname.o dirname-lgpl.o error.o exclude.o exitfail.o filenamecat.o filenamecat-lgpl.o file-type.o fnmatch.o gettime.o hard-locale.o hash.o ialloc.o imaxtostr.o inttostr.o localcharset.o malloca.o mbchar.o mbiter.o mbscasecmp.o mbslen.o mbsstr.o mbuiter.o nstrftime.o nt-missing.o offtostr.o prepargs.o progname.o propername.o quotearg.o rawmemchr.o regex.o sh-quote.o stat-time.o stdopen.o stripslash.o strnlen1.o setlocale_null.o time_rz.o timespec.o trim.o uinttostr.o umaxtostr.o version-etc.o version-etc-fsf.o wmempcpy.o xalloc-die.o xasprintf.o xfreopen.o xmalloc.o xmalloca.o xreadlink.o xsize.o xstdopen.o xstrtoimax.o xstrtol.o xstrtoul.o xvasprintf.o dynarray_at_failure.o dynarray_emplace_enlarge.o dynarray_finalize.o dynarray_resize.o dynarray_resize_clear.o"
+
+LINK -o cmp.exe cmp.o version.o LIBOBJS -L ${ntlibc}/lib -lc -lntdll
+LINK -o diff.exe analyze.o context.o diff.o dir.o ed.o ifdef.o io.o normal.o side.o util.o version.o LIBOBJS -L ${ntlibc}/lib -lc -lntdll
+LINK -o diff3.exe diff3.o version.o LIBOBJS -L ${ntlibc}/lib -lc -lntdll
+LINK -o sdiff.exe sdiff.o version.o LIBOBJS -L ${ntlibc}/lib -lc -lntdll
+
+# ---------------------------------------------------------------------------
+# Run them on real comparisons before installing them, and in a way that
+# CHECKS the answers rather than merely exercising the code.
+#
+# kaem has no printf, no redirection and no command substitution -- there is
+# no way to write literal text into a file, or to capture a program's output
+# and inspect it, the way findutils' self-test never needed to either.  What
+# it does have is `if'/`else'/`fi', built on a rule specific to this
+# builtin: the condition command's exit status is deliberately NOT checked
+# against --strict (see kaem's own if_cmd), only the branch taken from it
+# is, through the same execute() every bare line above already runs under.
+# So a check that CORRECT behaviour is exit 0 can simply be a bare line, as
+# every compile and link above is; a check that CORRECT behaviour is a
+# NONZERO exit -- diff and cmp finding a real difference is diffutils' most
+# basic contract -- has to name that outcome as the `else' of an `if' whose
+# `if' branch is a `match' call that can never agree, so that a wrongly-zero
+# exit status aborts the build exactly as a wrongly-nonzero one from a bare
+# line would.  This was tested against this package's own kaem before being
+# relied on here: an `if' whose condition truly exits 0 runs the `if' branch
+# and --strict catches the deliberate mismatch there; one that exits nonzero
+# runs the `else' branch, where `match ok ok' passes silently.
+#
+# Test data is real files this tarball ships, copied and concatenated with
+# `cp' and `catm' -- the same materials findutils' self-test builds its tree
+# from, for the same reason: there is no other way to put content on disk.
+${bin_mkdir} -p t
+${bin_cp} src/util.c t/same1
+${bin_cp} src/util.c t/same2
+${bin_catm} t/diff2 t/same1 src/analyze.c
+
+# sdiff and diff3 each fork and exec an external `diff' -- shim/paths.h's
+# DEFAULT_DIFF_PROGRAM, looked up through ntlibc's execvp -- and that lookup
+# is given an explicit path rather than left to $PATH.  WINEPATH is how a
+# HOST shell tells wine what to map onto the guest's search path, and it has
+# to be set before wine starts; kaem.exe is itself the program wine is
+# running here; setting it from an assignment inside this script would take
+# effect only after wine has already started, too late to matter, and was
+# confirmed to do nothing here for exactly that reason.  --diff-program is
+# an option both sdiff and diff3 already have for this, so it is used
+# instead, given the relative path this kaem script and the diff.exe built a
+# few lines up share.  This is not optional even for files that turn out
+# identical: measured directly, `sdiff -s t/same1 t/same2' -- files IDENTICAL,
+# so no difference for the exit status to report -- still exits 2 with
+# "sdiff.exe: diff: No such file or directory" when the child cannot be
+# found, and `diff3 -m' the same, "subsidiary program 'diff' not found".
+# That is what makes the two bare invocations below a real assertion about
+# fork/exec, not only about the comparison logic: either one would abort the
+# build under --strict if the child failed to start.
+
+# Identical inputs: diff and cmp agree there is nothing to report, and so,
+# via the fork/exec argument above, does sdiff -- which must still launch
+# diff to reach that answer.
+./cmp.exe t/same1 t/same2
+./diff.exe t/same1 t/same2
+./sdiff.exe --diff-program=./diff.exe -s -w 60 t/same1 t/same2
+
+# A real difference: diff and cmp must say so, which on this exit-code-only
+# testing surface means their exit status must be NONZERO.  See the note
+# above for why that has to be the `else' of an `if' rather than a bare
+# line, and why the `if' branch existing at all -- rather than the check
+# being skipped -- is what makes a wrongly-zero exit status fail the build
+# instead of passing it by accident.
+if ./diff.exe t/same1 t/diff2
+${bin_match} diff-wrongly-reported-no-difference SENTINEL
+else
+${bin_match} ok ok
+fi
+
+if ./cmp.exe t/same1 t/diff2
+${bin_match} cmp-wrongly-reported-no-difference SENTINEL
+else
+${bin_match} ok ok
+fi
+
+# sdiff on the same real difference -- both the comparison logic and,
+# again, that the forked diff produced something sdiff read as a
+# difference rather than sdiff's own fork/exec failing outright (which
+# would also be nonzero, but is already ruled out above by the bare
+# identical-input invocation succeeding).
+if ./sdiff.exe --diff-program=./diff.exe -s -w 60 t/same1 t/diff2
+${bin_match} sdiff-wrongly-reported-no-difference SENTINEL
+else
+${bin_match} ok ok
+fi
+
+# diff3, three-way, with the base appearing on both sides of the one real
+# change (t/same1 built from t/same1, t/same2 from the identical copy, and
+# t/diff2 the one side that actually differs): a clean, non-conflicting
+# merge, which GNU diff3 reports by exiting 0 -- so this is a bare line, and
+# both of diff3's own forked diffs (base-vs-mine, base-vs-yours) have to
+# have succeeded for it to reach that answer at all.
+./diff3.exe --diff-program=./diff.exe -e t/same1 t/same2 t/diff2
+./diff3.exe --diff-program=./diff.exe -m t/same1 t/same2 t/diff2
+
+# And that all four identify themselves, and that diff can be told about a
+# file that does not exist and say so -- nonzero, so again the `else' of an
+# `if', not a bare line.
+if ./diff.exe t/same1 t/nonexistent
+${bin_match} diff-wrongly-reported-no-difference SENTINEL
+else
+${bin_match} ok ok
+fi
+
+./diff.exe --version
+./cmp.exe --version
+./diff3.exe --version
+./sdiff.exe --version
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} diff.exe ${out}/bin/diff.exe
+${bin_cp} cmp.exe ${out}/bin/cmp.exe
+${bin_cp} diff3.exe ${out}/bin/diff3.exe
+${bin_cp} sdiff.exe ${out}/bin/sdiff.exe
