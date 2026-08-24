@@ -142,7 +142,6 @@
      HAVE_SIGPROCMASK,
      HAVE_SETSID,
      HAVE_GETDTABLESIZE,
-     HAVE_FWRITE_UNLOCKED,
      HAVE_ATEXIT,
      HAVE_TMPFILE,
      HAVE_MKSTEMP,
@@ -155,7 +154,22 @@
 #define HAVE_BTOWC 1
 #define HAVE_CLOCK_GETTIME 1
 #define HAVE_FMOD 1
-#define HAVE_FWRITE_UNLOCKED 1
+/* HAVE_FWRITE_UNLOCKED was 1 through the ntlibc pin that shipped
+   fwrite_unlocked (and ten sibling _unlocked aliases) in <stdio.h>; that pin
+   removed them as part of a 28-symbol deletion batch, having confirmed --
+   for every package audited at the time -- that nothing in this chain called
+   them. gawk 5.3.2 turned out to be the exception: awk.h `#define fwrite
+   fwrite_unlocked' under this flag, unconditionally, so every fwrite() call
+   in io.c became a call to a symbol ntlibc no longer defines, and tcc failed
+   the link with "unresolved reference to 'fwrite_unlocked'". Left at 0 (i.e.
+   not defined here), awk.h's #ifdef leaves `fwrite' as plain fwrite() --
+   already declared by ntlibc's <stdio.h> and already linked into every other
+   package in this chain -- which is exactly what fwrite_unlocked was an
+   unlocking *optimization* over. This bootstrap is single-threaded, so the
+   locking fwrite() does costs nothing observable; there is no correctness
+   difference, only a foregone micro-optimization. Package-side fix, per the
+   ntlibc-coordination convention: ntlibc is not asked to keep a symbol on
+   this port's account. */
 #define HAVE_GETDTABLESIZE 1
 #define HAVE_GETGRENT 1
 #define HAVE_GETGROUPS 1

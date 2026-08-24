@@ -32,6 +32,30 @@
 # read.c and gnulib's glob.c include <pwd.h> unconditionally off the
 # WINDOWS32 path, to expand `~user'.  ntlibc has one; before it did, this
 # build carried a shim whose getpwnam answered "no such user".
+#
+# -DHAVE_DECL_BSD_SIGNAL=1 WAS load-bearing, not a leftover: main.c:619's
+# `#if !HAVE_DECL_BSD_SIGNAL && !defined bsd_signal' looks like a clean
+# fallback to plain signal() at a glance, but only when HAVE_SIGACTION is
+# also undefined -- and this build sets -DHAVE_SIGACTION.  With the flag
+# dropped, main.c would instead compile its OWN static bsd_signal(), built
+# on sigaction(), right alongside ntlibc's already-declared one -- a static
+# redefinition of a name signal.h declared with external linkage, which C
+# leaves undefined and tcc lets through with a warning ("static storage
+# ignored") rather than an error.  The linker then sees two definitions and
+# fails outright.  Measured, not inferred: this exact build.kaem, flag
+# dropped, used to fail `link symbol 'bsd_signal' defined twice' against
+# ntlibc's libc.a.
+#
+# ntlibc's 33c8608 ("signal: drop bsd_signal(), to unblock GNU make")
+# removed bsd_signal() from <signal.h> and libc.a entirely, and the pin
+# bump past that commit is what makes dropping the flag here safe rather
+# than just untested: main.c's `#if !HAVE_DECL_BSD_SIGNAL && !defined
+# bsd_signal' branch's own `static bsd_signal()` is no longer redefining a
+# name with prior external linkage -- ntlibc declares no such name any
+# more, so it is a genuinely fresh static function.  No duplicate symbol,
+# no link conflict, nothing for the flag to be covering for.  Flag dropped
+# accordingly; -DHAVE_SIGACTION alone is enough to route main.c onto the
+# sigaction()-based fallback.
 
 cd ${NIX_BUILD_TOP}
 
@@ -53,7 +77,7 @@ ${bin_cp} lib/fnmatch.in.h lib/fnmatch.h
 ${bin_replace} --file src/job.c --output job-patched.c --match-on ${shellAbs} --replace-with ${shellRel}
 ${bin_cp} job-patched.c src/job.c
 
-alias CC="${tcc} -c -std=c99 -nostdinc -B ${ntlibc}/lib -I./src -I./lib -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -DHAVE_CONFIG_H -DMAKE_MAINTAINER_MODE -DPOSIX=1 -DNO_ARCHIVES -DFILE_TIMESTAMP_HI_RES=0 -DSCCS_GET=\"get\" -DLOCALEDIR=\"/fake-locale\" -DLIBDIR=\"${out}/lib\" -DHAVE_DECL_BSD_SIGNAL=1 -DHAVE_DECL_GETLOADAVG=0 -DHAVE_ALLOCA -DHAVE_ALLOCA_H -DHAVE_ATEXIT -DHAVE_DIRENT_H -DHAVE_DUP2 -DHAVE_FCNTL_H -DHAVE_FDOPEN -DHAVE_GETCWD -DHAVE_GETTIMEOFDAY -DHAVE_INTTYPES_H -DHAVE_ISATTY -DHAVE_LIMITS_H -DHAVE_LOCALE_H -DHAVE_MKTEMP -DHAVE_SA_RESTART -DHAVE_SETVBUF -DHAVE_SIGACTION -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRDUP -DHAVE_STRERROR -DHAVE_STRINGS_H -DHAVE_STRING_H -DHAVE_STRTOLL -DHAVE_SYS_FILE_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_WAIT_H -DHAVE_TTYNAME -DHAVE_UMASK -DHAVE_UNISTD_H -DHAVE_WAITPID -DSTDC_HEADERS -DPATH_SEPARATOR_CHAR=';'"
+alias CC="${tcc} -c -std=c99 -nostdinc -B ${ntlibc}/lib -I./src -I./lib -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -DHAVE_CONFIG_H -DMAKE_MAINTAINER_MODE -DPOSIX=1 -DNO_ARCHIVES -DFILE_TIMESTAMP_HI_RES=0 -DSCCS_GET=\"get\" -DLOCALEDIR=\"/fake-locale\" -DLIBDIR=\"${out}/lib\" -DHAVE_DECL_GETLOADAVG=0 -DHAVE_ALLOCA -DHAVE_ALLOCA_H -DHAVE_ATEXIT -DHAVE_DIRENT_H -DHAVE_DUP2 -DHAVE_FCNTL_H -DHAVE_FDOPEN -DHAVE_GETCWD -DHAVE_GETTIMEOFDAY -DHAVE_INTTYPES_H -DHAVE_ISATTY -DHAVE_LIMITS_H -DHAVE_LOCALE_H -DHAVE_MKTEMP -DHAVE_SA_RESTART -DHAVE_SETVBUF -DHAVE_SIGACTION -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRDUP -DHAVE_STRERROR -DHAVE_STRINGS_H -DHAVE_STRING_H -DHAVE_STRTOLL -DHAVE_SYS_FILE_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_WAIT_H -DHAVE_TTYNAME -DHAVE_UMASK -DHAVE_UNISTD_H -DHAVE_WAITPID -DSTDC_HEADERS -DPATH_SEPARATOR_CHAR=';'"
 
 CC -o ar.o src/ar.c
 CC -o arscan.o src/arscan.c

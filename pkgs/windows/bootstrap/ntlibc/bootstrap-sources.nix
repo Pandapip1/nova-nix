@@ -17,7 +17,7 @@
 rec {
   version = "0-unstable-2026-08-24";
 
-  rev = "d9b11c13b43da7deac5f4540495a4089852863d5";
+  rev = "a9d3b48c2ae6b3656b8ed82730f9f15df1c6fd10";
   ref = "main";
 
   src = builtins.fetchGit {
