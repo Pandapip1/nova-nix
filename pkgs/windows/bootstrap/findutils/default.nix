@@ -88,6 +88,17 @@
 # loader was not available, so everything here is WINE-ONLY unless it is a
 # statement about ntlibc's source.
 #
+#   -size, on DIRECTORIES
+#         differs, and quietly.  ntlibc reports st_size = 0 for a directory
+#         where Linux reports the block size, typically 4096.  Files agree
+#         exactly; only directories move.  So a small `-size -Nc' matches
+#         every directory in the tree here and none of them on the host --
+#         measured, `find t -size -10c' returning t, t/a, t/empty as well as
+#         the two files the host returns.  Nothing is wrong with find: it is
+#         asking a question NT answers differently.  Worth knowing because
+#         the divergence is silent and only shows up when a predicate happens
+#         to straddle 0 -- `-size +1k' agrees with the host everywhere.
+#
 #   -perm, -executable
 #         work, but on modes ntlibc SYNTHESISES rather than stores.
 #         mode_from_attrs() in src/stat/stat.c is the whole model: a directory
