@@ -223,6 +223,11 @@ let
     #
     # ar, ranlib, nm, objcopy, as, ld, dlltool: see its default.nix.
     binutils = callPackage ./bootstrap/binutils { };
+
+    # The last package in this chain's full-source bootstrap: cc1.exe and
+    # gcc.exe, compiled and linked entirely by this chain's own tcc against
+    # ntlibc. See its default.nix.
+    gcc = callPackage ./bootstrap/gcc { };
   };
 in
 self
