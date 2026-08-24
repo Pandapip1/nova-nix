@@ -70,33 +70,84 @@
  * and intptr_t/uintptr_t/intmax_t/uintmax_t (all real, via ntlibc's
  * bits/alltypes.h __NEED_ mechanism, stdint.h).
  *
- * What is NOT audited yet, on purpose, and why:
+ * AS_FOR_TARGET/LD_FOR_TARGET -- RESOLVED, not deferred anymore: this
+ * chain's own tcc, not ../../binutils's as/ld.  Not a guess -- forced by a
+ * real object-format wall, found by checking both linkers' actual source,
+ * not by inference from the binutils package comment alone:
  *
- *   - The ~55 HAVE_AS_*/HAVE_GAS_*/HAVE_LD_* lines (assembler and linker
- *     feature probes: CFI directives, --gdwarf2, .weak, TLS relocs,
- *     etc). These are not host-libc questions at all -- they are real
- *     configure-time feature tests run against whatever assembler/linker
- *     configure finds (`gcc_cv_as`/`gcc_cv_ld`), by actually invoking it
- *     on tiny test inputs. The reference run found no i686-pc-mingw32
- *     cross-assembler on its x86_64-linux host and so answered undef to
- *     nearly all of them (matches what's below) -- that is not evidence
- *     either way for what this chain's own real gas (built by
- *     ../../binutils) actually supports. Re-deriving these correctly
- *     means running configure's real feature-test assembles against
- *     that built gas/ld, which needs a decision this package hasn't made
- *     yet: whether build.kaem points AS_FOR_TARGET/LD_FOR_TARGET at
- *     that binutils package's gas/ld at all, or something else. Left
- *     as-is (mostly undef, i.e. "assume nothing"), which is the safe
- *     default GCC itself falls back to when a feature can't be proven --
- *     it costs code quality/output size, never correctness.
+ *   - ../../binutils/default.nix's own "ntlibc's crt1.o/libc.a are ELF,
+ *     not COFF" already proved that a real `ld` cannot link against
+ *     ntlibc's own crt1.o/libc.a at all -- they are tcc's internal ELF
+ *     relocatable format, not COFF, and BFD's pei-i386/coff-i386 backend
+ *     has no reader for that format. So whatever finally links this
+ *     package's cc1.exe/gcc.exe/cpp.exe (which must, to run standalone
+ *     against ntlibc) has to be tcc's own linker, not the real ld built
+ *     by ../../binutils -- that part ../../binutils already established.
  *
- *   - HAVE_GNU_AS, HAVE_GNU_LD: same open question as above -- the
- *     reference's 0 reflects "no cross tool found on this Linux host",
- *     not "this chain's toolchain isn't GNU" (../../binutils's own gas
- *     and ld genuinely are GNU). Left as the reference produced them
- *     rather than guessed at, pending that build.kaem decision.
+ *   - What this package had to check for itself: whether tcc's linker
+ *     could at least take real-COFF *input* (i.e. objects assembled by
+ *     the real `as`, with the *final* link still done by tcc) -- the
+ *     binutils package's own hint that "gcc-compiled translation units
+ *     would link against each other ... just fine through this package's
+ *     ld" doesn't answer this, since that sentence is about the real ld,
+ *     not tcc. Checked directly against this chain's tcc fork (pinned at
+ *     69eed4d3, .../Projects/tinycc is a live clone with that commit as
+ *     an ancestor): tccelf.c's tcc_object_type() recognises only ELF
+ *     magic (AFF_BINTYPE_REL/DYN/AR) or its own C67 magic
+ *     (AFF_BINTYPE_C67, and tcccoff.c -- the only COFF *reader* tcc has
+ *     at all -- is compiled in only for the unrelated TMS320C67 target,
+ *     checked directly against Makefile's c67_FILES). tccpe.c's
+ *     pe_load_file(), the PE-target link-time file loader, dispatches on
+ *     extension/magic to exactly three cases: `.def` (pe_load_def),
+ *     windres's single-section `.rsrc`-only COFF (pe_load_res, not a
+ *     general object reader), and an "MZ"-signature DLL (pe_load_dll) --
+ *     there is no fourth case for an ordinary multi-section COFF .o.  So
+ *     tcc's linker cannot consume a real `as`-assembled object at all,
+ *     not even as an input alongside its own objects. Splitting "real as
+ *     assembles, tcc links" is not available.
  *
- *   - The ENABLE_*/DEFAULT_*/CONFIG_SJLJ_EXCEPTIONS-style feature macros
+ *   Put together: every .o that ends up in this package's own final links
+ *   must come out of tcc itself (tcc's C compiler for .c, and tcc's own
+ *   integrated assembler for any .s this package's build needs to
+ *   assemble directly), because tcc's linker is the only linker able to
+ *   resolve ntlibc's crt1.o/libc.a, and tcc's linker cannot read what a
+ *   real `as` produces. AS_FOR_TARGET and LD_FOR_TARGET -- the tools this
+ *   package's own newly-built gcc will invoke later, once it exists, to
+ *   assemble and link *its own* future compilations against ntlibc -- are
+ *   therefore this chain's own tcc, invoked as an assembler
+ *   (`tcc -c foo.s -o foo.o`) and as a linker respectively, not
+ *   ../../binutils's as.exe/ld.exe. Those stay built and useful (for
+ *   whoever eventually rebuilds ntlibc's own runtime objects in real
+ *   COFF, the follow-up ../../binutils's own default.nix already
+ *   flagged) but they are not this package's target tools.
+ *
+ *   Consequence for the ~55 HAVE_AS_* / HAVE_GAS_* / HAVE_LD_* lines below
+ *   (CFI directives, --gdwarf2, .weak, TLS relocs, etc) and HAVE_GNU_AS/
+ *   HAVE_GNU_LD: since AS_FOR_TARGET/LD_FOR_TARGET is tcc, not a real GNU
+ *   as/ld, these need to describe tcc's assembler/linker, not gas/ld's --
+ *   re-deriving them against ../../binutils's gas/ld (what the reference
+ *   run's own undef answers were originally waiting on) would answer the
+ *   wrong question entirely now that the tool is settled. HAVE_GNU_AS and
+ *   HAVE_GNU_LD (these two are always #define'd 0-or-1, never #undef'd --
+ *   checked, that is genuinely how configure.ac emits them) are confirmed
+ *   at the reference's own 0 here as a real, checked answer now, not a
+ *   leftover "no cross tool found" default: tcc's assembler/linker are not GNU
+ *   as/ld and do not implement GNU as/ld's own extensions (checked
+ *   directly for the highest-value case, CFI: no ".cfi_" handling
+ *   anywhere in tccasm.c/i386-asm.c -- consistent with this package's
+ *   libgcc needing to be scoped without a DWARF/CFI unwinder in the first
+ *   place, see this package's own follow-up work for that scope
+ *   decision). The remaining ~55 feature macros are left at the
+ *   reference's own mostly-undef answers -- now on solid ground rather
+ *   than deferred, since "assume nothing GNU-specific" is the *correct*
+ *   answer for a tcc target, not just the safe fallback it was when the
+ *   question was still open. (tcc does support a few things this
+ *   undef-everything set under-claims, e.g. .weak -- checked,
+ *   tccasm.c:746 -- but GCC's own fallback for an unproven feature is
+ *   always "don't use it", never "use it and hope", so under-claiming
+ *   here costs code quality only, same as before, not correctness.)
+ *
+ *   - The ENABLE_* / DEFAULT_* / CONFIG_SJLJ_EXCEPTIONS-style feature macros
  *     (ENABLE_LIBQUADMATH_SUPPORT, ENABLE_PLUGIN, DEFAULT_USE_CXA_ATEXIT,
  *     etc): these come from *configure flags*, not host facts, and the
  *     reference run used a fuller default configuration to get a real
