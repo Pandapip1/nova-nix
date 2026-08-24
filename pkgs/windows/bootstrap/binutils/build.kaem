@@ -1,0 +1,289 @@
+# GNU binutils 2.46.0, compiled by the tcc this chain built, against ntlibc.
+#
+# ar, ranlib, nm, objcopy.  See default.nix for the target-triple decision,
+# why this is hand-compiled rather than ./configure-driven, what generated/
+# is and why every one of its four *-config.h files was re-audited against
+# ntlibc by hand rather than trusted from the Linux host that generated
+# them, and why pex-unix.c stands in for pex-win32.c.
+#
+# Shape: unpack, apply windows.patch (six _WIN32 branches written against a
+# real Win32 CRT ntlibc does not have -- see the patch's own header), drop
+# the generated/ headers into place, compile every file GNU's own
+# Makefile.am/config.bfd say the target needs, link the four programs, run
+# each one and prove the two that write files actually work together.
+
+cd ${NIX_BUILD_TOP}
+
+${bin_catm} binutils-doubled.tar.xz ${tarball} ${tarball}
+${bin_unxz} --file binutils-doubled.tar.xz --output binutils.tar
+${tar} xf binutils.tar
+
+cd ${NIX_BUILD_TOP}/binutils-${version}
+
+${patch} -Np0 -i ${windowsPatch}
+
+# generated/ -- see default.nix's "What generated/ actually is".
+${bin_cp} ${genBfdH} bfd/bfd.h
+${bin_cp} ${genBfdverH} bfd/bfdver.h
+${bin_cp} ${genElf32TargetH} bfd/elf32-target.h
+${bin_cp} ${genElf64TargetH} bfd/elf64-target.h
+${bin_cp} ${genTargmatchH} bfd/targmatch.h
+${bin_cp} ${genPeigenC} bfd/peigen.c
+${bin_cp} ${genBfdConfigH} bfd/config.h
+${bin_cp} ${genLibibertyConfigH} libiberty/config.h
+${bin_cp} ${genBinutilsConfigH} binutils/config.h
+${bin_cp} ${genLibsframeConfigH} libsframe/config.h
+
+# This port's own header, in a shim/ directory of its own so it is never in
+# doubt which is binutils' and which is ours -- see default.nix's "The
+# FNM_CASEFOLD shim".  -Ishim goes ahead of ntlibc's own include dir on the
+# CC alias below so this is the fnmatch.h libiberty/fnmatch.c finds.
+${bin_mkdir} -p shim
+${bin_cp} ${shimFnmatch} shim/fnmatch.h
+
+# ntlibc's dlopen() rpath -- see default.nix and nt-rpath.c's own header.
+${bin_cp} ${ntRpathC} nt-rpath.c
+
+# DEBUGDIR/BINDIR/LIBDIR: autoconf substitutes these from --prefix into
+# bfd/dwarf2.c (separate-debug-file search) and bfd/plugin.c (LTO plugin
+# search, unused, but plugin.c still names them at file scope).  On the
+# whole alias rather than as one-off extra args -- easier to get right for
+# every file that needs one than to enumerate which files do.
+alias CC="${tcc} -nostdinc -Ishim -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -Ibfd -Ibinutils -Iinclude -Ilibiberty -Ilibsframe -Ilibctf -Izlib -DHAVE_CONFIG_H -DDEBUGDIR=\"${out}/share/gdb/auto-load\" -DBINDIR=\"${out}/bin\" -DLIBDIR=\"${out}/lib\" -c"
+
+# --- bfd core: BFD32_LIBS/BFD32_LIBS_CFILES, read off bfd/Makefile.am ---
+CC -o archive.o bfd/archive.c
+# SELECT_ARCHITECTURES: bfd/archures.c's bfd_archures_list is every known
+# architecture's &bfd_*_arch unless this is defined -- config.bfd sets
+# targ_archs=bfd_i386_arch for every i[3-7]86 target (checked directly:
+# bfd/config.bfd line 204, matched by this target's i[3-7]86 branch), so
+# this is the one-element list a real configure run would have produced.
+# Without it, targets.c's target_vector -- built narrow, above, by
+# SELECT_VECS -- still pulls in bfd_default_arch_struct's neighbours via
+# archures.c and the link fails wanting every architecture bfd knows.
+CC -DSELECT_ARCHITECTURES=&bfd_i386_arch -o archures.o bfd/archures.c
+CC -o bfd.o bfd/bfd.c
+CC -o bfdio.o bfd/bfdio.c
+CC -o cache.o bfd/cache.c
+CC -o coff-bfd.o bfd/coff-bfd.c
+CC -o compress.o bfd/compress.c
+CC -o corefile.o bfd/corefile.c
+CC -o format.o bfd/format.c
+CC -o hash.o bfd/hash.c
+CC -o libbfd.o bfd/libbfd.c
+CC -o linker.o bfd/linker.c
+CC -o merge.o bfd/merge.c
+CC -o opncls.o bfd/opncls.c
+CC -o reloc.o bfd/reloc.c
+CC -o section.o bfd/section.c
+CC -o simple.o bfd/simple.c
+CC -o stab-syms.o bfd/stab-syms.c
+CC -o stabs.o bfd/stabs.c
+CC -o syms.o bfd/syms.c
+CC -o binary.o bfd/binary.c
+CC -o ihex.o bfd/ihex.c
+CC -o srec.o bfd/srec.c
+CC -o tekhex.o bfd/tekhex.c
+CC -o verilog.o bfd/verilog.c
+
+# --- bfd i686-pc-pe target: config.bfd's i[3-7]86-*-pe stanza, read directly
+# rather than run (there is no shell here that could run bfd/configure). ---
+CC -o pe-i386.o bfd/pe-i386.c
+CC -o peigen.o bfd/peigen.c
+CC -o cofflink.o bfd/cofflink.c
+CC -o coffgen.o bfd/coffgen.c
+CC -o dwarf2.o bfd/dwarf2.c
+CC -o pei-i386.o bfd/pei-i386.c
+CC -o elf32-i386.o bfd/elf32-i386.c
+CC -o elfxx-x86.o bfd/elfxx-x86.c
+CC -o elf-ifunc.o bfd/elf-ifunc.c
+CC -o elf-vxworks.o bfd/elf-vxworks.c
+CC -o elf32.o bfd/elf32.c
+CC -o elf.o bfd/elf.c
+CC -o elflink.o bfd/elflink.c
+CC -o elf-attrs.o bfd/elf-attrs.c
+CC -o elf-strtab.o bfd/elf-strtab.c
+CC -o elf-eh-frame.o bfd/elf-eh-frame.c
+CC -o elf-properties.o bfd/elf-properties.c
+CC -o elf-sframe.o bfd/elf-sframe.c
+CC -o dwarf1.o bfd/dwarf1.c
+CC -o pdb.o bfd/pdb.c
+CC -o elf32-gen.o bfd/elf32-gen.c
+CC -DDEBUGDIR=\"${out}/share/gdb/auto-load\" -DBINDIR=\"${out}/bin\" -DLIBDIR=\"${out}/lib\" -o plugin.o bfd/plugin.c
+CC -o cpu-i386.o bfd/cpu-i386.c
+CC -o cpu-iamcu.o bfd/cpu-iamcu.c
+CC -o archive64.o bfd/archive64.c
+
+# targets.c needs telling which vectors config.bfd selected, both as the
+# array to build (SELECT_VECS/DEFAULT_VECTOR) and as the HAVE_ names
+# targmatch.h's own #ifs gate each triplet-matching entry on -- generated/
+# targmatch.h was built by a real config.bfd/Makefile run for this exact
+# --target, see the head of default.nix.
+CC -DDEFAULT_VECTOR=i386_pe_vec -DSELECT_VECS=&i386_pe_vec,&i386_pe_big_vec,&i386_pei_vec,&i386_elf32_vec,&iamcu_elf32_vec,&pdb_vec,&elf32_le_vec,&elf32_be_vec -DHAVE_i386_pe_vec -DHAVE_i386_pe_big_vec -DHAVE_i386_pei_vec -DHAVE_i386_elf32_vec -DHAVE_iamcu_elf32_vec -DHAVE_pdb_vec -DHAVE_elf32_le_vec -DHAVE_elf32_be_vec -o targets.o bfd/targets.c
+
+# --- zlib, bundled with the tarball: bfd/compress.c wants it for compressed
+# debug sections. Only the memory-to-memory half (deflate/inflate/compress2/
+# uncompress) is ever called -- the gz* file API (gzopen and friends) is not
+# built, so its MSVC io.h/_wopen assumptions (exactly what windows.patch
+# deletes elsewhere) are simply never reached. ---
+CC -o z_adler32.o zlib/adler32.c
+CC -o z_compress.o zlib/compress.c
+CC -o z_crc32.o zlib/crc32.c
+CC -o z_deflate.o zlib/deflate.c
+CC -o z_infback.o zlib/infback.c
+CC -o z_inflate.o zlib/inflate.c
+CC -o z_inftrees.o zlib/inftrees.c
+CC -o z_inffast.o zlib/inffast.c
+CC -o z_trees.o zlib/trees.c
+CC -o z_uncompr.o zlib/uncompr.c
+CC -o z_zutil.o zlib/zutil.c
+
+# --- libsframe: two of its three files. sframe-dump.c is a standalone dump
+# tool's own main(), not linked into anything here; sframe.c/sframe-error.c
+# are what bfd/elf-sframe.c calls. ---
+CC -o sf_sframe.o libsframe/sframe.c
+CC -o sf_sframe-error.o libsframe/sframe-error.c
+
+# --- libiberty: REQUIRED_OFILES off libiberty/Makefile.in, with pex-unix.c
+# standing in for pex-win32.c -- see default.nix for why. ---
+CC -o li_regex.o libiberty/regex.c
+CC -o li_cplus-dem.o libiberty/cplus-dem.c
+CC -o li_cp-demangle.o libiberty/cp-demangle.c
+CC -o li_md5.o libiberty/md5.c
+CC -o li_sha1.o libiberty/sha1.c
+CC -o li_alloca.o libiberty/alloca.c
+CC -o li_argv.o libiberty/argv.c
+CC -o li_bsearch_r.o libiberty/bsearch_r.c
+CC -o li_choose-temp.o libiberty/choose-temp.c
+CC -o li_concat.o libiberty/concat.c
+CC -o li_cp-demint.o libiberty/cp-demint.c
+CC -o li_crc32.o libiberty/crc32.c
+CC -o li_d-demangle.o libiberty/d-demangle.c
+CC -o li_dwarfnames.o libiberty/dwarfnames.c
+CC -o li_dyn-string.o libiberty/dyn-string.c
+CC -o li_fdmatch.o libiberty/fdmatch.c
+CC -o li_fibheap.o libiberty/fibheap.c
+CC -o li_filedescriptor.o libiberty/filedescriptor.c
+CC -o li_filename_cmp.o libiberty/filename_cmp.c
+CC -o li_floatformat.o libiberty/floatformat.c
+CC -o li_fnmatch.o libiberty/fnmatch.c
+CC -o li_fopen_unlocked.o libiberty/fopen_unlocked.c
+CC -o li_getopt.o libiberty/getopt.c
+CC -o li_getopt1.o libiberty/getopt1.c
+CC -o li_getpwd.o libiberty/getpwd.c
+CC -o li_getruntime.o libiberty/getruntime.c
+CC -o li_hashtab.o libiberty/hashtab.c
+CC -o li_hex.o libiberty/hex.c
+CC -o li_lbasename.o libiberty/lbasename.c
+CC -o li_ldirname.o libiberty/ldirname.c
+CC -o li_lrealpath.o libiberty/lrealpath.c
+CC -o li_make-relative-prefix.o libiberty/make-relative-prefix.c
+CC -o li_make-temp-file.o libiberty/make-temp-file.c
+CC -o li_objalloc.o libiberty/objalloc.c
+CC -o li_obstack.o libiberty/obstack.c
+CC -o li_partition.o libiberty/partition.c
+CC -o li_pexecute.o libiberty/pexecute.c
+CC -o li_physmem.o libiberty/physmem.c
+CC -o li_pex-common.o libiberty/pex-common.c
+CC -o li_pex-one.o libiberty/pex-one.c
+CC -o li_pex-unix.o libiberty/pex-unix.c
+CC -o li_vprintf-support.o libiberty/vprintf-support.c
+CC -o li_rust-demangle.o libiberty/rust-demangle.c
+CC -o li_safe-ctype.o libiberty/safe-ctype.c
+CC -o li_simple-object.o libiberty/simple-object.c
+CC -o li_simple-object-coff.o libiberty/simple-object-coff.c
+CC -o li_simple-object-elf.o libiberty/simple-object-elf.c
+CC -o li_simple-object-mach-o.o libiberty/simple-object-mach-o.c
+CC -o li_simple-object-xcoff.o libiberty/simple-object-xcoff.c
+CC -o li_sort.o libiberty/sort.c
+CC -o li_spaces.o libiberty/spaces.c
+CC -o li_splay-tree.o libiberty/splay-tree.c
+CC -o li_stack-limit.o libiberty/stack-limit.c
+CC -o li_strerror.o libiberty/strerror.c
+CC -o li_strsignal.o libiberty/strsignal.c
+CC -o li_timeval-utils.o libiberty/timeval-utils.c
+CC -o li_unlink-if-ordinary.o libiberty/unlink-if-ordinary.c
+CC -o li_xasprintf.o libiberty/xasprintf.c
+CC -o li_xatexit.o libiberty/xatexit.c
+CC -o li_xexit.o libiberty/xexit.c
+CC -o li_xmalloc.o libiberty/xmalloc.c
+CC -o li_xmemdup.o libiberty/xmemdup.c
+CC -o li_xstrdup.o libiberty/xstrdup.c
+CC -o li_xstrerror.o libiberty/xstrerror.c
+CC -o li_xstrndup.o libiberty/xstrndup.c
+CC -o li_xvasprintf.o libiberty/xvasprintf.c
+
+# The rpath every ntlibc program that calls dlopen() must provide -- see
+# nt-rpath.c. bfd/plugin.c does (elflink.c calls it unconditionally, whether
+# or not anything is ever asked to load a plugin).
+CC -o bu_nt-rpath.o nt-rpath.c
+
+# --- binutils/: common to all four programs ---
+CC -DBINDIR=\"${out}/bin\" -DTOOLLIBDIR=\"${out}/lib\" -o bu_bucomm.o binutils/bucomm.c
+CC -o bu_version.o binutils/version.c
+CC -o bu_filemode.o binutils/filemode.c
+
+# --- ar/ranlib: one binary (ar.c) built twice over, is_ranlib flipped by
+# which one-line wrapper is compiled (not-ranlib.c / is-ranlib.c);
+# binemul.c/arsup.c's bin_dummy_emulation is #defined to the one real
+# emulation (vanilla -- nothing here needs anything target-specific), the
+# same rename Makefile.am's AM_CPPFLAGS applies to the whole directory. ---
+CC -Dbin_dummy_emulation=bin_vanilla_emulation -o bu_not-ranlib.o binutils/not-ranlib.c
+CC -Dbin_dummy_emulation=bin_vanilla_emulation -o bu_is-ranlib.o binutils/is-ranlib.c
+CC -Dbin_dummy_emulation=bin_vanilla_emulation -o bu_arsup.o binutils/arsup.c
+CC -o bu_rename.o binutils/rename.c
+CC -Dbin_dummy_emulation=bin_vanilla_emulation -o bu_binemul.o binutils/binemul.c
+CC -o bu_arparse.o binutils/arparse.c
+CC -o bu_arlex.o binutils/arlex.c
+CC -o bu_emul_vanilla.o binutils/emul_vanilla.c
+
+# --- nm ---
+CC -DBINDIR=\"${out}/bin\" -DTOOLLIBDIR=\"${out}/lib\" -o bu_nm.o binutils/nm.c
+CC -o bu_demanguse.o binutils/demanguse.c
+
+# --- objcopy ---
+CC -DBINDIR=\"${out}/bin\" -DTOOLLIBDIR=\"${out}/lib\" -o bu_not-strip.o binutils/not-strip.c
+CC -o bu_rddbg.o binutils/rddbg.c
+CC -o bu_debug.o binutils/debug.c
+CC -o bu_stabs.o binutils/stabs.c
+CC -o bu_rdcoff.o binutils/rdcoff.c
+CC -o bu_wrstabs.o binutils/wrstabs.c
+
+# --- link ---
+#
+# -nostdlib, crt1.o and -lc/-lntdll named outright: a PE-target tcc adds
+# neither a startup object nor a default C library the way the ELF side
+# does, and the default it does reach for (msvcrt, kernel32) is not what
+# this bootstrap has.  ntdll.def is the import library ntlibc programs
+# resolve their kernel calls through -- see ntlibc's own build.kaem.
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o ar.exe archive.o archures.o bfd.o bfdio.o cache.o coff-bfd.o compress.o corefile.o format.o hash.o libbfd.o linker.o merge.o opncls.o reloc.o section.o simple.o stab-syms.o stabs.o syms.o binary.o ihex.o srec.o tekhex.o verilog.o pe-i386.o peigen.o cofflink.o coffgen.o dwarf2.o pei-i386.o elf32-i386.o elfxx-x86.o elf-ifunc.o elf-vxworks.o elf32.o elf.o elflink.o elf-attrs.o elf-strtab.o elf-eh-frame.o elf-properties.o elf-sframe.o dwarf1.o pdb.o elf32-gen.o plugin.o cpu-i386.o cpu-iamcu.o archive64.o targets.o z_adler32.o z_compress.o z_crc32.o z_deflate.o z_infback.o z_inflate.o z_inftrees.o z_inffast.o z_trees.o z_uncompr.o z_zutil.o sf_sframe.o sf_sframe-error.o li_regex.o li_cplus-dem.o li_cp-demangle.o li_md5.o li_sha1.o li_alloca.o li_argv.o li_bsearch_r.o li_choose-temp.o li_concat.o li_cp-demint.o li_crc32.o li_d-demangle.o li_dwarfnames.o li_dyn-string.o li_fdmatch.o li_fibheap.o li_filedescriptor.o li_filename_cmp.o li_floatformat.o li_fnmatch.o li_fopen_unlocked.o li_getopt.o li_getopt1.o li_getpwd.o li_getruntime.o li_hashtab.o li_hex.o li_lbasename.o li_ldirname.o li_lrealpath.o li_make-relative-prefix.o li_make-temp-file.o li_objalloc.o li_obstack.o li_partition.o li_pexecute.o li_physmem.o li_pex-common.o li_pex-one.o li_pex-unix.o li_vprintf-support.o li_rust-demangle.o li_safe-ctype.o li_simple-object.o li_simple-object-coff.o li_simple-object-elf.o li_simple-object-mach-o.o li_simple-object-xcoff.o li_sort.o li_spaces.o li_splay-tree.o li_stack-limit.o li_strerror.o li_strsignal.o li_timeval-utils.o li_unlink-if-ordinary.o li_xasprintf.o li_xatexit.o li_xexit.o li_xmalloc.o li_xmemdup.o li_xstrdup.o li_xstrerror.o li_xstrndup.o li_xvasprintf.o bu_nt-rpath.o bu_bucomm.o bu_version.o bu_filemode.o bu_not-ranlib.o bu_arsup.o bu_rename.o bu_binemul.o bu_arparse.o bu_arlex.o bu_emul_vanilla.o -L ${ntlibc}/lib -lc -lntdll
+
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o ranlib.exe archive.o archures.o bfd.o bfdio.o cache.o coff-bfd.o compress.o corefile.o format.o hash.o libbfd.o linker.o merge.o opncls.o reloc.o section.o simple.o stab-syms.o stabs.o syms.o binary.o ihex.o srec.o tekhex.o verilog.o pe-i386.o peigen.o cofflink.o coffgen.o dwarf2.o pei-i386.o elf32-i386.o elfxx-x86.o elf-ifunc.o elf-vxworks.o elf32.o elf.o elflink.o elf-attrs.o elf-strtab.o elf-eh-frame.o elf-properties.o elf-sframe.o dwarf1.o pdb.o elf32-gen.o plugin.o cpu-i386.o cpu-iamcu.o archive64.o targets.o z_adler32.o z_compress.o z_crc32.o z_deflate.o z_infback.o z_inflate.o z_inftrees.o z_inffast.o z_trees.o z_uncompr.o z_zutil.o sf_sframe.o sf_sframe-error.o li_regex.o li_cplus-dem.o li_cp-demangle.o li_md5.o li_sha1.o li_alloca.o li_argv.o li_bsearch_r.o li_choose-temp.o li_concat.o li_cp-demint.o li_crc32.o li_d-demangle.o li_dwarfnames.o li_dyn-string.o li_fdmatch.o li_fibheap.o li_filedescriptor.o li_filename_cmp.o li_floatformat.o li_fnmatch.o li_fopen_unlocked.o li_getopt.o li_getopt1.o li_getpwd.o li_getruntime.o li_hashtab.o li_hex.o li_lbasename.o li_ldirname.o li_lrealpath.o li_make-relative-prefix.o li_make-temp-file.o li_objalloc.o li_obstack.o li_partition.o li_pexecute.o li_physmem.o li_pex-common.o li_pex-one.o li_pex-unix.o li_vprintf-support.o li_rust-demangle.o li_safe-ctype.o li_simple-object.o li_simple-object-coff.o li_simple-object-elf.o li_simple-object-mach-o.o li_simple-object-xcoff.o li_sort.o li_spaces.o li_splay-tree.o li_stack-limit.o li_strerror.o li_strsignal.o li_timeval-utils.o li_unlink-if-ordinary.o li_xasprintf.o li_xatexit.o li_xexit.o li_xmalloc.o li_xmemdup.o li_xstrdup.o li_xstrerror.o li_xstrndup.o li_xvasprintf.o bu_nt-rpath.o bu_bucomm.o bu_version.o bu_filemode.o bu_is-ranlib.o bu_arsup.o bu_rename.o bu_binemul.o bu_arparse.o bu_arlex.o bu_emul_vanilla.o -L ${ntlibc}/lib -lc -lntdll
+
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o nm.exe archive.o archures.o bfd.o bfdio.o cache.o coff-bfd.o compress.o corefile.o format.o hash.o libbfd.o linker.o merge.o opncls.o reloc.o section.o simple.o stab-syms.o stabs.o syms.o binary.o ihex.o srec.o tekhex.o verilog.o pe-i386.o peigen.o cofflink.o coffgen.o dwarf2.o pei-i386.o elf32-i386.o elfxx-x86.o elf-ifunc.o elf-vxworks.o elf32.o elf.o elflink.o elf-attrs.o elf-strtab.o elf-eh-frame.o elf-properties.o elf-sframe.o dwarf1.o pdb.o elf32-gen.o plugin.o cpu-i386.o cpu-iamcu.o archive64.o targets.o z_adler32.o z_compress.o z_crc32.o z_deflate.o z_infback.o z_inflate.o z_inftrees.o z_inffast.o z_trees.o z_uncompr.o z_zutil.o sf_sframe.o sf_sframe-error.o li_regex.o li_cplus-dem.o li_cp-demangle.o li_md5.o li_sha1.o li_alloca.o li_argv.o li_bsearch_r.o li_choose-temp.o li_concat.o li_cp-demint.o li_crc32.o li_d-demangle.o li_dwarfnames.o li_dyn-string.o li_fdmatch.o li_fibheap.o li_filedescriptor.o li_filename_cmp.o li_floatformat.o li_fnmatch.o li_fopen_unlocked.o li_getopt.o li_getopt1.o li_getpwd.o li_getruntime.o li_hashtab.o li_hex.o li_lbasename.o li_ldirname.o li_lrealpath.o li_make-relative-prefix.o li_make-temp-file.o li_objalloc.o li_obstack.o li_partition.o li_pexecute.o li_physmem.o li_pex-common.o li_pex-one.o li_pex-unix.o li_vprintf-support.o li_rust-demangle.o li_safe-ctype.o li_simple-object.o li_simple-object-coff.o li_simple-object-elf.o li_simple-object-mach-o.o li_simple-object-xcoff.o li_sort.o li_spaces.o li_splay-tree.o li_stack-limit.o li_strerror.o li_strsignal.o li_timeval-utils.o li_unlink-if-ordinary.o li_xasprintf.o li_xatexit.o li_xexit.o li_xmalloc.o li_xmemdup.o li_xstrdup.o li_xstrerror.o li_xstrndup.o li_xvasprintf.o bu_nt-rpath.o bu_bucomm.o bu_version.o bu_filemode.o bu_nm.o bu_demanguse.o -L ${ntlibc}/lib -lc -lntdll
+
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o objcopy.exe archive.o archures.o bfd.o bfdio.o cache.o coff-bfd.o compress.o corefile.o format.o hash.o libbfd.o linker.o merge.o opncls.o reloc.o section.o simple.o stab-syms.o stabs.o syms.o binary.o ihex.o srec.o tekhex.o verilog.o pe-i386.o peigen.o cofflink.o coffgen.o dwarf2.o pei-i386.o elf32-i386.o elfxx-x86.o elf-ifunc.o elf-vxworks.o elf32.o elf.o elflink.o elf-attrs.o elf-strtab.o elf-eh-frame.o elf-properties.o elf-sframe.o dwarf1.o pdb.o elf32-gen.o plugin.o cpu-i386.o cpu-iamcu.o archive64.o targets.o z_adler32.o z_compress.o z_crc32.o z_deflate.o z_infback.o z_inflate.o z_inftrees.o z_inffast.o z_trees.o z_uncompr.o z_zutil.o sf_sframe.o sf_sframe-error.o li_regex.o li_cplus-dem.o li_cp-demangle.o li_md5.o li_sha1.o li_alloca.o li_argv.o li_bsearch_r.o li_choose-temp.o li_concat.o li_cp-demint.o li_crc32.o li_d-demangle.o li_dwarfnames.o li_dyn-string.o li_fdmatch.o li_fibheap.o li_filedescriptor.o li_filename_cmp.o li_floatformat.o li_fnmatch.o li_fopen_unlocked.o li_getopt.o li_getopt1.o li_getpwd.o li_getruntime.o li_hashtab.o li_hex.o li_lbasename.o li_ldirname.o li_lrealpath.o li_make-relative-prefix.o li_make-temp-file.o li_objalloc.o li_obstack.o li_partition.o li_pexecute.o li_physmem.o li_pex-common.o li_pex-one.o li_pex-unix.o li_vprintf-support.o li_rust-demangle.o li_safe-ctype.o li_simple-object.o li_simple-object-coff.o li_simple-object-elf.o li_simple-object-mach-o.o li_simple-object-xcoff.o li_sort.o li_spaces.o li_splay-tree.o li_stack-limit.o li_strerror.o li_strsignal.o li_timeval-utils.o li_unlink-if-ordinary.o li_xasprintf.o li_xatexit.o li_xexit.o li_xmalloc.o li_xmemdup.o li_xstrdup.o li_xstrerror.o li_xstrndup.o li_xvasprintf.o bu_nt-rpath.o bu_bucomm.o bu_version.o bu_filemode.o bu_not-strip.o bu_rename.o bu_rddbg.o bu_debug.o bu_stabs.o bu_rdcoff.o bu_wrstabs.o -L ${ntlibc}/lib -lc -lntdll
+
+# --- run every one of them before installing anything: a binutils that
+# cannot say what it is is not a binutils worth handing to the next
+# stage. ---
+./ar.exe --version
+./ranlib.exe --version
+./nm.exe --version
+./objcopy.exe --version
+
+# And a real round trip, ar and ranlib together, over an object this same
+# build already produced: archive it, index it, list it back, copy it
+# through objcopy, and read its symbols with nm -- the four programs
+# actually agreeing on one file, not four version strings in isolation.
+./ar.exe rc selftest.a bu_bucomm.o
+./ranlib.exe selftest.a
+./ar.exe t selftest.a
+./objcopy.exe bu_bucomm.o selftest-copy.o
+./nm.exe selftest-copy.o
+
+${bin_mkdir} -p ${out}/bin
+${bin_cp} ar.exe ${out}/bin/ar.exe
+${bin_cp} ranlib.exe ${out}/bin/ranlib.exe
+${bin_cp} nm.exe ${out}/bin/nm.exe
+${bin_cp} objcopy.exe ${out}/bin/objcopy.exe
