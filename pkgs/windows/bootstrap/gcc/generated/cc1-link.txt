@@ -1,0 +1,178 @@
+# cc1's real, complete OBJS/C_OBJS closure and link line, recovered directly
+# from the off-chain reference build (/tmp/claude/gcc-scope/build/gcc/Makefile
+# and make3.log's actual `ar rc libbackend.a ...` / `gcc -o cc1 ...` lines --
+# not re-derived from gcc's documentation or generic knowledge of its source
+# layout, per this package's established discipline). Kept as a package-owned
+# artifact so build.kaem's per-file compile/link lines can be transcribed from
+# real data with no re-derivation, the same reason generated/libiberty/config.h
+# and generated/*/config.h are vendored rather than regenerated from a guess.
+#
+# ---------------------------------------------------------------------------
+# 1. libbackend.a -- OBJS-common + OBJS-md ($(out_object_file) = i386.o) +
+#    host_hook_obj + OBJS-archive, from gcc/Makefile:1186-1494 cross-checked
+#    against the real `ar rc libbackend.a ...` line at make3.log:67250.
+#    ONE substitution from the reference list below: host-linux.o -> our own
+#    host-default.o (537e2c8's decision -- ntlibc has no host-linux.c
+#    equivalent, GCC's own generic host-default.c fallback is used instead;
+#    every other name here is unchanged from the reference's real link line).
+#    winnt.o and winnt-stubs.o are EXTRA_OBJS for the i386 pe/mingw config.gcc
+#    stanza (target-specific, not host-specific -- real for this target
+#    either way).
+# ---------------------------------------------------------------------------
+insn-attrtab.o insn-automata.o insn-emit.o insn-extract.o insn-modes.o
+insn-opinit.o insn-output.o insn-peep.o insn-preds.o insn-recog.o
+insn-enums.o ggc-page.o alias.o alloc-pool.o auto-inc-dec.o bb-reorder.o
+bitmap.o bt-load.o builtins.o caller-save.o calls.o cfg.o cfganal.o
+cfgbuild.o cfgcleanup.o cfgexpand.o cfghooks.o cfglayout.o cfgloop.o
+cfgloopanal.o cfgloopmanip.o cfgrtl.o combine.o combine-stack-adj.o
+compare-elim.o convert.o coverage.o cse.o cselib.o dbxout.o dbgcnt.o dce.o
+ddg.o debug.o df-core.o df-problems.o df-scan.o dfp.o diagnostic.o dojump.o
+dominance.o domwalk.o double-int.o dse.o dwarf2asm.o dwarf2out.o ebitmap.o
+emit-rtl.o et-forest.o except.o explow.o expmed.o expr.o final.o
+fixed-value.o fold-const.o function.o fwprop.o gcse.o ggc-common.o gimple.o
+gimple-iterator.o gimple-fold.o gimple-low.o gimple-pretty-print.o
+gimplify.o godump.o graph.o graphds.o graphite.o graphite-blocking.o
+graphite-clast-to-gimple.o graphite-cloog-util.o graphite-dependences.o
+graphite-flattening.o graphite-interchange.o graphite-poly.o
+graphite-ppl.o graphite-scop-detection.o graphite-sese-to-poly.o
+gtype-desc.o haifa-sched.o hooks.o hwint.o ifcvt.o implicit-zee.o
+init-regs.o input.o integrate.o intl.o ira.o ira-build.o ira-costs.o
+ira-conflicts.o ira-color.o ira-emit.o ira-lives.o jump.o langhooks.o
+lcm.o lists.o loop-doloop.o loop-init.o loop-invariant.o loop-iv.o
+loop-unroll.o loop-unswitch.o lower-subreg.o lto-cgraph.o
+lto-streamer-in.o lto-streamer-out.o lto-section-in.o lto-section-out.o
+lto-symtab.o lto-opts.o lto-streamer.o lto-compress.o mcf.o
+mode-switching.o modulo-sched.o omega.o omp-low.o optabs.o options.o
+opts-common.o opts-global.o opts.o params.o passes.o plugin.o
+pointer-set.o postreload-gcse.o postreload.o predict.o pretty-print.o
+print-rtl.o print-tree.o profile.o real.o realmpfr.o recog.o reg-stack.o
+regcprop.o reginfo.o regmove.o regrename.o regstat.o reload.o reload1.o
+reorg.o resource.o rtl-error.o rtl.o rtlanal.o rtlhooks.o sbitmap.o
+sched-deps.o sched-ebb.o sched-rgn.o sched-vis.o sdbout.o sel-sched-ir.o
+sel-sched-dump.o sel-sched.o sese.o simplify-rtx.o sparseset.o sreal.o
+stack-ptr-mod.o statistics.o stmt.o stor-layout.o store-motion.o
+stringpool.o target-globals.o targhooks.o timevar.o toplev.o tracer.o
+tree-affine.o tree-call-cdce.o tree-cfg.o tree-cfgcleanup.o tree-chrec.o
+tree-complex.o tree-data-ref.o tree-dfa.o tree-diagnostic.o tree-dump.o
+tree-eh.o tree-emutls.o tree-if-conv.o tree-into-ssa.o tree-iterator.o
+tree-loop-distribution.o tree-nested.o tree-nrv.o tree-object-size.o
+tree-optimize.o tree-outof-ssa.o tree-parloops.o tree-phinodes.o
+tree-predcom.o tree-pretty-print.o tree-profile.o tree-scalar-evolution.o
+tree-sra.o tree-switch-conversion.o tree-ssa-address.o tree-ssa-alias.o
+tree-ssa-ccp.o tree-ssa-coalesce.o tree-ssa-copy.o tree-ssa-copyrename.o
+tree-ssa-dce.o tree-ssa-dom.o tree-ssa-dse.o tree-ssa-forwprop.o
+tree-ssa-ifcombine.o tree-ssa-live.o tree-ssa-loop-ch.o tree-ssa-loop-im.o
+tree-ssa-loop-ivcanon.o tree-ssa-loop-ivopts.o tree-ssa-loop-manip.o
+tree-ssa-loop-niter.o tree-ssa-loop-prefetch.o tree-ssa-loop-unswitch.o
+tree-ssa-loop.o tree-ssa-math-opts.o tree-ssa-operands.o tree-ssa-phiopt.o
+tree-ssa-phiprop.o tree-ssa-pre.o tree-ssa-propagate.o tree-ssa-reassoc.o
+tree-ssa-sccvn.o tree-ssa-sink.o tree-ssa-structalias.o tree-ssa-ter.o
+tree-ssa-threadedge.o tree-ssa-threadupdate.o tree-ssa-uncprop.o
+tree-ssa-uninit.o tree-ssa.o tree-ssanames.o tree-stdarg.o tree-tailcall.o
+tree-vect-generic.o tree-vect-patterns.o tree-vect-data-refs.o
+tree-vect-stmts.o tree-vect-loop.o tree-vect-loop-manip.o
+tree-vect-slp.o tree-vectorizer.o tree-vrp.o tree.o value-prof.o
+var-tracking.o varasm.o vec.o version.o vmsdbgout.o web.o xcoffout.o
+i386.o winnt.o winnt-stubs.o host-default.o
+cgraph.o cgraphbuild.o cgraphunit.o cppbuiltin.o cppdefault.o incpath.o
+ipa-cp.o ipa-split.o ipa-inline.o ipa-prop.o ipa-pure-const.o
+ipa-reference.o ipa-ref.o ipa-struct-reorg.o ipa-type-escape.o ipa-utils.o
+ipa.o matrix-reorg.o prefix.o tree-inline.o tree-nomudflap.o varpool.o
+
+# ---------------------------------------------------------------------------
+# 2. Real cc1 link line, from make3.log:67256-67257 (the actual final `gcc
+#    -o cc1 ...` invocation, not the rule text). C_OBJS (front-end) +
+#    cc1-checksum.o (genchecksum's output over the C_OBJS list, real per
+#    make3.log:67252's `build/genchecksum` invocation -- a trivial checksum
+#    generator, in-tree, not yet scoped as its own build.kaem step) + main.o
+#    + libbackend.a + libcpp.a + libdecnumber.a + libiberty.a, then
+#    -lmpc -lmpfr -lgmp against gmp/mpfr/mpc's own .libs, then -lz against
+#    zlib (already bundled, per 537e2c8). No -rdynamic equivalent needed --
+#    that flag is ELF-shared-library-symbol-export, meaningless for a PE
+#    static link with no plugin loader in this bootstrap's scope.
+# ---------------------------------------------------------------------------
+c-lang.o c-family/stub-objc.o attribs.o c-errors.o c-decl.o c-typeck.o
+c-convert.o c-aux-info.o c-objc-common.o c-parser.o tree-mudflap.o
+c-family/c-common.o c-family/c-cppbuiltin.o c-family/c-dump.o
+c-family/c-format.o c-family/c-gimplify.o c-family/c-lex.o
+c-family/c-omp.o c-family/c-opts.o c-family/c-pch.o c-family/c-ppoutput.o
+c-family/c-pragma.o c-family/c-pretty-print.o c-family/c-semantics.o
+c-family/c-ada-spec.o i386-c.o msformat-c.o
+cc1-checksum.o main.o
+libbackend.a ../libcpp/libcpp.a ../libdecnumber/libdecnumber.a
+../libiberty/libiberty.a
+-lmpc -lmpfr -lgmp -lz
+
+# ---------------------------------------------------------------------------
+# 3. Real install-path -D values from the reference's actual gcc.c compile
+#    line (make3.log:66264, the `-DSTANDARD_STARTFILE_PREFIX=...` block),
+#    with this package's substitution already decided in 5c4abbd
+#    (${out} for /usr/local, i686-pc-pe for the reference's
+#    i686-pc-mingw32) and confirmed to match ../binutils/build.kaem's own
+#    -DBINDIR=\"${out}/bin\" idiom (binutils/build.kaem:106):
+#
+#      reference (off-chain build, /usr/local prefix, i686-pc-mingw32):
+#        -DSTANDARD_STARTFILE_PREFIX=\"../../../\"
+#        -DSTANDARD_EXEC_PREFIX=\"/usr/local/lib/gcc/\"
+#        -DSTANDARD_LIBEXEC_PREFIX=\"/usr/local/libexec/gcc/\"
+#        -DDEFAULT_TARGET_VERSION=\"4.6.4\"
+#        -DDEFAULT_TARGET_MACHINE=\"i686-pc-mingw32\"
+#        -DSTANDARD_BINDIR_PREFIX=\"/usr/local/bin/\"
+#        -DTOOLDIR_BASE_PREFIX=\"../../../../\"
+#        -DCONFIGURE_SPECS=\"\"
+#
+#      this package (${out} substituted for /usr/local, target renamed):
+#        -DSTANDARD_STARTFILE_PREFIX=\"../../../\"        (unchanged: relative)
+#        -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\"
+#        -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\"
+#        -DDEFAULT_TARGET_VERSION=\"4.6.4\"                (unchanged)
+#        -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\"
+#        -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\"
+#        -DTOOLDIR_BASE_PREFIX=\"../../../../\"            (unchanged: relative)
+#        -DCONFIGURE_SPECS=\"\"                            (unchanged: empty)
+#
+#    STANDARD_STARTFILE_PREFIX and TOOLDIR_BASE_PREFIX are both relative
+#    paths (walked from wherever gcc.exe's own argv[0] resolves to at
+#    runtime, via make_relative_prefix -- see gcc.c's real use of
+#    standard_startfile_prefix), not literal /usr/local references, so
+#    neither needs a ${out} substitution; only the three absolute-path
+#    prefixes and the target triple actually changed.
+#
+#    cppbuiltin.c and cppdefault.c take no install-path -D flags of their
+#    own beyond the same STANDARD_EXEC_PREFIX/GCC_INCLUDE_DIR machinery
+#    already covered above -- GCC_INCLUDE_DIR is unset for this
+#    configuration (real reference compile line has no -DGCC_INCLUDE_DIR;
+#    cppdefault.c's own #ifdef GCC_INCLUDE_DIR branch is dead code here,
+#    confirmed directly rather than assumed) so cpp_GCC_INCLUDE_DIR falls
+#    to the empty-string branch (cppdefault.c:106-111) already in real
+#    upstream source -- no substitution needed there at all.
+
+# ---------------------------------------------------------------------------
+# 4. The 8 C99 _Complex libgcc2.c lib2funcs tcc can't compile
+#    (__mulsc3/__muldc3/__mulxc3/__multc3/__divsc3/__divdc3/__divxc3/__divtc3):
+#    grepped for callers across the ENTIRE closed source set this package
+#    actually builds (gcc/*.c, gcc/c-family/*.c, gmp-4.3.2/*.c,
+#    mpfr-2.4.2/*.c, mpc/src/*.c) -- zero references to any of the eight
+#    symbol names anywhere. The one place complex host arithmetic exists at
+#    all in this closure -- mpc/src/get_x.c's mpc_get_dc/mpc_get_ldc and
+#    set_x.c's mpc_set_dc/mpc_set_ldc, real uses of C's `double _Complex`
+#    type doing genuine complex multiply/add (`I * im + re`) -- are
+#    themselves never called by gcc's own source (grepped gcc/*.c gcc/*.h
+#    for mpc_get_dc/mpc_set_dc/mpc_get_ldc/mpc_set_ldc: zero matches; GCC's
+#    real/complex constant folding goes through mpc_mul/mpc_div on
+#    mpc_srcptr, pure GMP/MPFR, never through C's native _Complex type at
+#    all). Since a static-archive member is only pulled into the link when
+#    one of its symbols is referenced, get_x.o/set_x.o never even get
+#    linked into anything cc1 needs -- so it does not matter, for THIS
+#    bootstrap, whether tcc's own `I * double` codegen would want a
+#    __muldc3 call or not; the code path is unreachable from cc1's actual
+#    call graph. Confirmed dead code for the host side, same category as
+#    ../binutils's own confirmed-dead-code exclusions.
+#
+#    Verdict: exclude all 8 from libgcc's L_* file list (LIB2FUNCS_EXCLUDE
+#    at the build.kaem level, matching gcc's own Makefile.in variable name)
+#    with this file cited as the reference for why -- target C programs
+#    built by this bootstrap's gcc.exe that use C99 _Complex multiply/
+#    divide will fail to link (undefined __muldc3 etc.), which is an
+#    accepted, documented gap, not an oversight. Nothing in gcc/gmp/mpfr/
+#    mpc/cc1's own build requires them.
