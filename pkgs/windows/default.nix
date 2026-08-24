@@ -112,6 +112,13 @@ let
     # pre-generated parser, so it needs no bison either.
     gawk = callPackage ./bootstrap/gawk { };
 
+    # And the awk everything above here actually uses.  The seed above is
+    # what a modern config.status is too new for; this is the one it needs.
+    # It is built with the seed rather than by it -- there is no configure
+    # here to run an awk script -- so the edge to it is a declared input
+    # that nothing in the build executes.  See its default.nix.
+    gawk5 = callPackage ./bootstrap/gawk5 { bootGawk = self.gawk; };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
