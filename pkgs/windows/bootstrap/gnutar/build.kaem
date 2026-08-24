@@ -22,17 +22,28 @@ cd ${NIX_BUILD_TOP}/tar-${version}
 # written for -- and the third is cosmetic but earns its place in a bootstrap
 # where a diagnostic is the only debugging channel there is.
 #
-#   nt-no-symlinks       ntlibc answers yes to every symlink question and
-#                        then does not deliver.  Withdrawing S_ISLNK puts tar
-#                        into a configuration it already supports and turns a
-#                        silently wrong file into a visible refusal.
+#   nt-no-symlinks       ntlibc's symlink() works, and that is the problem.
+#                        Under Wine it produces something Wine reads back as
+#                        a symbolic link and nothing else does -- a
+#                        zero-length file with '?' on the end of its name --
+#                        and on real NT it needs a privilege the build may
+#                        not hold.  Withdrawing S_ISLNK puts tar into a
+#                        configuration it already supports, and decides that
+#                        once rather than per host.
 #   nt-readonly-attribute
 #                        a file created without owner write picks up NT's
 #                        read-only attribute, after which its timestamps and
 #                        attributes can no longer be set -- so extracting any
 #                        archive containing a 0444 file, which is nearly every
 #                        source tarball, failed on both the utime and the
-#                        chmod.  Create writable, chmod last.
+#                        chmod.  Create writable, chmod last.  As of the
+#                        ntlibc pinned here chmod() and utimensat() clear the
+#                        attribute themselves and both calls succeed on a
+#                        0444 file, so this patch no longer carries the build;
+#                        it stays because creating writable and applying the
+#                        real mode last is right whatever the C library does,
+#                        and because it is what makes the order independent
+#                        of that library's version.
 #   nt-program-name      argv[0] arrives as a full NT path.
 #
 # Each file says the rest in its own header.
