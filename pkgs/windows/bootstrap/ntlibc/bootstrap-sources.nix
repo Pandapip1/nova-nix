@@ -15,9 +15,9 @@
 # pin's own `rev`/`narHash`, there is nothing to prefetch by hand.
 { }:
 rec {
-  version = "0-unstable-2026-08-23";
+  version = "0-unstable-2026-08-24";
 
-  rev = "d89ec5d17fdd370072ae50c8ed2949d23ceb72b6";
+  rev = "73131bb173fc2dde78252eb62bf095b2fb842be6";
   ref = "main";
 
   src = builtins.fetchGit {
