@@ -137,12 +137,13 @@ let
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
 
-    # gcc is not packaged yet, and neither are binutils' as/ld (see
-    # ./bootstrap/binutils/default.nix for why -- both need a generation
-    # step, bison for ld's deffilep.c and genscripts.sh for its ldscripts,
-    # that this chain does not have yet). ar, ranlib, nm and objcopy are
-    # below. What follows is settled, for whoever adds gcc/as/ld, so the
-    # question does not have to be re-opened: what target triple
+    # gcc is not packaged yet. binutils' as, ld and dlltool are, alongside
+    # ar, ranlib, nm and objcopy, all below -- see ./bootstrap/binutils/
+    # default.nix's "as/ld generated files" section for what that took
+    # (genscripts.sh off-chain for ld's i386pe emulation glue and
+    # ldscripts; nothing at all for as; bison was never actually needed).
+    # What follows is settled, checked against a real as+ld link under
+    # ntlibc rather than assumed: what target triple
     # binutils/ld should be configured with, given that this chain's libc
     # is ntlibc, not mingw's runtime.
     #
@@ -220,8 +221,7 @@ let
     # ntlibc's crt/crt1.c, lib/ntdll.def and include/ntlibc/delayload.h --
     # not from memory of how mingw toolchains usually work elsewhere.
     #
-    # ar, ranlib, nm, objcopy: the four of GNU binutils that need neither
-    # a bison grammar nor genscripts.sh's ldscripts. See its default.nix.
+    # ar, ranlib, nm, objcopy, as, ld, dlltool: see its default.nix.
     binutils = callPackage ./bootstrap/binutils { };
   };
 in
