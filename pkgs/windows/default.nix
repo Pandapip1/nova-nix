@@ -106,6 +106,12 @@ let
     # where POSIX has nine mode bits.
     gnutar = callPackage ./bootstrap/gnutar { };
 
+    # And the awk every ./configure above here runs from its first hundred
+    # lines.  3.0.6 is the seed awk: old enough and small enough to build
+    # with no awk in the picture, and its release tarball ships the
+    # pre-generated parser, so it needs no bison either.
+    gawk = callPackage ./bootstrap/gawk { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
