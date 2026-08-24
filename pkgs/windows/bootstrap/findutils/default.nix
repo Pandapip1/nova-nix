@@ -138,12 +138,19 @@
 #         one of the MOUNTED_* macros to make it compile would have been the
 #         mes-libc mistake in reverse.
 #   -newer, -mtime, -atime, -newerXY, -printf %T
-#         work here, and this is the result to trust least.  Timestamps are
-#         read correctly, but the ntlibc pinned here has a known real-Windows
-#         regression in which utimensat/utime/futimesat FAIL on ordinary
-#         files, and that is green under wine and red on NT.  So every
-#         timestamp-dependent result in this package is wine-only in a
-#         stronger sense than the rest.
+#         work here, and used to be the result to trust least: ntlibc
+#         d89ec5d had a real-Windows regression in which
+#         utimensat/utime/futimesat FAILED on ordinary files, green under
+#         wine and red on NT (see pkgs/windows/bootstrap/gnutar/build.kaem's
+#         nt-readonly-attribute note for the mechanism).  The pin now at
+#         73131bb carries ntlibc's own fix, reported green on real-Windows
+#         CI -- not independently verified against real hardware here, only
+#         reproduced at the mechanism level under wine.  find itself only
+#         reads timestamps (stat, not utimensat), so this package was never
+#         exposed to the write side of that regression; it is noted here
+#         because -newer et al. are exactly the kind of result the bug would
+#         have made silently wrong on real NT while reading correct-looking
+#         green results under wine.
 #   -context
 #         refuses, as GNU find does on any host without libselinux; the stub
 #         in shim/selinux/ makes is_selinux_enabled() return 0.

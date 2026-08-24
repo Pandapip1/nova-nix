@@ -137,9 +137,104 @@ let
     # does by not needing them.  See its default.nix.
     findutils = callPackage ./bootstrap/findutils { };
 
+    # And the tool binutils' configure runs to check its own generated files
+    # against what it expects, and that a patch-based build takes its patches
+    # in.  The smallest gnulib import on this side yet, and the first where
+    # that smallness -- not needing configure's generated headers -- turned
+    # out to follow from the package's own age rather than from anything this
+    # port did differently.  See its default.nix.
+    diffutils = callPackage ./bootstrap/diffutils { };
+
     # The shared tinycc, told what it is targeting: 32-bit PE32 on x86, whose
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
+
+    # gcc is not packaged yet. binutils' as, ld and dlltool are, alongside
+    # ar, ranlib, nm and objcopy, all below -- see ./bootstrap/binutils/
+    # default.nix's "as/ld generated files" section for what that took
+    # (genscripts.sh off-chain for ld's i386pe emulation glue and
+    # ldscripts; nothing at all for as; bison was never actually needed).
+    # What follows is settled, checked against a real as+ld link under
+    # ntlibc rather than assumed: what target triple
+    # binutils/ld should be configured with, given that this chain's libc
+    # is ntlibc, not mingw's runtime.
+    #
+    # The obvious answer -- i686-pc-mingw32, since that is the nearest stock
+    # config for a binutils this old -- was never checked against what it
+    # actually asks a target to be. It does not. Read against binutils
+    # 2.46.0 (the version pinned at ../linux/bootstrap/binutils, tarball
+    # already fetched there):
+    #
+    #   - bfd/config.bfd's `i[3-7]86-*-mingw32* | *-cygwin* | *-winnt | *-pe)`
+    #     stanza treats all four spellings identically: targ_defvec =
+    #     i386_pe_vec, same selvecs, same targ_underscore. "mingw32" carries
+    #     no separate behaviour there -- it is one alternative among four
+    #     that all mean "an i386 PE/COFF object", "pe" being the plainest.
+    #   - ld/configure.tgt and gas/configure.tgt agree: `i[3-7]86-*-pe)` gets
+    #     the identical targ_emul=i386pe / fmt=coff,em=pe that mingw32,
+    #     cygwin and winnt get. Nothing i386pe-specific reads the OS field
+    #     back out to ask "is this actually mingw"; the four names are
+    #     synonyms at every selection point in bfd, gas and ld.
+    #   - The only `#ifdef __MINGW32__` / `__CYGWIN__` code in bfd
+    #     (bfd/peXXigen.c, bfd/pe-x86_64.c, bfd/bfdio.c) is guarded on the
+    #     macro the *compiler building binutils* predefines when *binutils
+    #     itself* is hosted on mingw/cygwin -- i.e. it is about what binutils
+    #     runs on, not what it targets. Built here by tcc against ntlibc,
+    #     that macro is simply never defined, and the branches are dead code.
+    #   - `./config.sub i686-pc-pe` parses cleanly (binutils-2.46.0's own
+    #     config.sub, checked directly), so nothing needs a made-up triple.
+    #
+    # So: use i686-pc-pe, not i686-pc-mingw32. Same bfd/ld/gas backend,
+    # nothing lost, and it does not spell out a runtime ("mingw32") this
+    # chain does not have and does not want autoconf scripts inferring
+    # things from.
+    #
+    # What *is* a real interface question, not a naming one, and has to be
+    # handled in the binutils and later gcc packages regardless of the
+    # triple string chosen:
+    #
+    #   1. Entry point. GNU ld's PE emulation (ld/emultempl/pe.em,
+    #      set_entry_point) defaults the entry symbol to "mainCRTStartup"
+    #      (or "WinMainCRTStartup" for a few legacy subsystem versions).
+    #      ntlibc's crt1.c defines the entry point as `_start`, and this
+    #      chain's own tcc fork already agrees -- tccpe.c's PE linker names
+    #      "_start" as the entry when linking -nostdlib (see the comment
+    #      at ntlibc/crt/crt1.c:8). ld's default does not match either; any
+    #      link against ntlibc's crt1.o needs an explicit `-e _start`
+    #      (or `--entry _start`), unconditionally, independent of triple.
+    #   2. Import libraries. ntlibc does not build a conventional import
+    #      library -- it ships lib/ntdll.def, and this chain's tcc reads a
+    #      .def directly as an input library (tccpe.c's pe_load_def), which
+    #      is a tcc extension. GNU ld has no equivalent: ld/emultempl/pe.em
+    #      only reads a .def file to learn what a DLL *being linked* should
+    #      export (building an implib alongside a DLL you are creating), not
+    #      to resolve imports *from* an existing DLL. The standard GNU
+    #      toolchain answer is `dlltool -d lib/ntdll.def -l libntdll.a`, run
+    #      once, to synthesize a real archive import library that `-lntdll`
+    #      then resolves the ordinary way -- dlltool needs no live ntdll.dll
+    #      to do this, only the .def. This has to happen somewhere in the
+    #      binutils (or ntlibc-consuming) package; it is not automatic.
+    #   3. Delay-import directory (PE directory entry 13). ntlibc's own
+    #      delay-load mechanism (include/ntlibc/delayload.h) deliberately
+    #      leaves this directory unpopulated -- tcc's linker cannot write it
+    #      and nothing currently reads it. GNU ld does not populate it
+    #      either for an ordinary link; the machinery that does
+    #      (bfd/peXXigen.c's PE_DELAY_IMPORT_DESCRIPTOR handling, dlltool's
+    #      `--delay`/`-y`, the `__delayLoadHelper2` MSVC convention) is only
+    #      exercised if dlltool is explicitly asked to build a delay-import
+    #      stub library. As long as that flag is never used, ordinary
+    #      dlltool-built import libraries leave entry 13 empty, which is
+    #      exactly ntlibc's own convention -- not a conflict, but worth
+    #      recording so nobody reaches for --delay by habit.
+    #
+    # Verified against binutils-2.46.0 source directly (config.sub,
+    # bfd/config.bfd, ld/configure.tgt, gas/configure.tgt,
+    # ld/emultempl/pe.em, bfd/peXXigen.c, binutils/dlltool.c) and against
+    # ntlibc's crt/crt1.c, lib/ntdll.def and include/ntlibc/delayload.h --
+    # not from memory of how mingw toolchains usually work elsewhere.
+    #
+    # ar, ranlib, nm, objcopy, as, ld, dlltool: see its default.nix.
+    binutils = callPackage ./bootstrap/binutils { };
   };
 in
 self
