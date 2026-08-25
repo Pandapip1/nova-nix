@@ -33,13 +33,41 @@
 # for the rest of the translation unit, including a `.type` SIGSEGV), a
 # PE-COFF object reader, and PE section-alignment work.
 #
-# rev is a merge commit (6118fc91): fetchGit is given the full rev so a
+# rev is a merge commit lineage: fetchGit is given the full rev so a
 # shallow/single-commit fetch assumption elsewhere is not relied on.
+#
+# Bumped past 6118fc91 to 7d9b1b53: lands the real-`gcc -S` GAS directive
+# gaps fix (.zero, .section flags/type/entsize and its default type from
+# name, .p2align empty-middle and max-skip, .comm/.local/.lcomm,
+# .uleb128/.sleb128, forward local-label arithmetic, sym@PLT, cltq/sall/
+# salq) -- differentially tested against GNU as. Also fixes a silent-
+# miscompile in `movl $imm, sym(%rip)` under a real (non-tcc) linker (the
+# %rip correction landed on the stored displacement; tcc's own linker
+# compensated so `tcc -run` always looked fine, but GNU ld linked 4 bytes
+# off -- any gcc-linked-by-a-real-linker result from before this fix may be
+# silently wrong even if it looked fine under this chain's own tcc linker,
+# though this chain has never linked with anything but its own tcc). Also
+# hardens the PE-COFF reader itself: a silent-relocation-loss bug (a
+# truncated count made it exit 0 having discarded every relocation, no
+# diagnostic -- the exact objcopy failure mode the reader exists to
+# prevent) and a 4-byte-patch SIGSEGV, both fixed, 180,000 fuzz inputs
+# clean afterward. `.file` no longer remaps diagnostic line numbers (every
+# earlier assembler error's line number in this project's own history may
+# have been wrong), and inline-asm's separate off-by-one is fixed too.
+#
+# Still broken as of this pin, noted so a stall reads as expected rather
+# than a fresh regression: SSE2 scalar float (movsd/addsd/cvtss2sd) is
+# unknown-opcode, so any translation unit with floating point still fails
+# to assemble -- the next real blocker. `.cfi_*` are accepted and dropped
+# with a warning (no .eh_frame -- survivable for C, not C++/_Unwind_*).
+# `.loc` is unimplemented, so `gcc -S -g` still doesn't assemble. `.type`/
+# `.size` before a label are dropped, so tcc-assembled objects carry no
+# symbol sizes.
 { }:
 rec {
-  version = "unstable-2026-08-25";
+  version = "unstable-2026-08-25b";
 
-  rev = "6118fc91b1435a64bb3539bf03c0de87e75ef3b5";
+  rev = "7d9b1b534e2a622b03f9b31e3e77c73c552a6efe";
   ref = "mob";
 
   src = builtins.fetchGit {
