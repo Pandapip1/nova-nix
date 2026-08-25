@@ -42,29 +42,39 @@
 # `ar`/`ranlib` need no shim at all: binutils' own ar.exe/ranlib.exe (this
 # chain's own binutils, already proven against tcc-produced objects by
 # every earlier package in the chain) are put on PATH directly, unwrapped.
+#
+# No bash arrays anywhere in this file, on purpose: this chain's own bash
+# (pkgs/windows/bootstrap/bash) builds with an empty config.h (see that
+# package's default.nix) and never defines ARRAY_VARS -- bash-2.05b's own
+# config.h.in leaves it #undef by default, meaning array support
+# (`var=(...)`, `var+=(...)`) is compiled out of this bash entirely, not
+# merely mode-dependent. Measured directly: `wine bash.exe cc-wrapper.sh
+# -o a.exe x.c`, invoked as plain "bash" (not "sh", so POSIX-mode was not
+# the variable) still failed with "line 48: syntax error near unexpected
+# token `('" -- line 48 was the first `incFlags=(...)` this file used to
+# have. Every list below is a plain, space-separated string instead
+# (matching $configureFlags/$makeFlags's own convention elsewhere in this
+# stdenv), which costs nothing here: every path this whole chain passes
+# around is a /tmp or /nix/store path, never one containing a space.
 
 set -e
 
-incFlags=(
-  -I"$NN_NTLIBC_SRC_INCLUDE"
-  -I"$NN_NTLIBC_ARCH_I386"
-  -I"$NN_NTLIBC_ARCH_GENERIC"
-  -I"$NN_NTLIBC_INCLUDE"
-)
+incFlags="-I$NN_NTLIBC_SRC_INCLUDE -I$NN_NTLIBC_ARCH_I386 -I$NN_NTLIBC_ARCH_GENERIC -I$NN_NTLIBC_INCLUDE"
 
 realGcc="$NN_GCC/gcc.exe"
 
 # --- classify the invocation ---
+# allArgs: a copy of the original argument line, for passthrough mode
+# below -- the while loop consumes "$@" itself via shift, so by the time
+# passthrough mode is known, "$@" would otherwise be empty.
+allArgs="$*"
 mode=link
 outFile=""
-sources=()
-otherArgs=()
+sources=""
+otherArgs=""
 
-i=0
-argv=("$@")
-n=${#argv[@]}
-while [ "$i" -lt "$n" ]; do
-  a="${argv[$i]}"
+while [ "$#" -gt 0 ]; do
+  a="$1"
   case "$a" in
     -c)
       if [ "$mode" = link ]; then mode=compile; fi
@@ -73,28 +83,28 @@ while [ "$i" -lt "$n" ]; do
       mode=passthrough
       ;;
     -o)
-      i=$((i + 1))
-      outFile="${argv[$i]}"
+      shift
+      outFile="$1"
       ;;
     *.c)
-      sources+=("$a")
-      otherArgs+=("$a")
+      sources="$sources $a"
+      otherArgs="$otherArgs $a"
       ;;
     *)
-      otherArgs+=("$a")
+      otherArgs="$otherArgs $a"
       ;;
   esac
-  i=$((i + 1))
+  shift
 done
 
 if [ "$mode" = passthrough ]; then
-  exec "$realGcc" "$@" "${incFlags[@]}"
+  exec "$realGcc" $allArgs $incFlags
 fi
 
 # --- compile every .c source to a real object, via -S + tcc -c ---
 # (the proven-working path for both `compile` and `link` mode: `link` mode
 # still needs each source turned into an object before the final tcc link.)
-objs=()
+objs=""
 tmpdir="${TMPDIR:-.}/cc-wrapper.$$"
 mkdir -p "$tmpdir"
 trap 'rm -rf "$tmpdir"' EXIT
@@ -103,30 +113,37 @@ trap 'rm -rf "$tmpdir"' EXIT
 # own -S call sees them alongside -I/-D/-O and the rest); build a
 # source-free copy for the sole flags gcc.exe -S actually wants, adding
 # -c/-o back in per-source below instead of trusting the original -c/-o.
-flagsOnly=()
-for a in "${otherArgs[@]}"; do
+flagsOnly=""
+for a in $otherArgs; do
   case "$a" in
     *.c) ;;
-    *) flagsOnly+=("$a") ;;
+    *) flagsOnly="$flagsOnly $a" ;;
   esac
 done
 
+# sourceCount: whether this is a single-source compile (the only case
+# $outFile may name the object directly, matching gcc's own -c -o rule).
+sourceCount=0
+for src in $sources; do
+  sourceCount=$((sourceCount + 1))
+done
+
 srcIndex=0
-for src in "${sources[@]}"; do
+for src in $sources; do
   base="$(basename "$src" .c)"
   asmFile="$tmpdir/$base.$srcIndex.s"
   srcIndex=$((srcIndex + 1))
 
-  "$realGcc" "${flagsOnly[@]}" "${incFlags[@]}" -S -o "$asmFile" "$src"
+  "$realGcc" $flagsOnly $incFlags -S -o "$asmFile" "$src"
 
-  if [ "$mode" = compile ] && [ -n "$outFile" ] && [ "${#sources[@]}" = 1 ]; then
+  if [ "$mode" = compile ] && [ -n "$outFile" ] && [ "$sourceCount" = 1 ]; then
     objFile="$outFile"
   else
     objFile="$base.o"
   fi
 
   "$NN_TCC" -c -o "$objFile" "$asmFile"
-  objs+=("$objFile")
+  objs="$objs $objFile"
 done
 
 if [ "$mode" = compile ]; then
@@ -138,11 +155,11 @@ fi
 # Non-source args (already-compiled .o/.a, -l/-L, and anything else on the
 # line) pass straight through to the link; only the .c sources were pulled
 # out above to be compiled first.
-linkArgs=()
-for a in "${otherArgs[@]}"; do
+linkArgs=""
+for a in $otherArgs; do
   case "$a" in
     *.c) ;;
-    *) linkArgs+=("$a") ;;
+    *) linkArgs="$linkArgs $a" ;;
   esac
 done
 
@@ -151,6 +168,6 @@ finalOut="${outFile:-a.exe}"
 exec "$NN_TCC" \
   -B "$NN_NTLIBC_LIB" -nostdlib "$NN_NTLIBC_LIB/crt1.o" \
   -o "$finalOut" \
-  "${objs[@]}" "${linkArgs[@]}" \
+  $objs $linkArgs \
   -L "$NN_GCC_LIBDIR" -lgcc \
   -L "$NN_NTLIBC_LIB" -lc -lntdll

@@ -156,7 +156,21 @@ cp "$ccWrapperSrc" "$wrapperBin/gcc"
 cp "$ccWrapperSrc" "$wrapperBin/cc"
 chmod +x "$wrapperBin/gcc" "$wrapperBin/cc"
 export PATH="$wrapperBin:$PATH"
-export CC="$toolShims/sh $wrapperBin/gcc"
+#
+# $toolShims/bash, not $toolShims/sh: cc-wrapper.sh needs real bash, not
+# POSIX-mode bash. Both are the same bash.exe binary copied under two
+# bare names, and bash inspects its own argv[0] to decide which mode to
+# start in -- named "sh", it disables its own extensions, array syntax
+# (incFlags=(...), sources=(), and every other array this script uses)
+# included, which is a syntax error under sh-mode, not just a behaviour
+# change. Measured directly: `wine sh.exe cc-wrapper.sh -o a.exe x.c`
+# outside the whole build, in isolation, up against this exact repo's
+# cc-wrapper.sh -- "cc-wrapper.sh: line 48: syntax error near unexpected
+# token `('" (line 48 is incFlags=( ... ), the first array in the file).
+# ./configure above stays on $toolShims/sh deliberately: it is a plain
+# #!/bin/sh script with no bash extensions of its own, so sh-mode is the
+# right mode for it, not just a tolerated one.
+export CC="$toolShims/bash $wrapperBin/gcc"
 
 prefix="$out"
 
