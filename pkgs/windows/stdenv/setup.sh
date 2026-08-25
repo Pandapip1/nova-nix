@@ -164,8 +164,25 @@ fi
 # --- configure phase (autotools packages only) ---
 # $dontConfigure skips this -- for packages with no ./configure, or that
 # build via a hand-written makefile.
-if [ -z "$dontConfigure" ] && [ -x ./configure ]; then
-  ./configure --prefix="$prefix" $configureFlags
+#
+# Tested with [ -x ./configure ] before, and that guard was always false:
+# ntlibc's stat() (src/stat/stat.c) has no shebang-sniffing ("which is not
+# cheap here" -- that file's own comment), so it synthesizes the execute
+# bit from the filename suffix alone (.exe/.com/.bat/.cmd/.sh -> 0755,
+# anything else -> 0644) regardless of the tarball's real Unix mode bit.
+# "configure" has no such suffix, so the guard was unconditionally false,
+# every package's configure phase silently no-op'd (no error under set -e
+# -- a false `if` isn't one), and make ran against a source tree with no
+# Makefile -- measured directly against GNU hello: its GNUmakefile's own
+# fallback path is `abort-due-to-no-makefile`, which is what "make: sh: No
+# such file or directory" was actually coming from, not a broken shell
+# lookup. Existence is the right test; running the script through this
+# stdenv's own sh explicitly (not a direct ./configure exec, which would
+# hit the same synthesized-permission wall as bash's own exec()) is the
+# right way to invoke a suffix-less script here, the same reasoning as
+# $SHELL above.
+if [ -z "$dontConfigure" ] && [ -e ./configure ]; then
+  "$toolShims/sh" ./configure --prefix="$prefix" $configureFlags
 fi
 
 # --- build phase ---
