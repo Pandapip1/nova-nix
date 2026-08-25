@@ -1454,6 +1454,15 @@ ${bin_cp} cc1.exe ${out}/libexec/gcc/i686-pc-pe/4.6.4/cc1.exe
 ${bin_mkdir} -p ${out}/lib/gcc/i686-pc-pe/4.6.4
 ${bin_cp} cc1.exe ${out}/lib/gcc/i686-pc-pe/4.6.4/cc1.exe
 
+# libgcc.a itself: this package's own build already links cc1.exe/gcc.exe
+# straight from the .o's (never through this archive -- see the "link
+# cc1.exe" line below, which lists lg_*.o directly, not libgcc.a), so
+# installing the archive is new here, not something the two links above
+# needed. A consumer of this package as a stdenv (any later package's own
+# -lgcc) does need it, though, and this is the same exec-prefix cc1.exe
+# and as.exe already install to.
+${bin_cp} libgcc.a ${out}/lib/gcc/i686-pc-pe/4.6.4/libgcc.a
+
 # gcc.exe's own "assemble" spec step (gcc.c's default_compilers table,
 # the ".s"/"@assembler" rule) spawns a program literally named "as",
 # searched through the same exec_prefixes cc1 was -- see 9518ca7/63d15d7
