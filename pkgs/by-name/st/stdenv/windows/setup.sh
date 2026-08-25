@@ -362,8 +362,181 @@ fi
 # hit the same synthesized-permission wall as bash's own exec()) is the
 # right way to invoke a suffix-less script here, the same reasoning as
 # $SHELL above.
+#
+# Two variables have to be preset for that to be enough, because
+# ./configure does not route every subprocess through the shell this
+# script hands it.
+#
+# CONFIG_SHELL, not SHELL.  configure's own line 284 is
+#   SHELL=${CONFIG_SHELL-/bin/sh}
+# an UNSET-ONLY default keyed on CONFIG_SHELL, so the $SHELL exported
+# above (already "$toolShims/sh") is discarded and clobbered to the
+# literal string /bin/sh.  That is verbatim what the failure said:
+# `configure: error: cannot run /bin/sh ./build-aux/config.sub', from
+# configure:6864-6865
+#   $SHELL "${ac_aux_dir}config.sub" sun4 >/dev/null 2>&1 ||
+#     as_fn_error $? "cannot run $SHELL ${ac_aux_dir}config.sub" ...
+# -- $SHELL already expanded, /bin/sh being a HOST path this chain has
+# no business execing.  Setting CONFIG_SHELL instead also drives
+# configure's own re-exec (configure:134's `exec $CONFIG_SHELL ...'),
+# skips the shell hunt at :142-282 (which otherwise scans /bin,
+# /usr/bin and $PATH for a host shell), and reaches
+# Makefile.in:2263's `SHELL = @SHELL@' -- make's recipe shell for the
+# whole build and install phase -- and config.status
+# (configure:33083).
+#
+# Why any of this matters at all, i.e. why a script cannot simply be
+# exec'd here: wine's NtCreateUserProcess (dlls/ntdll/unix/process.c)
+# escapes to the native host via fork_and_exec() whenever the exec
+# TARGET is not a loadable PE.  A #!-script is not a PE, so wine
+# execv()s the script itself and the LINUX KERNEL honours its
+# `#!/bin/sh' line, running the HOST shell.  That escape path has two
+# defects (wine's, not ours): it returns success with a NULL process
+# handle, which ntlibc maps STATUS_INVALID_HANDLE -> EBADF -> "Bad
+# file descriptor", exit 126; and it sends the escaped process's
+# stdout to /dev/null, so command substitution comes back empty.
+# Neither is reachable when the exec target IS a valid PE -- hence
+# every site below names $toolShims/sh (a real PE) and passes the
+# script as an ARGUMENT.  Rewriting the helper scripts' own shebangs
+# would be strictly worse, not better: wine never reads the shebang,
+# the kernel does, and `#!/nix/store/.../sh.exe' names a PE with no
+# binfmt_misc entry -- the "unable to find an interpreter for gcc.exe"
+# wall documented at $CC above, reached from a new direction.
+#
+# INSTALL, because CONFIG_SHELL alone is NOT enough.  configure:4286
+# sets ac_install_sh="${as_dir}install-sh -c" and :4506 does
+# INSTALL=$ac_install_sh with no $SHELL anywhere -- a direct-exec site.
+# It propagates through :4514-4518 into Makefile.in:1921-1924 and
+# fires at Makefile.in:2744, :5067, :5074 and ~10 more
+# $(INSTALL_DATA) lines, i.e. all of `make install'.
+#
+# And it is guaranteed to fire, not conditional on a missing system
+# install: the PATH probe at :4437 accepts a candidate only through
+# as_fn_executable_p (configure:372-375, `test -f "$1" && test -x
+# "$1"'), this chain's coreutils installs `install' extensionless, and
+# ntlibc synthesizes the execute bit from the filename suffix alone
+# (src/stat/stat.c) -- so `test -x install' is unconditionally false
+# and the install-sh fallback is always taken.  ac_executable_extensions
+# is never assigned in this configure, so no .exe alias rescues it.
+#
+# Preset INSTALL rather than ac_cv_path_install because :4437 is
+# `if test -z "$INSTALL"; then' -- a preset short-circuits the probe
+# entirely -- and configure's own comment at :4499-4501 says that
+# cache var is deliberately not cached for a source dir.  The path
+# must be ABSOLUTE: config.status (configure:34119-34121) passes
+# `[\\/$]* | ?:[\\/]*' through untouched but glues
+# $ac_top_build_prefix onto anything relative -- onto the SHELL, not
+# the script.  The drive-letter strip mirrors $builddir above.
+#
+# Deliberately NOT preset: am_cv_prog_cc_c_o.  configure:6397's
+# `CC="$am_aux_dir/compile $CC"' (gated on :6390) is a third potential
+# direct-exec site, but our cc-wrapper does support -c -o, so that
+# cache var should come out `yes' on its own.  Pinning it would hide a
+# real cc-wrapper regression behind a cache variable; let it fail
+# visibly instead.
 if [ -z "$dontConfigure" ] && [ -e ./configure ]; then
-  "$toolShims/sh" ./configure --prefix="$prefix" $configureFlags
+  export CONFIG_SHELL="$toolShims/sh"
+
+  # ac_executable_extensions: the general answer to the same synthesized-
+  # exec-bit wall, for every AC_PATH_PROG/AC_CHECK_PROG in the script.
+  #
+  # Every one of those probes accepts a candidate only through
+  #   as_fn_executable_p () { test -f "$1" && test -x "$1"; }
+  # (configure:372-375) and, per the INSTALL note below, `test -x' is
+  # unconditionally FALSE for an extensionless file here -- ntlibc
+  # synthesizes the mode from the filename suffix (src/stat/stat.c:
+  # .exe/.com/.bat/.cmd/.sh -> 0755, everything else -> 0644).  The
+  # search loop is
+  #   for ac_exec_ext in '' $ac_executable_extensions; do
+  #     ac_path_FOO="$as_dir$ac_prog$ac_exec_ext"
+  #     as_fn_executable_p "$ac_path_FOO" || continue
+  # so with ac_executable_extensions empty the ONLY name ever tried is
+  # the bare one, which can never pass.  Measured: with CONFIG_SHELL and
+  # --build in place, hello's next failure was
+  #   configure: error: no acceptable egrep could be found in <PATH>
+  # with gnugrep-2.4/bin/{grep,egrep,fgrep}.exe present and on PATH the
+  # whole time -- the probe simply never spelled the ".exe".
+  #
+  # This chain's real userland (binutils, sed, grep, awk, find, diff,
+  # make, patch, gzip, tar, bash) installs real .exe files, and the
+  # coreutils shims above are copied into $toolShims under a ".exe" name
+  # for exactly this reason, so ".exe" is the one extension that makes
+  # every probe resolve.  hello 2.12.3's configure never assigns this
+  # variable itself (25 references, all reads -- checked), so an exported
+  # value survives.  It is the same thing autoconf's own DJGPP/Cygwin
+  # support uses the variable for; ours is simply not a case autoconf
+  # sets it for automatically.
+  #
+  # Note the bare name is still tried FIRST ('' leads the list) and still
+  # always fails, so this cannot make a probe pick up a bare-named file
+  # it could not have executed anyway.
+  export ac_executable_extensions=".exe"
+
+  srcAbs="$PWD"
+  case "$srcAbs" in
+    ?:*) srcAbs="${srcAbs#?:}" ;;
+  esac
+  for auxdir in . build-aux config scripts aux; do
+    if [ -e "./$auxdir/install-sh" ]; then
+      export INSTALL="$toolShims/sh $srcAbs/$auxdir/install-sh -c"
+      break
+    fi
+  done
+
+  # --build, because config.guess CANNOT work in this chain.
+  #
+  # config.guess's whole first act is
+  #   UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
+  #   UNAME_RELEASE=`(uname -r) 2>/dev/null` || UNAME_RELEASE=unknown
+  #   UNAME_SYSTEM=`(uname -s) 2>/dev/null` || UNAME_SYSTEM=unknown
+  #   UNAME_VERSION=`(uname -v) 2>/dev/null` || UNAME_VERSION=unknown
+  # (hello 2.12.3's build-aux/config.guess:147-150) and this chain's
+  # coreutils 5.0 does not build `uname' AT ALL -- nor `date'.  Measured,
+  # not assumed: its bin/ has 62 entries (basename cat chmod cksum cp
+  # csplit cut dirname echo expand expr factor false fmt fold head
+  # hostname id install join kill link ln logname ls md5sum mkdir mkfifo
+  # mknod mv nl od paste pathchk pr printf ptx pwd readlink rm rmdir seq
+  # sha1sum sleep sort split sum tac tail tee test touch tr true tsort
+  # unexpand uniq unlink wc whoami yes) and neither name is among them,
+  # because live-bootstrap's own main.mk -- which this chain's
+  # ../../../co/coreutils/windows/build.kaem drives instead of a ./configure --
+  # does not build them.
+  #
+  # So all four probes are "unknown", no case in config.guess matches,
+  # and it prints "unable to guess system type" plus a diagnostic dump
+  # (config.guess:1780-1800) that itself shells out to `date`, `expr` and
+  # the HARDCODED HOST ABSOLUTE PATHS /bin/uname -X and /usr/bin/arch -k
+  # -- which is exactly where the build log's
+  #   /bin/uname: invalid option -- 'X'
+  #   /usr/bin/arch: invalid option -- 'k'
+  # come from.  Those are config.guess's own literal paths escaping to
+  # the host, NOT a PATH leak and NOT the wine-escape defect above.
+  # configure then stops at "cannot guess build type; you must specify
+  # one" (configure:6876-6877).
+  #
+  # Specifying one is what that error asks for and it is the honest
+  # answer here: this stdenv builds for exactly one platform.
+  # i686-pc-pe is this chain's own triple, the same one ../binutils and
+  # ../../../gc/gcc/windows are built for and for the reasons those packages'
+  # own default.nix files give; config.sub accepts it unchanged
+  # (`config.sub i686-pc-pe' -> `i686-pc-pe', rc 0).
+  #
+  # Deliberately NOT i686-pc-mingw32, even though config.sub takes that
+  # too: gnulib branches on $host_os in ~100 places, and "mingw" selects
+  # msvcrt/Win32-API code paths.  ntlibc is a POSIX-shaped libc (fork,
+  # execve, dirfd, opendir...), not msvcrt, so the generic branch an
+  # unrecognized "pe" selects is the ACCURATE one, not merely the
+  # conservative one -- and it is the same shape every hand-written
+  # config.h in this chain's own userland already assumes.
+  #
+  # Only --build is passed, not --host: configure:6910 does
+  # `ac_cv_host=$ac_cv_build' when host_alias is empty, so build == host
+  # and cross_compiling stays "no" -- runtime probes still really run,
+  # through wine, which is what we want.  $configureFlags comes AFTER,
+  # so a package that needs a different triple can just pass its own
+  # --build and win (autoconf's option loop is a plain assignment; the
+  # last one takes effect).
+  "$toolShims/sh" ./configure --prefix="$prefix" --build=i686-pc-pe $configureFlags
 fi
 
 # --- build phase ---
