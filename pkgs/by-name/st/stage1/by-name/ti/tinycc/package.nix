@@ -2,17 +2,32 @@
   callPackage,
   platform,
   stage0,
-  mes,
-  nyacc,
+  stage1,
+  tinycc-intermediate,
+  libc,
+  gnumake,
+  gnused-mes,
+  gnugrep,
+  gnutar-mes,
+  gzip,
+  bash,
+  coreutils-mes,
 }:
 if platform == "linux" then
-  callPackage ./shared {
-    inherit stage0 mes nyacc;
-    bloodElf = stage0.blood-elf;
-    tccTarget = "I386";
-    mesArchInclude = "linux/x86";
+  let
+    toolchain = tinycc-intermediate // {
+      compiler = tinycc-intermediate;
+      libs = tinycc-intermediate;
+      inherit (stage1.tinycc-mes) mainlineSrc version;
+    };
+  in
+  callPackage ./linux {
+    inherit (stage0) system platforms;
+    musl = libc;
+    tinycc = toolchain;
+    gnused = gnused-mes;
+    gnutar = gnutar-mes;
+    coreutils = coreutils-mes;
   }
 else
-  callPackage ./windows {
-    inherit stage0 mes nyacc;
-  }
+  stage1.tinycc-mes.boot.compiler

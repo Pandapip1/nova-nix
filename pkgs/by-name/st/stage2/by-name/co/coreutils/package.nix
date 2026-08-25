@@ -22,6 +22,6 @@ if platform == "linux" then
   }
 else
   callPackage ./windows {
-    tinycc = stage1.tinycc;
+    tinycc = stage1.tinycc-mes;
     ntlibc = libc;
   }

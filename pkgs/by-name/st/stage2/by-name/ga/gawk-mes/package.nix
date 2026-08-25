@@ -15,13 +15,13 @@
 if platform == "linux" then
   callPackage ../gawk/linux/mes.nix {
     inherit (stage0) system platforms;
-    tinycc = stage1.tinycc.boot;
+    tinycc = stage1.tinycc-mes.boot;
     gnused = gnused-mes;
     coreutils = coreutils-mes;
     mesInclude = "${mes.src}/include";
   }
 else
   callPackage ../gawk/windows {
-    tinycc = stage1.tinycc;
+    tinycc = stage1.tinycc-mes;
     ntlibc = libc;
   }

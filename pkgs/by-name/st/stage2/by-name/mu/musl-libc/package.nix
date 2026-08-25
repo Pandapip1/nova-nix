@@ -17,7 +17,7 @@ let
   toolchain = tinycc-intermediate // {
     compiler = tinycc-intermediate;
     libs = tinycc-intermediate;
-    inherit (stage1.tinycc) mainlineSrc version;
+    inherit (stage1.tinycc-mes) mainlineSrc version;
   };
 in
 callPackage ./default.nix {

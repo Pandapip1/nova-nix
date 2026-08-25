@@ -13,11 +13,11 @@
   coreutils-mes,
 }:
 if platform == "linux" then
-  callPackage ../tinycc/linux {
+  callPackage ../../../../stage1/by-name/ti/tinycc/linux {
     inherit (stage0) system platforms;
     musl = libc-mes;
-    tinycc = stage1.tinycc.boot // {
-      inherit (stage1.tinycc) mainlineSrc version;
+    tinycc = stage1.tinycc-mes.boot // {
+      inherit (stage1.tinycc-mes) mainlineSrc version;
     };
     gnused = gnused-mes;
     gnutar = gnutar-mes;

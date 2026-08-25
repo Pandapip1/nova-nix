@@ -9,5 +9,5 @@ in
 callPackage ./default.nix {
   inherit stage0;
   inherit (target) system platforms;
-  tinycc = stage1.tinycc;
+  tinycc = stage1.tinycc-mes;
 }

@@ -17,7 +17,7 @@
 if platform == "linux" then
   callPackage ./linux {
     inherit (stage0) system platforms;
-    tinycc = stage1.tinycc;
+    tinycc = stage1.tinycc-mes;
     gnused = gnused;
     bootGawk = gawk-mes;
     gnutar = gnutar-mes;

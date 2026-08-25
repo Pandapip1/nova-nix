@@ -14,13 +14,13 @@
 if platform == "linux" then
   callPackage ../gnutar/linux {
     inherit (stage0) system platforms;
-    tinycc = stage1.tinycc.boot;
+    tinycc = stage1.tinycc-mes.boot;
     gnused = gnused-mes;
     coreutils = coreutils-mes;
     mesInclude = "${mes.src}/include";
   }
 else
   callPackage ../gnutar/windows {
-    tinycc = stage1.tinycc;
+    tinycc = stage1.tinycc-mes;
     ntlibc = libc;
   }

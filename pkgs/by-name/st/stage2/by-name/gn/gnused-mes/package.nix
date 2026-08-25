@@ -12,12 +12,12 @@
 if platform == "linux" then
   callPackage ../gnused/linux {
     inherit (stage0) system platforms;
-    tinycc = stage1.tinycc.boot;
+    tinycc = stage1.tinycc-mes.boot;
     coreutils = coreutils-mes;
     mesInclude = "${mes.src}/include";
   }
 else
   callPackage ../gnused/windows {
-    tinycc = stage1.tinycc;
+    tinycc = stage1.tinycc-mes;
     ntlibc = libc;
   }
