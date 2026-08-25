@@ -248,6 +248,7 @@ derivationWithMeta {
   ntlibcSrc = ntlibcSources.src;
 
   windowsPatch = ./windows.patch;
+  defSclTypePatch = ./def-scl-type.patch;
   genDir = ./generated;
   shimDir = ./shim;
   cc1ChecksumC = ./shim/cc1-checksum.c;
