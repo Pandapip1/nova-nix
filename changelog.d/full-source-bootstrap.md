@@ -1,0 +1,1 @@
+- **Linux and Windows can bootstrap complete native toolchains from source.** The package set now traces from stage0 through Mes, TinyCC, libc, GNU userland, binutils, and modern GCC; the Windows stdenv builds ordinary packages with the resulting PE32 toolchain rather than the MSYS2 compiler seed.

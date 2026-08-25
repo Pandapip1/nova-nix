@@ -1,16 +1,29 @@
-/* The three functions gawk 5.3.2 references that ntlibc does not have.
+/* The one function gawk 5.3.2 references that ntlibc does not have.
  *
  * Everything else gawk asks for is either in libc.a or is a gawk replacement
- * from missing_d/ that config.h keeps out of the build.  These three are
- * neither: each is called from a file that must be compiled, from code that
+ * from missing_d/ that config.h keeps out of the build.  nl_langinfo is
+ * neither: it is called from a file that must be compiled, from code that
  * is not behind a HAVE_ #ifdef, so there is nothing to withhold and no
- * replacement to enable.  They were found by `nm', and by tcc's
+ * replacement to enable.  It was found by `nm', and by tcc's
  * implicit-declaration warnings, before the link was attempted.
  *
- * None of them collides with anything: `nm' over ntlibc's 874 globals finds
- * none of the three, so these definitions add symbols rather than shadowing
- * them.  The eleven names that DO overlap are gawk's own getopt and regex,
- * and both are deliberate -- see build.kaem.
+ * This file used to carry two more, putwc and wcscoll, on the strength of
+ * `nm' over ntlibc's globals at the time finding neither.  That reading was
+ * correct when it was made and is no longer: the ntlibc pin bump to
+ * ac08c2f0 (see ../ntlibc/bootstrap-sources.nix) brought wide stdio with it
+ * -- src/stdio/wide.c compiles to a wide.o defining fgetwc, fputwc, getwc,
+ * getwchar, putwc, putwchar, ungetwc, fgetws, fputws and fwide, and a
+ * separate wcscoll.o defines wcscoll.  Both of this file's own definitions
+ * therefore became duplicates rather than additions, and the link stopped
+ * with `libc.a: error: link symbol 'putwc' defined twice'.  Measured
+ * directly against both archives, not inferred from the error text: the
+ * 2026-08-24 libc.a's armap has no putwc, no wcscoll and no fwide entry at
+ * all, the 2026-08-25 one has putwc and fwide in wide.o and wcscoll in
+ * wcscoll.o, and nl_langinfo is absent from both.  So the two that ntlibc
+ * grew are deleted here and the one it still lacks stays.
+ *
+ * The eleven names that DO overlap ntlibc deliberately are gawk's own
+ * getopt and regex -- see build.kaem.
  *
  * This file is compiled with the rest and lands in the source root, which
  * -I. already covers.
@@ -42,40 +55,4 @@ char *nl_langinfo(int item)
 	   date and time formats, AM/PM.  gawk asks for none of them; the
 	   empty string is the shape callers expect for "no answer". */
 	return codeset + sizeof(codeset) - 1;
-}
-
-/* wcscoll --- eval.c's cmp_strings compares two wide strings with this when
- * the locale is multibyte.  ntlibc has wcscmp but not wcscoll.  In the C
- * locale collation order IS code-point order, so this is exact rather than
- * an approximation -- and with MB_CUR_MAX at 1 the branch that calls it is
- * unreachable in the first place.  The declaration eval.c gets is the
- * implicit one, which for a function returning int with pointer arguments
- * is the same cdecl call this definition provides.
- */
-int wcscoll(const wchar_t *a, const wchar_t *b)
-{
-	return wcscmp(a, b);
-}
-
-/* putwc --- node.c's dump_wstr(), a debugging aid marked
- * __attribute__((unused)) and called from nowhere, is the only caller.  tcc
- * emits it regardless, so the symbol has to resolve.  ntlibc has no wide
- * stdio at all, so this is built out of wcrtomb and putc, which it does
- * have.  wint_t is int here, so again the implicit declaration node.c gets
- * agrees with this definition.
- */
-wint_t putwc(wchar_t c, FILE *fp)
-{
-	char buf[MB_LEN_MAX];
-	size_t n, i;
-
-	n = wcrtomb(buf, c, (mbstate_t *) 0);
-	if (n == (size_t) -1)
-		return (wint_t) -1;
-
-	for (i = 0; i < n; i++)
-		if (putc(buf[i], fp) == EOF)
-			return (wint_t) -1;
-
-	return (wint_t) c;
 }

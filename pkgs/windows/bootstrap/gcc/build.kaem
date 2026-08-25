@@ -1454,6 +1454,15 @@ ${bin_cp} cc1.exe ${out}/libexec/gcc/i686-pc-pe/4.6.4/cc1.exe
 ${bin_mkdir} -p ${out}/lib/gcc/i686-pc-pe/4.6.4
 ${bin_cp} cc1.exe ${out}/lib/gcc/i686-pc-pe/4.6.4/cc1.exe
 
+# libgcc.a itself: this package's own build already links cc1.exe/gcc.exe
+# straight from the .o's (never through this archive -- see the "link
+# cc1.exe" line below, which lists lg_*.o directly, not libgcc.a), so
+# installing the archive is new here, not something the two links above
+# needed. A consumer of this package as a stdenv (any later package's own
+# -lgcc) does need it, though, and this is the same exec-prefix cc1.exe
+# and as.exe already install to.
+${bin_cp} libgcc.a ${out}/lib/gcc/i686-pc-pe/4.6.4/libgcc.a
+
 # gcc.exe's own "assemble" spec step (gcc.c's default_compilers table,
 # the ".s"/"@assembler" rule) spawns a program literally named "as",
 # searched through the same exec_prefixes cc1 was -- see 9518ca7/63d15d7
@@ -1481,8 +1490,8 @@ ${bin_cp} ${tcc} ${out}/lib/gcc/i686-pc-pe/4.6.4/as.exe
 # --- prove the DRIVER itself works, not just cc1 invoked directly: a
 # real `gcc.exe hello2.c -o hello2.exe`-shaped invocation has to find and
 # exec cc1 on its own. Stops at -S (cc1 only) rather than -c (cc1 then
-# "as") -- see hello3's own comment below for why -c is not attempted
-# here yet, a real, separate, still-open gap. gcc.exe still cannot
+# "as") only because hello3 below already proves the full -c path;
+# there is no longer a gap here. gcc.exe still cannot
 # invoke a real `ld` either (neither ../binutils's own -- the ELF/COFF
 # split -- nor does this bootstrap teach its specs about this chain's
 # own tcc as a stand-in linker, a bigger question than the assembler
@@ -1504,33 +1513,24 @@ ${out}/bin/gcc.exe -B ${out}/lib/gcc/i686-pc-pe/4.6.4/ -B ${out}/libexec/gcc/i68
 # CROSS_INCLUDE_DIR/TOOL_INCLUDE_DIR alone since neither it nor
 # bits/alltypes.h lives under arch/.
 #
-# Still -S here, not -c: -c (cc1 piping through a real intermediate .s
-# file to "as") was tried and found a real, separate, NOT-yet-solved
-# bug, investigated directly rather than worked around blindly --
-# libiberty's own make_temp_file() (choose_tmpdir + mkstemps(), the
-# windows.patch-neutralized POSIX branch every ntlibc program already
-# uses) is handed a real Windows-notation path by wine's own auto-set
-# TMP/TEMP env vars (e.g. "C:\users\<u>\AppData\Local\Temp\ccXXXXXX.s"),
-# and gcc.exe's driver goes on to invoke "as.exe" with that exact path
-# with no error reported -- but the file is never actually created
-# there (confirmed directly: the real host directory behind that wine
-# path stays empty after the run, and "as.exe" then correctly reports
-# it missing). This is NOT a general Windows-path problem -- a direct,
-# isolated ntlibc fopen() test against the exact same path (both
-# backslash-only and the mixed-separator form GCC's own temp-path
-# construction actually produces) succeeds and writes a real file every
-# time, confirmed directly. Setting TMPDIR explicitly to a real
-# host-style path ahead of TMP/TEMP in choose_tmpdir's own search order
-# did not change the outcome either. The gap is therefore somewhere more
-# specific -- inside mkstemps()'s own file-creation path as gcc-core's
-# bundled libiberty actually calls it, or in how that env var reaches
-# the process under this chain's own wine invocation -- not yet
-# root-caused to a single line, and not something to route around
-# quietly (this could plausibly be a real ntlibc gap, in which case it
-# is ntlibc-coordination's "report, don't patch" territory, not
-# something for this package to paper over). Left open, reported here
-# rather than forced through under time pressure; hello3.c below still
-# proves the zero-flag CROSS_INCLUDE_DIR/TOOL_INCLUDE_DIR defaults work,
-# just stops at -S rather than chasing -c's real bug further. ---
+# This is -c, not -S: cc1 pipes through a real intermediate .s file to
+# "as", so the driver's own fork()+execv() path is exercised too. That
+# step used to fail -- "as" reported the .s missing -- and the cause is
+# now root-caused and fixed upstream rather than worked around here.
+# ntlibc's execve() ended with exit() instead of _exit(): with no image
+# replacement on NT, execve() spawns, waits, and ends, and ending with
+# exit() re-ran the *caller's* still-registered atexit handlers over its
+# still-live address space. GCC 4.6.4's driver registers
+# delete_temp_files() (gcc/gcc.c:6174), so every `gcc.exe -c` deleted its
+# own intermediate .s the instant cc1 finished writing it. strace showed
+# the file created, grown to 258 bytes by cc1, then unlink()ed between
+# cc1's execve and as's. mkstemps() was never implicated -- which is why
+# an isolated ntlibc fopen() against the same Windows-notation temp path
+# had always looked fine, and why the earlier "the file is never created"
+# reading here was wrong: it was created and then removed before anything
+# could observe it. Fixed by ntlibc ac08c2f0 ("exec: end with _exit(), not
+# exit()"), which this package pins via ../ntlibc/bootstrap-sources.nix;
+# gcc.exe links a static libc.a, so that pin bump is what carries the fix
+# in. -pipe remains separately unsupported. ---
 ${bin_cp} ${helloC} hello3.c
-${out}/bin/gcc.exe -S hello3.c -o hello3.s
+${out}/bin/gcc.exe -c hello3.c -o hello3.o
