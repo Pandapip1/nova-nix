@@ -48,6 +48,33 @@ esac
 mkdir -p "$builddir/tmp"
 export TMPDIR="$builddir/tmp" TMP="$builddir/tmp" TEMP="$builddir/tmp"
 
+# --- bare-name tool shims ---
+# Every package in this chain's own userland except coreutils installs its
+# binaries with a real .exe suffix (gnutar's tar.exe, gzip's gunzip.exe,
+# gnumake's make.exe, gnused's sed.exe, and so on -- see each package's own
+# build.kaem "install" section); coreutils alone installs bare names (cp,
+# mkdir, ...). This chain's own PATH search has no PATHEXT-style ".exe"
+# fallback (found directly: `tar xf` and `gunzip -c`, with tar.exe/
+# gunzip.exe genuinely present on PATH, both fail "command not found").
+# autoconf-generated ./configure scripts and plain Makefiles invoke sed,
+# grep, awk, make and the rest by their bare, extensionless names
+# throughout -- not just this script's own two calls above -- so the fix
+# has to be general: a shim directory of bare-named copies of every .exe
+# in this chain's own (non-gcc) userland, ahead of the real bin dirs on
+# PATH. gccBin is deliberately excluded here -- "gcc"/"cc" get the
+# cc-wrapper.sh shim below instead, not a bare pass-through alias, and
+# nothing above the compiler needs cc1.exe/as.exe by their own bare names.
+toolShims="$builddir/tool-shims"
+mkdir -p "$toolShims"
+for dir in "$binutilsBin" "$gnusedBin" "$gnugrepBin" "$gawk5Bin" "$findutilsBin" "$diffutilsBin" "$gnumakeBin" "$gnupatchBin" "$gzipBin" "$gnutarBin"; do
+  for f in "$dir"/*.exe; do
+    [ -e "$f" ] || continue
+    base="$(basename "$f" .exe)"
+    cp "$f" "$toolShims/$base"
+  done
+done
+export PATH="$toolShims:$PATH"
+
 # --- dependency flags ---
 # Start from EMPTY flag sets: host-inherited CPPFLAGS/LDFLAGS would inject
 # ambient -I/-L directories ahead of the declared buildInputs, silently
@@ -83,12 +110,7 @@ if [ -d "$src" ]; then
 else
   case "$src" in
     *.tar.gz | *.tgz)
-      # gunzip.exe, not gunzip: this chain's own gzip package installs its
-      # three names (gzip.exe/gunzip.exe/zcat.exe) with the real .exe
-      # suffix (../bootstrap/gzip/build.kaem), unlike coreutils/gnused/
-      # gnugrep/etc., which install theirs bare -- exec here needs the
-      # exact on-disk name, no PATHEXT-style extension search.
-      gunzip.exe -c "$src" > src.tar
+      gunzip -c "$src" > src.tar
       tar xf src.tar
       ;;
     *.tar)
