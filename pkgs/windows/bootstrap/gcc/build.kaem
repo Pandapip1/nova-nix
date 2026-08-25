@@ -1393,3 +1393,30 @@ ${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o hello.exe hello.s -L .
 ${bin_mkdir} -p ${out}/bin
 ${bin_cp} cc1.exe ${out}/bin/cc1.exe
 ${bin_cp} gcc.exe ${out}/bin/gcc.exe
+
+# gcc.exe's own driver (gcc.c) does not look for cc1 next to itself in
+# bin/ -- it searches STANDARD_LIBEXEC_PREFIX/STANDARD_EXEC_PREFIX, each
+# joined with DEFAULT_TARGET_MACHINE/DEFAULT_TARGET_VERSION
+# (add_prefix's own require_machine_suffix=1 case, gcc.c:3872-3874 for
+# libexec, :3877 for exec/BINUTILS), well before it ever falls back to a
+# bare PATH search for the literal string "cc1". Installed under both --
+# libexec first (checked first, real GCC's own modern convention) and
+# lib/gcc as a second copy (BINUTILS-component fallback path also reaches
+# it) -- cheaper than getting gcc_exec_prefix's own argv[0]-relocation
+# logic exactly right for a nix store path that never sits at a fixed
+# offset from its own bin/ the way a traditional --prefix install does.
+${bin_mkdir} -p ${out}/libexec/gcc/i686-pc-pe/4.6.4
+${bin_cp} cc1.exe ${out}/libexec/gcc/i686-pc-pe/4.6.4/cc1.exe
+${bin_mkdir} -p ${out}/lib/gcc/i686-pc-pe/4.6.4
+${bin_cp} cc1.exe ${out}/lib/gcc/i686-pc-pe/4.6.4/cc1.exe
+
+# --- prove the DRIVER itself works, not just cc1 invoked directly: a
+# real `gcc.exe hello2.c -o hello2.exe`-shaped invocation has to find and
+# exec cc1 on its own. gcc.exe still cannot invoke a real `as`/`ld`
+# (neither ../binutils's real ones -- the ELF/COFF split -- nor does
+# this bootstrap teach its specs about this chain's own tcc as a
+# stand-in assembler/linker), so this only proves the driver-to-cc1 half
+# (-S, stopping before assembly) -- the as/ld half is already proven
+# above, through cc1 invoked directly. ---
+${bin_cp} ${helloC} hello2.c
+${out}/bin/gcc.exe -B ${out}/lib/gcc/i686-pc-pe/4.6.4/ -B ${out}/libexec/gcc/i686-pc-pe/4.6.4/ -I ${ntlibcSrc}/include -I ${ntlibcSrc}/arch/i386 -I ${ntlibcSrc}/arch/generic -I ${ntlibc}/include -S hello2.c -o hello2.s
