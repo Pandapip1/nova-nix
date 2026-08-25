@@ -1268,6 +1268,13 @@ CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o ggc-none.o gcc-${vers
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_DRIVER -o gcc-options.o ${genDir}/options.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gcc.o gcc-${version}/gcc/gcc.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gccspec.o gcc-${version}/gcc/gccspec.c
+
+# driver-i386.c: gccspec.c's own -march=native support calls
+# host_detect_local_cpu, defined here -- genuinely missing from this
+# package's own driver-object list (5c4abbd's own audit of gcc.c/
+# gccspec.c never turned this file up; found only once gcc.exe's own
+# link failed wanting it, real flags from make3.log:66431).
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -o driver-i386.o gcc-${version}/gcc/config/i386/driver-i386.c
 # --- libgcc: the DImode helper subset this bootstrap's own build actually
 # needs (tcc's own 64-bit codegen per gen_opl in tccgen.c, and cc1's generated
 # code once it exists) -- 9518ca7/9386c7c already tcc-verified these 19 L_*
@@ -1346,7 +1353,7 @@ ${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o cc1.exe c-lang.o c-fam
 # pretty-print.o/input.o/vec.o/version.o/intl.o/prefix.o with libbackend.a's own
 # members -- the same physical .o files, not recompiled, exactly like real GCC's
 # own Makefile links them into both cc1 (via libbackend.a) and gcc (directly). ---
-${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o gcc.exe gcc.o opts-common.o gcc-options.o diagnostic.o pretty-print.o input.o vec.o ggc-none.o gccspec.o version.o intl.o prefix.o libcpp.a libdecnumber.a libiberty.a -L ${ntlibc}/lib -lc -lntdll
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o gcc.exe gcc.o opts-common.o gcc-options.o diagnostic.o pretty-print.o input.o vec.o ggc-none.o gccspec.o driver-i386.o version.o intl.o prefix.o libcpp.a libdecnumber.a libiberty.a -L ${ntlibc}/lib -lc -lntdll
 
 
 # --- prove cc1.exe actually works, same bar as every other package in this
