@@ -26,7 +26,7 @@
 # neither does this.
 set -e
 
-export PATH="$coreutilsBin:$gnusedBin:$gnugrepBin:$gawk5Bin:$findutilsBin:$diffutilsBin:$gnumakeBin:$gnupatchBin:$gzipBin:$gnutarBin:$binutilsBin:$gccBin"
+export PATH="$coreutilsBin:$gnusedBin:$gnugrepBin:$gawk5Bin:$findutilsBin:$diffutilsBin:$gnumakeBin:$gnupatchBin:$gzipBin:$gnutarBin:$binutilsBin:$gccBin:$bashBin"
 
 # This chain's own bash reports $PWD drive-letter-prefixed (e.g.
 # "Z:/tmp/..."), unlike every /nix/store path nix itself hands this
@@ -66,7 +66,7 @@ export TMPDIR="$builddir/tmp" TMP="$builddir/tmp" TEMP="$builddir/tmp"
 # nothing above the compiler needs cc1.exe/as.exe by their own bare names.
 toolShims="$builddir/tool-shims"
 mkdir -p "$toolShims"
-for dir in "$binutilsBin" "$gnusedBin" "$gnugrepBin" "$gawk5Bin" "$findutilsBin" "$diffutilsBin" "$gnumakeBin" "$gnupatchBin" "$gzipBin" "$gnutarBin"; do
+for dir in "$binutilsBin" "$gnusedBin" "$gnugrepBin" "$gawk5Bin" "$findutilsBin" "$diffutilsBin" "$gnumakeBin" "$gnupatchBin" "$gzipBin" "$gnutarBin" "$bashBin"; do
   for f in "$dir"/*.exe; do
     [ -e "$f" ] || continue
     base="$(basename "$f" .exe)"

@@ -92,6 +92,14 @@ in
         # through to ntlibc-linked programs with no translation).
         gccBin = "${gcc}/bin";
         binutilsBin = "${binutils}/bin";
+        # bash's own build.kaem installs sh.exe alongside bash.exe (a copy,
+        # not a symlink -- see that package's build.kaem), the same way
+        # gnutar's own userland aliases its bare name.  builder above already
+        # names bash.exe by its full store path to launch this script, which
+        # needs no PATH lookup -- but ./configure and every Makefile above
+        # here invoke a bare "sh" of their own, so bash's bin dir has to be
+        # on PATH too, same as every other tool below.
+        bashBin = "${bash}/bin";
         coreutilsBin = "${coreutils}/bin";
         gnusedBin = "${gnused}/bin";
         gnugrepBin = "${gnugrep}/bin";
