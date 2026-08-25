@@ -4,7 +4,7 @@
 # which is what bash was built for.  1.12 because 1.13 and later want more of
 # a C library than Mes provides.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -22,7 +22,7 @@ let
   sources = import ./sources.nix { };
   inherit (sources) version;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = sources.src;

@@ -5,7 +5,7 @@
 # uses: gcc 15's stops it with "Unknown file type 'x'".  This is the tar that
 # opens the sources above it.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   gcc,
@@ -26,7 +26,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

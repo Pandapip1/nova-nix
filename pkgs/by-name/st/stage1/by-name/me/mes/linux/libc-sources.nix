@@ -152,7 +152,7 @@
     "lib/linux/kill.c"
   ];
 
-  # 160 files
+  # 165 files
   libc_tcc_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -268,10 +268,12 @@
     "lib/ctype/toupper.c"
     "lib/mes/abtod.c"
     "lib/mes/dtoab.c"
+    "lib/mes/fdgets.c"
     "lib/mes/search-path.c"
     "lib/posix/execvp.c"
     "lib/stdio/fclose.c"
     "lib/stdio/fdopen.c"
+    "lib/stdio/fgets.c"
     "lib/stdio/ferror.c"
     "lib/stdio/fflush.c"
     "lib/stdio/fopen.c"
@@ -299,15 +301,18 @@
     "lib/stdlib/strtoul.c"
     "lib/stdlib/strtoull.c"
     "lib/string/memmem.c"
+    "lib/string/strcasecmp.c"
     "lib/string/strcat.c"
     "lib/string/strchr.c"
+    "lib/string/strerror.c"
     "lib/string/strlwr.c"
+    "lib/string/strncasecmp.c"
     "lib/string/strncpy.c"
     "lib/string/strrchr.c"
     "lib/string/strstr.c"
     "lib/string/strupr.c"
     "lib/stub/sigaction.c"
-    "lib/stub/ldexp.c"
+    "lib/math/ldexp.c"
     "lib/stub/mprotect.c"
     "lib/stub/localtime.c"
     "lib/stub/putenv.c"
@@ -316,7 +321,7 @@
     "lib/x86-mes-mescc/setjmp.c"
   ];
 
-  # 263 files
+  # 265 files
   libc_gnu_SOURCES = [
     "lib/mes/__init_io.c"
     "lib/mes/eputs.c"
@@ -463,15 +468,17 @@
     "lib/stdlib/strtoul.c"
     "lib/stdlib/strtoull.c"
     "lib/string/memmem.c"
+    "lib/string/strcasecmp.c"
     "lib/string/strcat.c"
     "lib/string/strchr.c"
     "lib/string/strlwr.c"
+    "lib/string/strncasecmp.c"
     "lib/string/strncpy.c"
     "lib/string/strrchr.c"
     "lib/string/strstr.c"
     "lib/string/strupr.c"
     "lib/stub/sigaction.c"
-    "lib/stub/ldexp.c"
+    "lib/math/ldexp.c"
     "lib/stub/mprotect.c"
     "lib/stub/localtime.c"
     "lib/stub/putenv.c"

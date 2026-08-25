@@ -1,6 +1,8 @@
 {
   callPackage,
-  platform,
+  isLinux,
+  isWindows,
+  targetTriple,
   stage0,
   stage1,
   tinycc-intermediate,
@@ -13,7 +15,7 @@
   bash,
   coreutils-mes,
 }:
-if platform == "linux" then
+if isLinux && targetTriple == "i686-pc-linux-gnu" then
   let
     toolchain = tinycc-intermediate // {
       compiler = tinycc-intermediate;
@@ -29,5 +31,11 @@ if platform == "linux" then
     gnutar = gnutar-mes;
     coreutils = coreutils-mes;
   }
+else if isWindows then
+  callPackage ./windows {
+    inherit (stage0) system platforms;
+    inherit targetTriple;
+    tinycc = stage1.tinycc-mes;
+  }
 else
-  stage1.tinycc-mes.boot.compiler
+  throw "tinycc: unsupported Linux target triple ${targetTriple}"

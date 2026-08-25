@@ -1,2 +1,2 @@
-{ callPackage, platform }:
-if platform == "windows" then callPackage ./windows.nix { } else null
+{ callPackage, isWindows }:
+if isWindows then callPackage ./windows.nix { } else null

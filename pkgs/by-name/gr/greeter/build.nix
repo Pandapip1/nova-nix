@@ -4,4 +4,4 @@
 # { stdenv, libgreet }), so something has to call it.  pkgs/windows/
 # default.nix already does, as `greeter` -- by-name is walked, not
 # enumerated, so the attribute exists by virtue of the directory.
-(import ../../../default.nix { platform = "windows"; }).greeter
+(import ../../../default.nix { platform = "i686-windows"; }).greeter

@@ -3,4 +3,4 @@
 # and by-name/li/libgreet/package.nix is a function (it takes { stdenv }),
 # so something has to call it. pkgs/windows/default.nix already does, as
 # `libgreet`.
-(import ../../../default.nix { platform = "windows"; }).libgreet
+(import ../../../default.nix { platform = "i686-windows"; }).libgreet

@@ -29,11 +29,12 @@
 
 cd ${NIX_BUILD_TOP}
 
-${bin_kaem} --verbose --strict --file ${srcdir}/boot/kaem/build-i386.kaem
+${bin_kaem} --verbose --strict --file ${srcdir}/boot/kaem/build-${targetArch}.kaem
 
 ${bin_mkdir} -p ${out}/lib
 ${bin_cp} lib/libc.a ${out}/lib/libc.a
 ${bin_cp} lib/crt1.o ${out}/lib/crt1.o
+${bin_cp} ${libtcc1} ${out}/lib/libtcc1.a
 
 # bits/alltypes.h is the one header the build generates rather than ships
 # (catm of two per-arch halves), so it cannot be reached through the source

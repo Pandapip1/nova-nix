@@ -1,6 +1,6 @@
 {
   callPackage,
-  platform,
+  isLinux,
   stage0,
   stage1,
   libc-mes,
@@ -12,7 +12,7 @@
   bash,
   coreutils-mes,
 }:
-if platform == "linux" then
+if isLinux then
   callPackage ../../../../stage1/by-name/ti/tinycc/linux {
     inherit (stage0) system platforms;
     musl = libc-mes;

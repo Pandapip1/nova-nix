@@ -6,7 +6,7 @@
 # then reads a distributed aclocal.m4 as older than the configure.ac beside it
 # and tries to run an aclocal that is not in this bootstrap.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   tinycc,
@@ -24,7 +24,7 @@ let
   sources = import ./sources.nix { };
   inherit (sources) version;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = sources.src;

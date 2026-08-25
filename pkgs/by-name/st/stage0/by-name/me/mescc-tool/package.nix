@@ -1,5 +1,5 @@
 {
-  platform,
+  isLinux,
   stage0-src,
   stage0-run,
   hex2,
@@ -14,7 +14,7 @@ stage0-run {
   builder = hex2;
   args =
     [ "--architecture" stage0Arch "--little-endian" ]
-    ++ (if platform == "linux" then [
+    ++ (if isLinux then [
       "-f" "${src}/M2libc/${stage0Arch}/ELF-${stage0Arch}-debug.hex2"
       "-f" hex2src
       "--base-address" "0x08048000"

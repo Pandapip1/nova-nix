@@ -1,6 +1,6 @@
 {
   callPackage,
-  platform,
+  isLinux,
   stage0,
   tinycc,
   stage1,
@@ -8,15 +8,15 @@
   coreutils,
   libc,
 }:
-if platform == "linux" then
+if isLinux then
   callPackage ./linux {
     inherit (stage0) system platforms;
-    tinycc = stage1.tinycc-mes;
+    tinycc = stage1.tinycc;
     gnused = gnused;
     coreutils = coreutils;
   }
 else
   callPackage ./windows {
-    tinycc = tinycc;
+    tinycc = stage1.tinycc-mes;
     ntlibc = libc;
   }

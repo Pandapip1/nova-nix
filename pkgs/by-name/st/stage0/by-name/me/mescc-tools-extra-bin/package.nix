@@ -1,5 +1,5 @@
 {
-  platform,
+  platformFamily,
   derivationWithMeta,
   stage0-src,
   kaem,
@@ -28,7 +28,7 @@ derivationWithMeta {
     "--verbose"
     "--strict"
     "--file"
-    (./. + "/${platform}.kaem")
+    (./. + "/${platformFamily}.kaem")
   ];
 
   bin_sha256sum = sha256sum;

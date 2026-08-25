@@ -6,7 +6,7 @@
 # touch cannot set a timestamp.  musl is a real C library.  From here up, a
 # program can expect what its authors expected.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -28,7 +28,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = sources.src;

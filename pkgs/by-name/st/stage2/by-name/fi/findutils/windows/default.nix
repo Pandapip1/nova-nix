@@ -172,7 +172,7 @@
 # The Linux sibling builds them because `make install' does, not because
 # anything asks for them.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -192,7 +192,7 @@ let
   inherit (stage0) system platforms;
   ntlibcSources = callPackage ../../../nt/ntlibc/bootstrap-sources.nix { };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = (import <nix/fetchurl.nix>) {

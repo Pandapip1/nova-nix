@@ -1,11 +1,11 @@
 {
-  platform,
+  isLinux,
   stage0-src,
   stage0-run,
   catm,
 }:
 name: hex2src:
-if platform == "linux" then
+if isLinux then
   hex2src
 else
   let

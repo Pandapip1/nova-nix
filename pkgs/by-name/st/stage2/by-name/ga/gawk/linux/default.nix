@@ -5,7 +5,7 @@
 # config.status writes a subs.awk with line continuations that 3.0.6 rejects,
 # so anything configured from here on needs the newer awk.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   tinycc,
@@ -24,7 +24,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

@@ -5,7 +5,7 @@
 # the same reason sh is a copy of bash: a store path is read-only by the time
 # anything would follow it.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   tinycc,
@@ -24,7 +24,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

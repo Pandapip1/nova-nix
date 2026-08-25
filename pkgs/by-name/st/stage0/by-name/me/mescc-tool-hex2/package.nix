@@ -1,5 +1,5 @@
 {
-  platform,
+  isWindows,
   stage0-src,
   stage0-run,
   M1,
@@ -14,7 +14,7 @@ stage0-run {
   builder = M1;
   args =
     [ "--architecture" stage0Arch "--little-endian" "-f" ]
-    ++ (if platform == "windows" then [ linkedM1 ] else [
+    ++ (if isWindows then [ linkedM1 ] else [
       "${src}/M2libc/${stage0Arch}/${stage0Arch}_defs.M1"
       "-f" "${src}/M2libc/${stage0Arch}/libc-full.M1"
       "-f" M1src

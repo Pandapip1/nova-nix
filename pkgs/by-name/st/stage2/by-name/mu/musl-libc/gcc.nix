@@ -7,7 +7,7 @@
 # the compilers above this point link against; the tcc-built one is static
 # only, which was all tcc could produce.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   gcc,
@@ -26,7 +26,7 @@ let
   sources = import ./sources.nix { };
   inherit (sources) version;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = sources.src;

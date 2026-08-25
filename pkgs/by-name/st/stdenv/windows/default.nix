@@ -5,11 +5,11 @@
 # GNU-userland siblings (gnused, gnugrep, gawk5, findutils, diffutils,
 # gnumake, gnupatch, gzip, gnutar) as the tools every ./configure and
 # Makefile above here assumes, and bootstrap/tinycc's own tcc as the thing
-# that actually assembles and links -- see cc-wrapper.sh for why.
+# that actually assembles and links -- see cc-wrapper.c for why.
 #
-# system = "x86-windows": this chain emits 32-bit PE32, a real architecture
+# system = "i686-windows": this chain emits 32-bit PE32, a real architecture
 # change from the old msys/mingw-seeded stdenv's x86_64-windows -- see
-# ../../by-name/st/stage0/windows/platforms.nix, which is where "x86-windows" is
+# ../../by-name/st/stage0/windows/platforms.nix, where "i686-windows" is
 # first defined and where every earlier package on this side of the tree
 # already gets its own `system` from.
 #
@@ -33,7 +33,7 @@
 #      chain's own tcc assembling and linking that .s directly against
 #      ntlibc's crt1.o/libc.a, with -lntdll for the syscall surface.
 #
-# cc-wrapper.sh is the shim that hides both gaps from everything above it:
+# cc-wrapper.c is the native PE shim that hides both gaps from everything above it:
 # a `-c` invocation becomes `gcc.exe ... -S` followed by `tcc -c` on the
 # resulting assembly (tcc's own -c, proven fine -- the bug is specifically
 # in gcc's own driver-managed temp-file dance for the .s intermediate, not
@@ -66,7 +66,7 @@
 }:
 let
   setup = ./setup.sh;
-  ccWrapper = ./cc-wrapper.sh;
+  ccWrapper = ./cc-wrapper.c;
   tcc = tinycc.boot.tcc;
   ntlibcSrc = (stage2.callPackage ../../stage2/by-name/nt/ntlibc/bootstrap-sources.nix { }).src;
   # This package's own gcc/build.kaem installs cc1.exe/gcc.exe/as.exe under
@@ -82,7 +82,7 @@ in
     derivation (
       attrs
       // {
-        system = "x86-windows";
+        system = "i686-windows";
         builder = "${bash}/bin/bash.exe";
         args = [ "${setup}" ];
 
@@ -123,7 +123,7 @@ in
         # comment for what the bug is and why doubling the input fixes it.
         unxzBin = "${stage0.mescc-tools-extra.unxz}";
 
-        # cc-wrapper.sh's own inputs: this chain's own tcc, and everything
+        # cc-wrapper.c's own inputs: this chain's own tcc, and everything
         # it needs to reproduce the proven-working assemble+link recipe.
         NN_TCC = "${tcc}";
         NN_GCC = "${gcc}/bin";

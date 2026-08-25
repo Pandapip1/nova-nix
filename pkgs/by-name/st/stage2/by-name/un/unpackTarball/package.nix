@@ -1,5 +1,5 @@
-{ callPackage, platform, stage0 }:
-if platform == "linux" then
+{ callPackage, isLinux, stage0 }:
+if isLinux then
   callPackage ./linux { inherit (stage0) system platforms; }
 else
   null

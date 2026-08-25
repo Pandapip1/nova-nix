@@ -1,12 +1,8 @@
-# The pinned TinyCC source: janneke's bootstrappable fork.
+# The pinned TinyCC source: Janneke's bootstrappable fork.
 #
-# Mainline TinyCC cannot be compiled by MesCC; this fork is the one that can,
-# and Mes's own README names it as the next step above Mes.  The revision is
-# the one nixpkgs' minimal-bootstrap pins for Mes 0.27.1, and it sits on the
-# fork's mes-0.27 branch -- the branch that tracks this Mes.
-#
-# The version is 0.9.27 by the tree's own VERSION file, not the 0.9.26 the
-# fork is often described by.
+# The project's mainline fork is used as soon as TinyCC can self-host.  It
+# cannot be fed directly to MesCC: at the current mob pin MesCC loses the
+# parse in TCCState (reported at `jmp_buf`) and then fails expression lowering.
 { }:
 rec {
   version = "0.9.27-unstable-2024-07-07";

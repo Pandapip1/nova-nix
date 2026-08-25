@@ -9,7 +9,7 @@
 # stdbuf is not installed because libstdbuf.so cannot be built into a static
 # link, and getcwd's PATH_MAX answers are given rather than probed.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   tinycc,
@@ -28,7 +28,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

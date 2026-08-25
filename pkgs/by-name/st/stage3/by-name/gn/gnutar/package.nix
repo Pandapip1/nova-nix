@@ -1,15 +1,17 @@
 {
-  platform,
+  isLinux,
+  callPackage,
   stage0,
   stage2,
-  gcc46,
+  gcc_4_6_4,
   libc,
 }:
-if platform == "linux" then
-  stage2.callPackage ../../../../stage2/by-name/gn/gnutar/linux/latest.nix {
+if isLinux then
+  callPackage ../../../../stage2/by-name/gn/gnutar/linux/latest.nix {
     inherit (stage0) system platforms;
-    gcc = gcc46;
+    gcc = gcc_4_6_4;
     musl = libc;
+    gnutar = stage2.gnutar;
   }
 else
   stage2.gnutar

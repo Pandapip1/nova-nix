@@ -1,6 +1,6 @@
 {
-  platform,
+  isLinux,
   musl-libc-mes,
   ntlibc,
 }:
-if platform == "linux" then musl-libc-mes else ntlibc
+if isLinux then musl-libc-mes else ntlibc

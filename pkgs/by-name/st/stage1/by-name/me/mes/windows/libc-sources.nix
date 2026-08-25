@@ -1,4 +1,4 @@
-# The Mes C library's source lists, for x86-windows.
+# The Mes C library's source lists, for i686-windows.
 #
 # The counterpart of ../../../linux/bootstrap/mes/libc-sources.nix, computed
 # the same way from the same script -- build-aux/configure-lib.sh in the Mes

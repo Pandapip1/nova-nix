@@ -1,5 +1,5 @@
 {
-  platform,
+  isWindows,
   stage0-src,
   stage0-run,
   catm,
@@ -10,7 +10,7 @@ let
   inherit (stage0-src) src stage0Arch;
   out = builtins.placeholder "out";
 in
-if platform == "windows" then
+if isWindows then
   stage0-run {
     pname = "${name}-0.M1";
     builder = catm;

@@ -12,8 +12,8 @@
 #                              binary (not a bin dir) -- .tar.xz sources only
 #   $NN_TCC, $NN_GCC, $NN_GCC_LIBDIR, $NN_NTLIBC_LIB, $NN_NTLIBC_INCLUDE,
 #   $NN_NTLIBC_SRC_INCLUDE, $NN_NTLIBC_ARCH_I386, $NN_NTLIBC_ARCH_GENERIC
-#                              cc-wrapper.sh's own inputs, exported as-is
-#   $ccWrapperSrc              the cc-wrapper script (a store path)
+#                              cc-wrapper.c's own inputs, exported as-is
+#   $ccWrapperSrc              the cc-wrapper C source (a store path)
 #   $buildInputs               dependency store paths
 # plus these optional knobs a package may set:
 #   $configureFlags / $makeFlags  extra flags for the default phases
@@ -64,7 +64,7 @@ export TMPDIR="$builddir/tmp" TMP="$builddir/tmp" TEMP="$builddir/tmp"
 # has to be general: a shim directory of bare-named copies of every .exe
 # in this chain's own (non-gcc) userland, ahead of the real bin dirs on
 # PATH. gccBin is deliberately excluded here -- "gcc"/"cc" get the
-# cc-wrapper.sh shim below instead, not a bare pass-through alias, and
+# native cc-wrapper shim below instead, not a bare pass-through alias, and
 # nothing above the compiler needs cc1.exe/as.exe by their own bare names.
 toolShims="$builddir/tool-shims"
 mkdir -p "$toolShims"
@@ -150,67 +150,32 @@ done
 export CPPFLAGS LDFLAGS PATH
 
 # --- cc-wrapper: route every compiler call through our -S+tcc shim ---
-# Installed under "gcc" and "cc", ahead of the real gcc.exe on PATH -- see
-# cc-wrapper.sh for what it does and why. ar/ranlib/nm/objcopy need no
-# wrapper (binutilsBin above already puts the real ones on PATH).
-#
-# $CC is exported as "$toolShims/sh $wrapperBin/gcc" -- two words, not the
-# bare "gcc" this used to be -- because a bare PATH-resolved invocation of
-# wrapperBin/gcc goes through a real, measured EACCES, not a synthesized
-# one. wrapperBin/gcc is a text script (cc-wrapper.sh's own #!/bin/bash
-# shebang); ntlibc's chmod (src/stat/chmod.c, its own comment: "chmod can
-# only express one thing on NTFS: whether the file is read-only") has no
-# way to grant it a real host execute bit, NTFS having no such per-file
-# attribute at all. Confirmed with strace -f across a full hello build:
-# wine's own process-launch path, handed a non-PE target, tries a raw host
-# execve() of it first (`execve(".../wrappers/gcc", ["gcc","--version"],
-# ...) = -1 EACCES`) -- a real permission denial, the file genuinely has
-# no x bit on the host, not this chain's own synthesized-by-suffix stat()
-# question -- and on that failure falls back to reading the shebang line
-# and re-launching with the named interpreter as a raw HOST process
-# (`execve(".../z:/bin/bash", ["/bin/bash", ".../wrappers/gcc", ...])`),
-# escaping wine/ntlibc entirely into a genuinely native Linux bash. That
-# escaped bash is what was actually producing every other anomaly in the
-# same build: real /bin/uname and /usr/bin/arch (the coordinator's own
-# suspicion, confirmed -- not a PATH leak, a real native process), pwd's
-# write error, xargs' missing echo, and -- the actual blocker -- a raw
-# native execve() of gcc.exe/tcc with no wine translation at all, which
-# the kernel cannot run (no PE/wine entry in /proc/sys/fs/binfmt_misc on
-# this host, confirmed directly), falling through binfmt_misc's only
-# registered wildcard (mono's "cli" detector) to run-detectors, which also
-# has nothing for it: "unable to find an interpreter for gcc.exe".
-#
-# $toolShims/sh is a real PE binary (a copy of this chain's own bash.exe,
-# already proven throughout this chain's every earlier stage), so wine's
-# normal in-process PE loader handles it directly -- no raw host execve,
-# no shebang fallback, no escape. wrapperBin/gcc as a plain argument to it
-# is never itself exec'd by anything; sh only ever reads it as script text.
+# Compile the wrapper itself as a native PE executable. Both the explicit
+# $CC path and a bare gcc/cc found through PATH therefore stay inside the
+# Windows execution environment. The extensionless copies serve bash's
+# exact-name lookup; the .exe copies serve ntlibc's execvp lookup.
 wrapperBin="$builddir/wrappers"
 mkdir -p "$wrapperBin"
-cp "$ccWrapperSrc" "$wrapperBin/gcc"
-cp "$ccWrapperSrc" "$wrapperBin/cc"
-chmod +x "$wrapperBin/gcc" "$wrapperBin/cc"
+"$NN_TCC" \
+  -B "$NN_NTLIBC_LIB" \
+  -nostdinc \
+  -I "$NN_NTLIBC_SRC_INCLUDE" \
+  -I "$NN_NTLIBC_ARCH_I386" \
+  -I "$NN_NTLIBC_ARCH_GENERIC" \
+  -I "$NN_NTLIBC_INCLUDE" \
+  -nostdlib "$NN_NTLIBC_LIB/crt1.o" \
+  -o "$wrapperBin/gcc.exe" "$ccWrapperSrc" \
+  -L "$NN_NTLIBC_LIB" -lc -lntdll
+cp "$wrapperBin/gcc.exe" "$wrapperBin/gcc"
+cp "$wrapperBin/gcc.exe" "$wrapperBin/cc.exe"
+cp "$wrapperBin/gcc.exe" "$wrapperBin/cc"
+chmod +x "$wrapperBin/gcc.exe" "$wrapperBin/gcc" "$wrapperBin/cc.exe" "$wrapperBin/cc"
 export PATH="$wrapperBin:$PATH"
-#
-# $toolShims/bash, not $toolShims/sh: cc-wrapper.sh needs real bash, not
-# POSIX-mode bash. Both are the same bash.exe binary copied under two
-# bare names, and bash inspects its own argv[0] to decide which mode to
-# start in -- named "sh", it disables its own extensions, array syntax
-# (incFlags=(...), sources=(), and every other array this script uses)
-# included, which is a syntax error under sh-mode, not just a behaviour
-# change. Measured directly: `wine sh.exe cc-wrapper.sh -o a.exe x.c`
-# outside the whole build, in isolation, up against this exact repo's
-# cc-wrapper.sh -- "cc-wrapper.sh: line 48: syntax error near unexpected
-# token `('" (line 48 is incFlags=( ... ), the first array in the file).
-# ./configure above stays on $toolShims/sh deliberately: it is a plain
-# #!/bin/sh script with no bash extensions of its own, so sh-mode is the
-# right mode for it, not just a tolerated one.
-export CC="$toolShims/bash $wrapperBin/gcc"
+export CC="$wrapperBin/gcc.exe"
 
 # --- and the same absolute-path rule for the archiver ---
-# $CC above is absolute for a reason specific to the cc-wrapper (a text
-# script wine cannot exec), but there is a second, entirely separate
-# reason every tool name a Makefile invokes has to be absolute here, and
+# $CC above is absolute because make's fast path bypasses bash's PATH
+# lookup. The same rule applies to every tool name a Makefile invokes, and
 # it applies to real .exe binaries too: the ':'-vs-';' PATH split
 # documented at $SHELL above.  make does not route every recipe line
 # through $SHELL -- GNU make's construct_command_argv_internal takes a
@@ -560,7 +525,7 @@ fi
 # --- fixup phase: bundle non-system DLLs so outputs are self-contained ---
 # This chain has no shared-runtime DLLs of its own yet (gcc.exe/cc1.exe/
 # ntlibc are all statically linked into each output by tcc's own -nostdlib
-# link line in cc-wrapper.sh), so there is, for now, nothing for this phase
+# link line in cc-wrapper.c), so there is, for now, nothing for this phase
 # to bundle beyond what a package's own buildPhase/installPhase already
 # produced. Left as a real phase (not deleted) so a future DLL-producing
 # package on this stdenv has somewhere to hook a real fixup, the same way

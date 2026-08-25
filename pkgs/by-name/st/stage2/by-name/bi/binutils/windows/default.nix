@@ -408,7 +408,7 @@
 # from this package's point of view) -- report, don't patch, same rule
 # [[ntlibc-coordination]] already states for smaller issues.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -422,7 +422,7 @@ let
   inherit (stage0) system platforms;
   ntlibcSources = callPackage ../../../nt/ntlibc/bootstrap-sources.nix { };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = (import <nix/fetchurl.nix>) {

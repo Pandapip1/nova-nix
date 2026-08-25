@@ -31,7 +31,7 @@
 # it, so `touch -d' has to lose its argument parser -- and one patch of our
 # own, for a FILE that ntlibc quite correctly refuses to give a size to.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -50,7 +50,7 @@ let
   # live-bootstrap, at the revision the Linux package pins.
   liveBootstrap = "https://raw.githubusercontent.com/fosslinux/live-bootstrap/a8752029f60217a5c41c548b16f5cdd2a1a0e0db/sysa/coreutils-5.0";
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

@@ -142,7 +142,7 @@
 # the host's gawk, and every generated file came out identical apart from the
 # `AWK =' line and the build directory.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -156,7 +156,7 @@ let
   inherit (stage0) system platforms;
   ntlibcSources = callPackage ../../../nt/ntlibc/bootstrap-sources.nix { };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = (import <nix/fetchurl.nix>) {

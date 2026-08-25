@@ -81,7 +81,10 @@ derivationWithMeta {
 
   # One argument each: kaem substitutes a variable whole.  See the script for
   # why AR is named rather than looked up.
-  ccflag = "CC=${tinycc.compiler}/bin/tcc -static -B ${tinycc.libs}/lib -I ${mesInclude}";
+  # This Mes libc now provides the two case-insensitive comparisons.  Tell
+  # Bash not to redeclare strncasecmp with its historical int-sized count or
+  # compile its fallback copies into libsh.
+  ccflag = "CC=${tinycc.compiler}/bin/tcc -static -B ${tinycc.libs}/lib -I ${mesInclude} -DHAVE_STRCASECMP";
   arflag = "AR=${tinycc.compiler}/bin/tcc -ar";
 
   # See the script: this tcc's -ar takes no flag cluster.

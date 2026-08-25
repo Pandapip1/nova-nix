@@ -37,7 +37,7 @@ let
   # Both halves of ntlibc: the built library, and the source tree its headers
   # live in -- see the ntlibc package for why only one header is in the
   # output.
-  ntlibcSrc = (callPackage ../../../nt/ntlibc/bootstrap-sources.nix { }).src;
+  ntlibcSrc = (callPackage ../../../../../stage2/by-name/nt/ntlibc/bootstrap-sources.nix { }).src;
 
   # tcc's own runtime, for the 64-bit arithmetic helpers bash's `let' and
   # $((...)) need.  ntlibc does not carry it, and should not: it is the

@@ -1,5 +1,6 @@
 {
-  platform,
+  isLinux,
+  isWindows,
   stage0-src,
   stage0-run,
   M2,
@@ -12,7 +13,7 @@ let
   inherit (stage0-src) src stage0Arch;
   out = builtins.placeholder "out";
   libcSources =
-    if platform == "windows" then
+    if isWindows then
       [
         "-D" "__windows__=1"
         "-f" "${src}/M2libc/sys/types.h"
@@ -57,7 +58,7 @@ stage0-run {
     [ "--architecture" stage0Arch ]
     ++ libcSources
     ++ builtins.concatMap (source: [ "-f" "${src}/${source}" ]) sources
-    ++ (if platform == "linux" then [ "--debug" ] else [ ])
+    ++ (if isLinux then [ "--debug" ] else [ ])
     ++ [ "-o" out ];
   executable = false;
 }

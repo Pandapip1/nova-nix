@@ -8,7 +8,7 @@
 # --disable-plugins because neither is wanted here, and --with-lib-path=: so
 # that libbfd and libopcodes do not land on the default search path.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   tinycc,
@@ -29,7 +29,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {
@@ -60,11 +60,7 @@ derivationWithMeta {
   CC = "${tinycc}/bin/tcc -static -B ${tinycc}/lib";
   AR = "${tinycc}/bin/tcc -ar";
 
-  builder = "${bash}/bin/bash";
-  args = [
-    "-e"
-    ./build.sh
-  ];
+  buildScript = ./build.sh;
 
   meta = {
     description = "Tools for manipulating binaries (linker, assembler, etc.)";

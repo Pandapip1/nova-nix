@@ -7,7 +7,7 @@
 # into $out IS the copy, which matters because mescc-tools-extra's cp handles
 # one file at a time and nothing here can copy a tree.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -17,7 +17,7 @@
   version,
   tarball,
 }:
-derivationWithMeta {
+stdenv.mkDerivation {
   pname = name;
   inherit version system;
 
@@ -31,7 +31,7 @@ derivationWithMeta {
     "--verbose"
     "--strict"
     "--file"
-    ./unpack.kaem
+    ./build.kaem
   ];
 
   meta = {

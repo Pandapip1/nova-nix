@@ -5,7 +5,7 @@
 # configure that cannot run here, and nixpkgs' minimal bootstrap wrote a plain
 # one.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -21,7 +21,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

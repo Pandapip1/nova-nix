@@ -3,4 +3,4 @@
 # by-name/he/hello/package.nix is a function (it takes { stdenv, fetchurl }),
 # so something has to call it. pkgs/windows/default.nix already does, as
 # `hello`.
-(import ../../../default.nix { platform = "windows"; }).hello
+(import ../../../default.nix { platform = "i686-windows"; }).hello

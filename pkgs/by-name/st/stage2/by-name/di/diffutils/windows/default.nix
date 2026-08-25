@@ -77,7 +77,7 @@
 # spelling resolves and silently hands cmp the HOST's null device).  See
 # config.h's own comment on both, at the very end of the file.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -96,7 +96,7 @@ let
   inherit (stage0) system platforms;
   ntlibcSources = callPackage ../../../nt/ntlibc/bootstrap-sources.nix { };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = (import <nix/fetchurl.nix>) {

@@ -58,7 +58,7 @@
 # in this bootstrap produces a .Z, a .z or a .lzh to test them on.  Nor is
 # encryption (crypt.c), which gzip 1.2.4 ships stubbed out anyway.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -70,7 +70,7 @@ let
   inherit (stage0) system platforms;
   ntlibcSources = callPackage ../../../nt/ntlibc/bootstrap-sources.nix { };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = (import <nix/fetchurl.nix>) {

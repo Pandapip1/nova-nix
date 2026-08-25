@@ -1,10 +1,8 @@
 # The pinned mainline TinyCC source.
 #
 # The bootstrappable fork stops at 0.9.27 and carries changes made to let
-# MesCC compile it; this is upstream TinyCC, which the fork's last round is
-# able to build and which everything above wants instead.  The revision is
-# the one nixpkgs' minimal-bootstrap pins -- or was, until ntlibc needed
-# thread-local storage.
+# MesCC compile it; this is the project's TinyCC fork, which the bootstrap
+# fork's last round is able to build and which everything above wants instead.
 #
 # ntlibc's errno is a __thread int, which is what C and POSIX ask errno to
 # be and what the PE TLS directory exists for.  Upstream added Windows TLS

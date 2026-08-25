@@ -3,7 +3,7 @@
 # binutils' configure runs cmp, and gcc's build compares generated files
 # against what it has; neither gets far without this.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   tinycc,
@@ -21,7 +21,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

@@ -1,6 +1,6 @@
 {
   callPackage,
-  platform,
+  isLinux,
   stage0,
   stage1,
   mes,
@@ -11,7 +11,7 @@
   coreutils-mes,
   libc,
 }:
-if platform == "linux" then
+if isLinux then
   callPackage ./linux {
     inherit (stage0) system platforms;
     tinycc = stage1.tinycc-mes.boot;

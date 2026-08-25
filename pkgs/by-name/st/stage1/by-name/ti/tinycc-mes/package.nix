@@ -1,11 +1,11 @@
 {
   callPackage,
-  platform,
+  isLinux,
   stage0,
   mes,
   nyacc,
 }:
-if platform == "linux" then
+if isLinux then
   callPackage ./shared {
     inherit stage0 mes nyacc;
     bloodElf = stage0.blood-elf;

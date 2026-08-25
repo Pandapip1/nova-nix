@@ -9,7 +9,7 @@
 # small.  They are fetched and pinned rather than copied, so what is built is
 # what that project publishes.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -36,7 +36,7 @@ let
       inherit sha256;
     };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

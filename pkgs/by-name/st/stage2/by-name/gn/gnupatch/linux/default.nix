@@ -8,7 +8,7 @@
 # Version 2.5.9 rather than anything newer, because 2.6 and later reach for
 # gnulib pieces the Mes C library does not implement.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -30,7 +30,7 @@ let
     inherit version tarball;
   };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   srcdir = "${src}/patch-${version}";

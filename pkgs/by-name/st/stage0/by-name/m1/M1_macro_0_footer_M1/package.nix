@@ -1,6 +1,6 @@
-{ callPackage, platform }:
+{ callPackage, platformFamily }:
 let
-  implementation = ./. + "/${platform}.nix";
+  implementation = ./. + "/${platformFamily}.nix";
 in
 if builtins.pathExists implementation then
   callPackage implementation { }

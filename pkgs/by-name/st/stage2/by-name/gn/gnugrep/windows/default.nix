@@ -29,7 +29,7 @@
 # grep's bundled regex.c is the only POSIX matcher in the picture; dfa.c and
 # search.c use it through grep's own regex.h and nothing collides.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -41,7 +41,7 @@ let
   inherit (stage0) system platforms;
   ntlibcSources = callPackage ../../../nt/ntlibc/bootstrap-sources.nix { };
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = (import <nix/fetchurl.nix>) {

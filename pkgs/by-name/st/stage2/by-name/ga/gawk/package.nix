@@ -1,6 +1,6 @@
 {
   callPackage,
-  platform,
+  isLinux,
   stage0,
   tinycc,
   stage1,
@@ -14,10 +14,10 @@
   gawk-mes,
   libc,
 }:
-if platform == "linux" then
+if isLinux then
   callPackage ./linux {
     inherit (stage0) system platforms;
-    tinycc = stage1.tinycc-mes;
+    tinycc = stage1.tinycc;
     gnused = gnused;
     bootGawk = gawk-mes;
     gnutar = gnutar-mes;
@@ -25,7 +25,7 @@ if platform == "linux" then
   }
 else
   callPackage ../gawk5/windows {
-    tinycc = tinycc;
+    tinycc = stage1.tinycc-mes;
     ntlibc = libc;
     bootGawk = gawk-mes;
   }

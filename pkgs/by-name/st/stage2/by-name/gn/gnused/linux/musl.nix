@@ -13,7 +13,7 @@
 # a C library whose stdio holds up.  4.0.9 still needs no configure of its
 # own, which is why the version does not move either.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -28,7 +28,7 @@ let
   sources = import ./sources.nix { };
   inherit (sources) version;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = sources.src;

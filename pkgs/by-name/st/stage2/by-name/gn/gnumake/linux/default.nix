@@ -3,7 +3,7 @@
 # The first thing above patch, and what everything above it is built with:
 # coreutils, bash and the rest all ship a Makefile and expect make to run it.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
@@ -15,7 +15,7 @@ let
   pname = "gnumake";
   version = "4.4.1";
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = (import <nix/fetchurl.nix>) {

@@ -1,6 +1,6 @@
 {
   callPackage,
-  platform,
+  isLinux,
   stage0,
   tinycc,
   stage1,
@@ -14,7 +14,7 @@
   coreutils-mes,
   libc,
 }:
-if platform == "linux" then
+if isLinux then
   callPackage ./linux/musl.nix {
     inherit (stage0) system platforms;
     inherit tinycc gnused gnutar;

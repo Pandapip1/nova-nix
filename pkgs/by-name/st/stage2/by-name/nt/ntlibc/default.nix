@@ -15,17 +15,22 @@
 # consumer needs `src` on its include path as well as this output, and that
 # one generated header is copied out beside the libraries.
 {
-  derivationWithMeta,
+  stdenv,
   system,
   platforms,
   stage0,
   tinycc,
   callPackage,
+  targetTriple,
 }:
 let
   sources = callPackage ./bootstrap-sources.nix { };
+  targetArch =
+    if targetTriple == "i686-pc-pe" then "i386"
+    else if targetTriple == "x86_64-pc-pe" then "x86_64"
+    else throw "ntlibc: unsupported target triple ${targetTriple}";
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   pname = "ntlibc";
   inherit (sources) version;
   inherit system;
@@ -35,7 +40,9 @@ derivationWithMeta {
   # The compiler alone.  ntlibc's generated script archives with
   # `${CC} -ar rcs', and tcc accepts -ar only as its own first argument, so
   # anything appended here would stop it being that.
-  CC = tinycc.boot.tcc;
+  CC = "${tinycc}/bin/tcc";
+  inherit targetArch;
+  libtcc1 = "${tinycc.libs or tinycc}/lib/libtcc1.a";
 
   bin_kaem = stage0.kaem;
   bin_mkdir = stage0.mescc-tools-extra.mkdir;
@@ -49,6 +56,15 @@ derivationWithMeta {
     "--file"
     ./build.kaem
   ];
+
+  passthru = {
+    inherit targetArch targetTriple;
+    includePaths = [
+      "${sources.src}/include"
+      "${sources.src}/arch/${targetArch}"
+      "${sources.src}/arch/generic"
+    ];
+  };
 
   meta = {
     description = "A C library for the Windows NT API";

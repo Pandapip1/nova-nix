@@ -1,6 +1,6 @@
 {
   callPackage,
-  platform,
+  platformFamily,
   stage0,
 }:
-callPackage (./. + "/${platform}") { inherit stage0; }
+callPackage (./. + "/${platformFamily}") { inherit stage0; }

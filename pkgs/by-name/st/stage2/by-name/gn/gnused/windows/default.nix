@@ -28,7 +28,7 @@
 # place, an alloca fallback that HAVE_ALLOCA_H already skips over.  Taking
 # the defines away would have been a workaround for nothing.
 {
-  derivationWithMeta,
+  stdenv,
   stage0,
   tinycc,
   ntlibc,
@@ -43,7 +43,7 @@ let
 
   fetchurl = import <nix/fetchurl.nix>;
 in
-derivationWithMeta {
+stdenv.mkDerivation {
   inherit pname version system;
 
   tarball = fetchurl {

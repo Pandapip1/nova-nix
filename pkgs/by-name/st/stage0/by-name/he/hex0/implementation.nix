@@ -16,9 +16,11 @@ derivationWithMeta {
     (builtins.placeholder "out")
   ];
 
-  outputHashMode = "flat";
+  # Nix no longer permits an executable flat fixed-output file.  Recursive
+  # hashing covers the same bytes plus the executable mode needed by hex1.
+  outputHashMode = "recursive";
   outputHashAlgo = "sha256";
-  outputHash = stage0-src.hex0Hash;
+  outputHash = stage0-src.hex0NarHash;
 
   passthru = { hex0-seed = hex0-seed; };
 
