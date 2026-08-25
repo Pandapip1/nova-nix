@@ -1266,8 +1266,8 @@ CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o main.o gcc-${version}
 # not a second compile, matching real GCC's own Makefile (see 5c4abbd).
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o ggc-none.o gcc-${version}/gcc/ggc-none.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_DRIVER -o gcc-options.o ${genDir}/options.c
-CC -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gcc.o gcc-${version}/gcc/gcc.c
-CC -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gccspec.o gcc-${version}/gcc/gccspec.c
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gcc.o gcc-${version}/gcc/gcc.c
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gccspec.o gcc-${version}/gcc/gccspec.c
 # --- libgcc: the DImode helper subset this bootstrap's own build actually
 # needs (tcc's own 64-bit codegen per gen_opl in tccgen.c, and cc1's generated
 # code once it exists) -- 9518ca7/9386c7c already tcc-verified these 19 L_*
