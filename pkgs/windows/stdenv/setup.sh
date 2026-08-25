@@ -118,13 +118,45 @@ export CPPFLAGS LDFLAGS PATH
 # Installed under "gcc" and "cc", ahead of the real gcc.exe on PATH -- see
 # cc-wrapper.sh for what it does and why. ar/ranlib/nm/objcopy need no
 # wrapper (binutilsBin above already puts the real ones on PATH).
+#
+# $CC is exported as "$toolShims/sh $wrapperBin/gcc" -- two words, not the
+# bare "gcc" this used to be -- because a bare PATH-resolved invocation of
+# wrapperBin/gcc goes through a real, measured EACCES, not a synthesized
+# one. wrapperBin/gcc is a text script (cc-wrapper.sh's own #!/bin/bash
+# shebang); ntlibc's chmod (src/stat/chmod.c, its own comment: "chmod can
+# only express one thing on NTFS: whether the file is read-only") has no
+# way to grant it a real host execute bit, NTFS having no such per-file
+# attribute at all. Confirmed with strace -f across a full hello build:
+# wine's own process-launch path, handed a non-PE target, tries a raw host
+# execve() of it first (`execve(".../wrappers/gcc", ["gcc","--version"],
+# ...) = -1 EACCES`) -- a real permission denial, the file genuinely has
+# no x bit on the host, not this chain's own synthesized-by-suffix stat()
+# question -- and on that failure falls back to reading the shebang line
+# and re-launching with the named interpreter as a raw HOST process
+# (`execve(".../z:/bin/bash", ["/bin/bash", ".../wrappers/gcc", ...])`),
+# escaping wine/ntlibc entirely into a genuinely native Linux bash. That
+# escaped bash is what was actually producing every other anomaly in the
+# same build: real /bin/uname and /usr/bin/arch (the coordinator's own
+# suspicion, confirmed -- not a PATH leak, a real native process), pwd's
+# write error, xargs' missing echo, and -- the actual blocker -- a raw
+# native execve() of gcc.exe/tcc with no wine translation at all, which
+# the kernel cannot run (no PE/wine entry in /proc/sys/fs/binfmt_misc on
+# this host, confirmed directly), falling through binfmt_misc's only
+# registered wildcard (mono's "cli" detector) to run-detectors, which also
+# has nothing for it: "unable to find an interpreter for gcc.exe".
+#
+# $toolShims/sh is a real PE binary (a copy of this chain's own bash.exe,
+# already proven throughout this chain's every earlier stage), so wine's
+# normal in-process PE loader handles it directly -- no raw host execve,
+# no shebang fallback, no escape. wrapperBin/gcc as a plain argument to it
+# is never itself exec'd by anything; sh only ever reads it as script text.
 wrapperBin="$builddir/wrappers"
 mkdir -p "$wrapperBin"
 cp "$ccWrapperSrc" "$wrapperBin/gcc"
 cp "$ccWrapperSrc" "$wrapperBin/cc"
 chmod +x "$wrapperBin/gcc" "$wrapperBin/cc"
 export PATH="$wrapperBin:$PATH"
-export CC=gcc
+export CC="$toolShims/sh $wrapperBin/gcc"
 
 prefix="$out"
 
