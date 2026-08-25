@@ -201,6 +201,7 @@
   ntlibc,
   binutils,
   gnupatch,
+  gzip,
   callPackage,
 }:
 let
@@ -235,6 +236,13 @@ derivationWithMeta {
   tcc = tinycc.boot.tcc;
   patch = "${gnupatch}/bin/patch.exe";
   ar = "${binutils}/bin/ar.exe";
+  # This chain's own real gzip.exe (../gzip), not stage0's minimal
+  # ungz -- see build.kaem's own comment for why: ungz's fixed-buffer
+  # puff() inflate cannot decompress gcc-core-4.6.4.tar.gz (162MB
+  # uncompressed), confirmed directly, while this real gzip.exe already
+  # does. Referenced as gunzip.exe for its argv[0]-dispatched decompress
+  # mode (see ../gzip/build.kaem's own "Mode from argv[0]" comment).
+  gunzip = "${gzip}/bin/gunzip.exe";
 
   inherit ntlibc;
   ntlibcSrc = ntlibcSources.src;
@@ -243,9 +251,9 @@ derivationWithMeta {
   genDir = ./generated;
   shimDir = ./shim;
   cc1ChecksumC = ./shim/cc1-checksum.c;
+  ntRpathC = ./nt-rpath.c;
   helloC = ./hello.c;
 
-  bin_ungz = stage0.mescc-tools-extra.ungz;
   bin_untar = stage0.mescc-tools-extra.untar;
   bin_cp = stage0.mescc-tools-extra.cp;
   bin_mkdir = stage0.mescc-tools-extra.mkdir;
