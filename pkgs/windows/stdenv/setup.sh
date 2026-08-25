@@ -75,6 +75,32 @@ for dir in "$binutilsBin" "$gnusedBin" "$gnugrepBin" "$gawk5Bin" "$findutilsBin"
 done
 export PATH="$toolShims:$PATH"
 
+# gnumake's own build.kaem patches default_shell from "/bin/sh" to bare
+# "sh" (mirroring the Linux bootstrap's 0001-No-impure-bin-sh.patch), so
+# make resolves its per-recipe shell by searching PATH -- but only ONE of
+# this chain's two PATH consumers agrees on how PATH is delimited. bash's
+# own command lookup (general.c's get_next_path_element, unpatched by
+# windows.patch) hardcodes ':', same as every Unix bash; ntlibc's execvp
+# (src/process/find_program.c) parses PATH as the *Windows* variable,
+# entries split on ';' -- by design, not a bug (see that file's own
+# top-of-file comment). This chain's PATH is colon-joined for bash's sake,
+# which means the entire string is one non-existent ';'-delimited
+# directory as far as ntlibc's execvp is concerned: every bare-name
+# execvp() call -- not just this one -- fails ENOENT no matter what is
+# actually on PATH. Measured directly: gnumake's shell search for bare
+# "sh" failed this exact way even with $bashBin's sh.exe correctly on
+# PATH and shimmed bare into $toolShims.
+#
+# The fix is not to switch PATH's own delimiter (bash's internal lookup,
+# used for every recipe command make itself does NOT exec by shell-search,
+# needs ':' throughout). It is to give make an absolute path so it never
+# reaches PATH search at all: job.c's construct_command_argv checks $SHELL
+# before falling back to default_shell, and ntlibc's find_program takes
+# any name containing '/' as-is (its has_dir() check), skipping PATH
+# search entirely. $toolShims/sh is exactly that -- an absolute path to
+# the same sh.exe copy already shimmed above.
+export SHELL="$toolShims/sh"
+
 # --- dependency flags ---
 # Start from EMPTY flag sets: host-inherited CPPFLAGS/LDFLAGS would inject
 # ambient -I/-L directories ahead of the declared buildInputs, silently
