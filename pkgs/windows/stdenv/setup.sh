@@ -75,6 +75,39 @@ for dir in "$binutilsBin" "$gnusedBin" "$gnugrepBin" "$gawk5Bin" "$findutilsBin"
     cp "$f" "$toolShims/$base"
   done
 done
+
+# coreutils is the one package in this chain's userland that installs
+# BARE names (see the comment above), and that is not only a spelling
+# problem: ntlibc cannot execute a suffix-less file by PATH search at
+# all.  src/process/find_program.c's __find_program tries each PATH
+# entry as `dir\name' and then as `dir\name.exe', and gates both on
+# access(p, X_OK) -- and ntlibc's access (src/unistd/access.c) is
+# faccessat over its own stat, whose mode is synthesized from the
+# FILENAME (src/stat/stat.c: a name ending .exe/.com/.bat/.cmd/.sh gets
+# 0755, anything else 0644), NTFS having no per-file execute bit to
+# read.  So bare `mkdir' fails X_OK, `mkdir.exe' does not exist, and
+# every execvp of a coreutils name fails ENOENT no matter what is on
+# PATH -- the same synthesized-permission wall the configure-phase
+# comment below describes, reached from the other side.
+#
+# Measured directly, and it is what the PATH fix below alone did NOT
+# solve: making PATH ';'-parseable, on its own, left libgreet's install
+# recipe failing exactly as before with `make: mkdir: No such file or
+# directory'.  That is the second half of the same wall -- ntlibc could
+# now see $toolShims as a PATH entry and still could not execute
+# anything in it under a bare name.  binutils, sed, grep, awk, make,
+# patch, gzip, tar and bash all install real .exe files, so
+# __find_program's own ".exe" append already resolves those once PATH
+# parses; coreutils alone has no .exe to append to.
+#
+# The bare copies above are still what bash's own lookup uses; these are
+# .exe-suffixed copies for ntlibc's.  Both names, one directory.
+for f in "$coreutilsBin"/*; do
+  [ -f "$f" ] || continue
+  base="$(basename "$f")"
+  cp "$f" "$toolShims/$base.exe"
+done
+
 export PATH="$toolShims:$PATH"
 
 # gnumake's own build.kaem patches default_shell from "/bin/sh" to bare
@@ -173,6 +206,84 @@ export PATH="$wrapperBin:$PATH"
 # #!/bin/sh script with no bash extensions of its own, so sh-mode is the
 # right mode for it, not just a tolerated one.
 export CC="$toolShims/bash $wrapperBin/gcc"
+
+# --- and the same absolute-path rule for the archiver ---
+# $CC above is absolute for a reason specific to the cc-wrapper (a text
+# script wine cannot exec), but there is a second, entirely separate
+# reason every tool name a Makefile invokes has to be absolute here, and
+# it applies to real .exe binaries too: the ':'-vs-';' PATH split
+# documented at $SHELL above.  make does not route every recipe line
+# through $SHELL -- GNU make's construct_command_argv_internal takes a
+# fast path for any line with no shell metacharacters and execs the
+# program directly, which reaches ntlibc's execvp
+# (src/process/find_program.c) and its Windows-style ';'-delimited PATH
+# parse.  This chain's PATH is colon-joined for bash's sake, so every
+# such bare-name exec fails ENOENT no matter what is on PATH.
+#
+# Measured directly, and this is exactly how it surfaces: libgreet's own
+# Makefile has two recipe lines, `$(CC) -c greet.c -o greet.o` and
+# `$(AR) rcs libgreet.a greet.o`.  The first succeeded -- $CC is absolute
+# -- and the second failed with `make: ar: No such file or directory`
+# with $toolShims/ar (a real bare-named copy of binutils' own ar.exe)
+# present and on PATH the whole time.
+#
+# AR and RANLIB are what a Makefile actually spells (`AR ?= ar` is the
+# conventional line, and make's own built-in default for $(AR) is the
+# bare name "ar"), so those are the two exported here.  nm/objcopy/ld are
+# not: nothing in this package set invokes them from a Makefile, and a
+# package that does should get its own absolute value rather than have
+# this list grow speculatively.
+export AR="$toolShims/ar"
+export RANLIB="$toolShims/ranlib"
+
+# --- and, for every bare name NOT reachable through a Makefile variable ---
+# $CC/$AR/$RANLIB above only cover the names a Makefile happens to spell
+# as a variable.  libgreet's install recipe spells `mkdir -p ...` and
+# `cp ...` outright, and there is no $(MKDIR)/$(CP) to override: with
+# $AR fixed, the very next failure was `make: mkdir: No such file or
+# directory`, same fast-path execvp, same ';'-vs-':' PATH split.  That
+# class of line cannot be fixed one variable at a time, so PATH itself
+# is made to satisfy both parsers at once.
+#
+# It can be, because the two parsers disagree on the separator and on
+# nothing else, and each ignores an entry it cannot resolve:
+#
+#   bash 2.05b   general.c's extract_colon_unit, line 601:
+#                  for (start = i; string[i] && string[i] != ':'; i++)
+#                ':' is hardcoded, and findcmd.c's get_next_path_element
+#                turns an EMPTY element into "." -- so no empty element
+#                may be introduced here.
+#   ntlibc       src/process/find_program.c's __find_program:
+#                  const char *e = strchr(p, ';');
+#                ';' is hardcoded ("a ':' cannot be the separator because
+#                every absolute entry (\"C:\\Windows\") contains one" --
+#                that file's own comment), and a directory that does not
+#                resolve simply fails its access(X_OK) and is skipped.
+#
+# Both read verbatim from the sources this chain actually builds
+# (bash-2.05b's own tarball and the pinned ntlibc source), not assumed.
+#
+# So: keep the colon-joined list bash needs, append one guard element,
+# then repeat the same directories semicolon-joined.  Given a colon list
+# "A:B:C", PATH becomes "A:B:C:/nova-nix-nt-path-guard;A;B;C" and
+#
+#   bash    splits on ':'  -> A, B, C, "/nova-nix-nt-path-guard;A;B;C"
+#   ntlibc  splits on ';'  -> "A:B:C:/nova-nix-nt-path-guard", A, B, C
+#
+# Each parser sees every real directory in its own order, plus exactly
+# one trailing/leading junk entry the other side's separator created,
+# which is a non-existent directory to both and is skipped rather than
+# searched.  The guard is what keeps A alive for ntlibc: without it the
+# ';' split would swallow A into the first junk entry.  It is a literal
+# non-existent absolute path, never an empty element, so bash's
+# empty-means-"." rule is not triggered.
+#
+# This is done ONCE, here, after every earlier PATH mutation (the base
+# list, $toolShims, the $buildInputs bin dirs and $wrapperBin) has
+# already happened -- rewriting it earlier would only be undone by the
+# next prepend.
+ntPath="$(echo "$PATH" | sed 's/:/;/g')"
+export PATH="$PATH:/nova-nix-nt-path-guard;$ntPath"
 
 prefix="$out"
 
