@@ -45,7 +45,26 @@ let
   self = byName // {
     inherit lib newScope callPackage;
 
-    stdenv = import ./stdenv;
+    stdenv = import ./stdenv {
+      inherit (self)
+        gcc
+        binutils
+        bash
+        coreutils
+        gnused
+        gnugrep
+        gawk5
+        findutils
+        diffutils
+        gnumake
+        gnupatch
+        gzip
+        gnutar
+        tinycc
+        ntlibc
+        callPackage
+        ;
+    };
 
     # build-support entries are named here rather than discovered, as nixpkgs
     # does in all-packages.nix: they are ways of building things, not packages.
