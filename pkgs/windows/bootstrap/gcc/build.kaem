@@ -84,6 +84,13 @@ ${patch} -Np0 -i ${windowsPatch}
 # all ("unknown opcode '.def'", found by this package's own functional
 # test) -- see def-scl-type.patch's own header for the full story.
 ${patch} -Np0 -i ${defSclTypePatch}
+
+# gcc/config/i386/cygming.h's own USER_LABEL_PREFIX -- "_" by default,
+# ntlibc's real symbols (checked directly with nm) are undecorated. See
+# user-label-prefix.patch's own header: without this, every call cc1
+# emits into ntlibc, and every target program's own main() entry point,
+# fails to link (found by this package's own functional test).
+${patch} -Np0 -i ${userLabelPrefixPatch}
 cd ${NIX_BUILD_TOP}
 
 # --- CC aliases: one per real -I ordering this package's own tcc-probe
@@ -1291,7 +1298,15 @@ CCLIBGCC2 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NE
 CCLIBGCC2 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED -Dinhibit_libc -D_Complex= -DL_floatundisf -o lg_floatundisf.o gcc-${version}/gcc/libgcc2.c
 CCLIBGCC2 -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED -Dinhibit_libc -D_Complex= -DL_floatundidf -o lg_floatundidf.o gcc-${version}/gcc/libgcc2.c
 
-${ar} rc libgcc.a lg_ashldi3.o lg_ashrdi3.o lg_lshrdi3.o lg_muldi3.o lg_udivmoddi4.o lg_divdi3.o lg_moddi3.o lg_udivdi3.o lg_umoddi3.o lg_cmpdi2.o lg_ucmpdi2.o lg_fixunsdfdi.o lg_fixunssfdi.o lg_fixdfdi.o lg_fixsfdi.o lg_floatdisf.o lg_floatdidf.o lg_floatundisf.o lg_floatundidf.o
+# __main: real GCC auto-inserts a call to this at the top of every
+# compiled main() -- see main-stub.c's own header for why a no-op is the
+# honest answer here (no crtbegin/crtend, no __CTOR_LIST__, this
+# bootstrap has never had a global-constructor consumer). Found missing
+# by this package's own functional test ("unresolved reference to
+# '___main'" -- USER_LABEL_PREFIX's own "_" plus __main's own leading
+# "_" gives three, see user-label-prefix.patch).
+CC -o lg_main-stub.o ${mainStubC}
+${ar} rc libgcc.a lg_ashldi3.o lg_ashrdi3.o lg_lshrdi3.o lg_muldi3.o lg_udivmoddi4.o lg_divdi3.o lg_moddi3.o lg_udivdi3.o lg_umoddi3.o lg_cmpdi2.o lg_ucmpdi2.o lg_fixunsdfdi.o lg_fixunssfdi.o lg_fixdfdi.o lg_fixsfdi.o lg_floatdisf.o lg_floatdidf.o lg_floatundisf.o lg_floatundidf.o lg_main-stub.o
 # --- archive the static libraries: gmp, mpfr, mpc, libiberty, libcpp,
 # libdecnumber, zlib -- gcc's own real archive member lists (497e2c8/af6c095/
 # 5c4abbd/make2.log/make3.log), same ar idiom as binutils' own build.kaem. ---
@@ -1365,7 +1380,7 @@ ${bin_cp} ${helloC} hello.c
 # links against for its own compiles) avoids the gap entirely rather than
 # working around it -- this is the one path this chain has actually
 # verified end to end, for every package before this one.
-${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o hello.exe hello.s -L ${ntlibc}/lib -lc -lntdll
+${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o hello.exe hello.s -L . -lgcc -L ${ntlibc}/lib -lc -lntdll
 
 # And run it under the real PE32 loader (via this chain's own wine fork,
 # WINEDEBUG/WINEDLLOVERRIDES already set by the environment this build runs

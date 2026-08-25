@@ -249,10 +249,12 @@ derivationWithMeta {
 
   windowsPatch = ./windows.patch;
   defSclTypePatch = ./def-scl-type.patch;
+  userLabelPrefixPatch = ./user-label-prefix.patch;
   genDir = ./generated;
   shimDir = ./shim;
   cc1ChecksumC = ./shim/cc1-checksum.c;
   ntRpathC = ./nt-rpath.c;
+  mainStubC = ./main-stub.c;
   helloC = ./hello.c;
 
   bin_untar = stage0.mescc-tools-extra.untar;
