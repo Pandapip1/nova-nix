@@ -15,9 +15,17 @@
 # pin's own `rev`/`narHash`, there is nothing to prefetch by hand.
 { }:
 rec {
-  version = "0-unstable-2026-08-24";
+  version = "0-unstable-2026-08-25";
 
-  rev = "a9d3b48c2ae6b3656b8ed82730f9f15df1c6fd10";
+  # ac08c2f0: fixes execve() calling exit() instead of _exit() -- the exec'ing
+  # driver's own atexit-registered cleanup (e.g. gcc's delete_temp_files())
+  # re-ran the moment the exec'd child (cc1) exited, deleting the driver's
+  # own temp .s file before `as` could read it. This is the real cause of
+  # ../gcc/build.kaem's own hello3.c step stopping at -S instead of -c --
+  # see that file's own comment, due for an update once this pin's rebuild
+  # is verified. -pipe support is a separate, still-open item this rev does
+  # NOT fix.
+  rev = "ac08c2f0a45df264e03105e70fe84feebbc68500";
   ref = "main";
 
   src = builtins.fetchGit {
