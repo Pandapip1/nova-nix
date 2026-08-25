@@ -1204,8 +1204,23 @@ CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o host-default.o gcc-${
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o cgraph.o gcc-${version}/gcc/cgraph.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o cgraphbuild.o gcc-${version}/gcc/cgraphbuild.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o cgraphunit.o gcc-${version}/gcc/cgraphunit.c
-CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/sys-include\" -DTOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DBASEVER="\"4.6.4\"" -o cppbuiltin.o gcc-${version}/gcc/cppbuiltin.c
-CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/sys-include\" -DTOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -o cppdefault.o gcc-${version}/gcc/cppdefault.c
+# CROSS_INCLUDE_DIR: real GCC's own cppdefault.c #undefs LOCAL_INCLUDE_DIR/
+# SYSTEM_INCLUDE_DIR/STANDARD_INCLUDE_DIR whenever CROSS_DIRECTORY_STRUCTURE
+# is set and TARGET_SYSTEM_ROOT is not (checked directly -- this build
+# defines the former on every file, never the latter, matching every other
+# GNU cross-compiler's own "no default sysroot" shape) -- CROSS_INCLUDE_DIR
+# is the one default-search-path slot cppdefault.c leaves live for exactly
+# this configuration. Pointed at ntlibcSrc/include directly (a real,
+# already-existing store path, not the mechanical ${out}-substituted
+# /usr/local-style value every other path here gets) so `gcc.exe foo.c`
+# with no explicit -I can still find stdio.h/unistd.h/etc -- every CC*
+# alias in this file already reaches ntlibc the same way. Covers only
+# ntlibcSrc/include itself, not arch/i386 or arch/generic (this
+# single-slot mechanism has no room for three directories) -- a compile
+# that needs an arch-specific header still needs an explicit -I, same as
+# every real cross-gcc without a full sysroot.
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${ntlibcSrc}/include\" -DTOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DBASEVER="\"4.6.4\"" -o cppbuiltin.o gcc-${version}/gcc/cppbuiltin.c
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${ntlibcSrc}/include\" -DTOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -o cppdefault.o gcc-${version}/gcc/cppdefault.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o incpath.o gcc-${version}/gcc/incpath.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o ipa-cp.o gcc-${version}/gcc/ipa-cp.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o ipa-split.o gcc-${version}/gcc/ipa-split.c
@@ -1427,3 +1442,14 @@ ${bin_cp} cc1.exe ${out}/lib/gcc/i686-pc-pe/4.6.4/cc1.exe
 # above, through cc1 invoked directly. ---
 ${bin_cp} ${helloC} hello2.c
 ${out}/bin/gcc.exe -B ${out}/lib/gcc/i686-pc-pe/4.6.4/ -B ${out}/libexec/gcc/i686-pc-pe/4.6.4/ -I ${ntlibcSrc}/include -I ${ntlibcSrc}/arch/i386 -I ${ntlibcSrc}/arch/generic -I ${ntlibc}/include -S hello2.c -o hello2.s
+
+# --- and the real usability bar: `gcc.exe foo.c` with NO -B, NO -I at
+# all, invoked from its own installed ${out}/bin -- both the exec-prefix
+# search (STANDARD_LIBEXEC_PREFIX/STANDARD_EXEC_PREFIX, already installed
+# to above) and the CROSS_INCLUDE_DIR default (this commit's own fix)
+# have to work together with zero flags, the way a caller who has never
+# read this package's own build.kaem would actually invoke it. hello.c's
+# own #include <unistd.h> resolves through CROSS_INCLUDE_DIR alone since
+# unistd.h lives directly in ntlibcSrc/include, not under arch/. ---
+${bin_cp} ${helloC} hello3.c
+${out}/bin/gcc.exe -S hello3.c -o hello3.s
