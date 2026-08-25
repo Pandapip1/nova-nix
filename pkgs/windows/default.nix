@@ -45,27 +45,7 @@ let
   self = byName // {
     inherit lib newScope callPackage;
 
-    stdenv = import ./stdenv {
-      inherit (self)
-        gcc
-        binutils
-        bash
-        coreutils
-        gnused
-        gnugrep
-        gawk5
-        findutils
-        diffutils
-        gnumake
-        gnupatch
-        gzip
-        gnutar
-        tinycc
-        ntlibc
-        stage0
-        callPackage
-        ;
-    };
+    stdenv = import ./stdenv;
 
     # build-support entries are named here rather than discovered, as nixpkgs
     # does in all-packages.nix: they are ways of building things, not packages.
@@ -157,8 +137,8 @@ let
     # Mes headers live under include/windows/x86.
     tinycc = callPackage ./bootstrap/tinycc { };
 
-    # binutils' as, ld and dlltool, alongside ar, ranlib, nm and objcopy,
-    # all below -- see ./bootstrap/binutils/
+    # gcc is not packaged yet. binutils' as, ld and dlltool are, alongside
+    # ar, ranlib, nm and objcopy, all below -- see ./bootstrap/binutils/
     # default.nix's "as/ld generated files" section for what that took
     # (genscripts.sh off-chain for ld's i386pe emulation glue and
     # ldscripts; nothing at all for as; bison was never actually needed).
@@ -243,11 +223,6 @@ let
     #
     # ar, ranlib, nm, objcopy, as, ld, dlltool: see its default.nix.
     binutils = callPackage ./bootstrap/binutils { };
-
-    # The last package in this chain's full-source bootstrap: cc1.exe and
-    # gcc.exe, compiled and linked entirely by this chain's own tcc against
-    # ntlibc. See its default.nix.
-    gcc = callPackage ./bootstrap/gcc { };
   };
 in
 self

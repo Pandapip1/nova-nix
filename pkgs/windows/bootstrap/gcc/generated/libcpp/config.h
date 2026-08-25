@@ -27,8 +27,7 @@
 #define HAVE_ALLOCA_H 1
 
 /* Define to 1 if you have the `clearerr_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no clearerr_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_CLEARERR_UNLOCKED */
+#define HAVE_CLEARERR_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `abort', and to 0 if you don't.
    */
@@ -44,8 +43,7 @@
 
 /* Define to 1 if you have the declaration of `clearerr_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no clearerr_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_CLEARERR_UNLOCKED */
+#define HAVE_DECL_CLEARERR_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `errno', and to 0 if you don't.
    */
@@ -53,33 +51,27 @@
 
 /* Define to 1 if you have the declaration of `feof_unlocked', and to 0 if you
    don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no feof_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FEOF_UNLOCKED */
+#define HAVE_DECL_FEOF_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `ferror_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no ferror_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FERROR_UNLOCKED */
+#define HAVE_DECL_FERROR_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fflush_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fflush_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FFLUSH_UNLOCKED */
+#define HAVE_DECL_FFLUSH_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fgetc_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fgetc_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FGETC_UNLOCKED */
+#define HAVE_DECL_FGETC_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fgets_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fgets_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FGETS_UNLOCKED */
+#define HAVE_DECL_FGETS_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fileno_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fileno_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FILENO_UNLOCKED */
+#define HAVE_DECL_FILENO_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fprintf_unlocked', and to 0 if
    you don't. */
@@ -87,23 +79,19 @@
 
 /* Define to 1 if you have the declaration of `fputc_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fputc_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FPUTC_UNLOCKED */
+#define HAVE_DECL_FPUTC_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fputs_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fputs_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FPUTS_UNLOCKED */
+#define HAVE_DECL_FPUTS_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fread_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fread_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FREAD_UNLOCKED */
+#define HAVE_DECL_FREAD_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `fwrite_unlocked', and to 0 if
    you don't. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fwrite_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_DECL_FWRITE_UNLOCKED */
+#define HAVE_DECL_FWRITE_UNLOCKED 1
 
 /* Define to 1 if you have the declaration of `getchar_unlocked', and to 0 if
    you don't. */
@@ -133,47 +121,37 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `feof_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no feof_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FEOF_UNLOCKED */
+#define HAVE_FEOF_UNLOCKED 1
 
 /* Define to 1 if you have the `ferror_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no ferror_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FERROR_UNLOCKED */
+#define HAVE_FERROR_UNLOCKED 1
 
 /* Define to 1 if you have the `fflush_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fflush_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FFLUSH_UNLOCKED */
+#define HAVE_FFLUSH_UNLOCKED 1
 
 /* Define to 1 if you have the `fgetc_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fgetc_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FGETC_UNLOCKED */
+#define HAVE_FGETC_UNLOCKED 1
 
 /* Define to 1 if you have the `fgets_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fgets_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FGETS_UNLOCKED */
+#define HAVE_FGETS_UNLOCKED 1
 
 /* Define to 1 if you have the `fileno_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fileno_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FILENO_UNLOCKED */
+#define HAVE_FILENO_UNLOCKED 1
 
 /* Define to 1 if you have the `fprintf_unlocked' function. */
 /* #undef HAVE_FPRINTF_UNLOCKED */
 
 /* Define to 1 if you have the `fputc_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fputc_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FPUTC_UNLOCKED */
+#define HAVE_FPUTC_UNLOCKED 1
 
 /* Define to 1 if you have the `fputs_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fputs_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FPUTS_UNLOCKED */
+#define HAVE_FPUTS_UNLOCKED 1
 
 /* Define to 1 if you have the `fread_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fread_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FREAD_UNLOCKED */
+#define HAVE_FREAD_UNLOCKED 1
 
 /* Define to 1 if you have the `fwrite_unlocked' function. */
-/* ntlibc audit: undef -- same real gap as generated/auto-host.h's own identical correction (see this package's own build-attempt commit): ntlibc's real libc.a (a9d3b48 pin) has no fwrite_unlocked symbol, checked directly with nm. */
-/* #undef HAVE_FWRITE_UNLOCKED */
+#define HAVE_FWRITE_UNLOCKED 1
 
 /* Define to 1 if you have the `getchar_unlocked' function. */
 #define HAVE_GETCHAR_UNLOCKED 1
