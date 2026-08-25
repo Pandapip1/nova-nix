@@ -17,7 +17,7 @@
 nova-nix builds natively on Windows. The toolchain is itself a store path (fetched, hash-verified, and unpacked through derivations), and the builder runs it directly:
 
 ```console
-$ nova-nix build pkgs\windows\hello.nix
+$ nova-nix build pkgs\by-name\he\hello\build.nix
   [build]  mingw-w64-x86_64-gcc-16.1.0-5-any.pkg.tar.zst
   ...      (17 fixed-output fetches, one per MSYS2 package)
   [build]  mingw-w64-seed
@@ -28,7 +28,7 @@ $ C:\nix\store\78n2mrxhg3xgjganf7nfkaznh2j03z68-hello\bin\hello.exe
 Hello, world!
 ```
 
-The seed (`pkgs/windows/bootstrap/seed.nix`) is stage 0 of a native Windows stdenv: the sha256-pinned runtime closure of MinGW-w64 GCC, merged into one toolchain root by in-process fetch and unpack builtins.
+The legacy seed (`pkgs/by-name/se/stage0-seed/windows.nix`) is the sha256-pinned runtime closure of MinGW-w64 GCC, merged into one toolchain root by in-process fetch and unpack builtins. The full source bootstrap instead starts from the platform-selected `stage0-src` and its tiny hex seed.
 
 It also evaluates real nixpkgs. `import <nixpkgs> {}` resolves the top-level package set (~23,000 attributes) to weak head normal form, and a package evaluates through the stdenv bootstrap down to a derivation:
 
@@ -82,7 +82,7 @@ $ nova-nix --nix-path nixpkgs=/path eval FILE.nix
 Built outputs are content-addressed, so they can be served and substituted like any Nix store path. `nova-nix push` uploads a path and its closure to a cache (NAR before narinfo, skipping what the cache already has, signed server-side); `build --substituter` pulls from one before compiling.
 
 ```console
-$ nova-nix build pkgs\windows\hello.nix \
+$ nova-nix build pkgs\by-name\he\hello\build.nix \
     --store C:\scratch\store \
     --substituter https://cache.novavero.ai \
     --trusted-key cache.novavero.ai-1:9gQ7tLWMM+2tdC9H5sKMJltDIPfD7X2GWlZe8Aa8hHQ=
