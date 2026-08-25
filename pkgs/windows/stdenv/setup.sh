@@ -28,7 +28,23 @@ set -e
 
 export PATH="$coreutilsBin:$gnusedBin:$gnugrepBin:$gawk5Bin:$findutilsBin:$diffutilsBin:$gnumakeBin:$gnupatchBin:$gzipBin:$gnutarBin:$binutilsBin:$gccBin"
 
+# This chain's own bash reports $PWD drive-letter-prefixed (e.g.
+# "Z:/tmp/..."), unlike every /nix/store path nix itself hands this
+# script, which arrives plain ("/nix/store/..."). The two forms are NOT
+# interchangeable here: a real, measured ntlibc/coreutils bug (this
+# chain's own mkdir -p, tested directly outside any build -- never before
+# exercised in-chain, since every earlier kaem-driven package uses
+# mescc-tools-extra's own bin_mkdir instead) reports success on a
+# "Z:/foo/bar" target and creates nothing, while the byte-identical path
+# with the drive letter stripped ("/foo/bar") creates it correctly. Not
+# root-caused further (not patched here -- ntlibc is a read-only,
+# peer-owned dependency; this is a report, not a fix), but reliably
+# reproduced, so every path this script itself builds from $PWD strips
+# the drive letter before use.
 builddir="$PWD"
+case "$builddir" in
+  ?:*) builddir="${builddir#?:}" ;;
+esac
 mkdir -p "$builddir/tmp"
 export TMPDIR="$builddir/tmp" TMP="$builddir/tmp" TEMP="$builddir/tmp"
 
@@ -67,7 +83,12 @@ if [ -d "$src" ]; then
 else
   case "$src" in
     *.tar.gz | *.tgz)
-      gunzip -c "$src" > src.tar
+      # gunzip.exe, not gunzip: this chain's own gzip package installs its
+      # three names (gzip.exe/gunzip.exe/zcat.exe) with the real .exe
+      # suffix (../bootstrap/gzip/build.kaem), unlike coreutils/gnused/
+      # gnugrep/etc., which install theirs bare -- exec here needs the
+      # exact on-disk name, no PATHEXT-style extension search.
+      gunzip.exe -c "$src" > src.tar
       tar xf src.tar
       ;;
     *.tar)
