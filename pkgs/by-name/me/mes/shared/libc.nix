@@ -154,10 +154,9 @@ let
       MES_PREFIX = "${src}";
       GUILE_LOAD_PATH = "${src}/mes/module:${src}/module:${nyacc.guilePath}";
       M1 = stage0.M1;
-      # The hand-written hex2 takes its arguments positionally; mescc.scm
-      # passes flags, so on Windows this is the one written in C.  On Linux
-      # the chain's hex2 is already that one.
-      HEX2 = if windows then stage0.hex2-new else stage0.hex2;
+      # mescc.scm passes flags, so this is the C-written hex2 rather than the
+      # early hand-written linker on either platform.
+      HEX2 = stage0.hex2;
 
       builder = mes-m2;
       args = [

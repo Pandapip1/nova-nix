@@ -20,7 +20,7 @@ lib.makeScope newScope (
 
     inherit (callPackage ./bootstrap-sources.nix { }) version src;
 
-    inherit (callPackage ./mes-m2.nix { inherit (stage0) M2 M1 hex2-new; })
+    inherit (callPackage ./mes-m2.nix { inherit (stage0) M2 M1 hex2; })
       mes-m2
       ;
 

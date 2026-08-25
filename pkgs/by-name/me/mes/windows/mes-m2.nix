@@ -28,7 +28,7 @@
   platforms,
   M2,
   M1,
-  hex2-new,
+  hex2,
 }:
 rec {
   out = builtins.placeholder "out";
@@ -359,7 +359,7 @@ rec {
   # Phase-3: link.  --base-address is the ImageBase PE32-i386.hex2 declares,
   # and hex2 here is the C one -- the hand-written hex2 takes its arguments
   # positionally and has no --base-address.
-  mes-m2 = runExe "mes-m2" hex2-new [
+  mes-m2 = runExe "mes-m2" hex2 [
     "--architecture"
     "x86"
     "--little-endian"

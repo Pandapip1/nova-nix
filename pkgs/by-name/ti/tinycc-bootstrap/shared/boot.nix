@@ -71,16 +71,15 @@
   baseAddress ? null,
   # hex2, as MesCC's linker: the one that reads flags (--base-address,
   # --little-endian) rather than the hand-written one some chains bootstrap
-  # with, which cannot.  Defaults to the ELF chain's own, which is already
-  # that one; the PE32 chain has to say so, because its `stage0.hex2` is the
-  # hand-written positional one and its flag-reading one is `hex2-new`.
+  # with, which cannot.  The stage0 package set exposes the C-written linker
+  # as `hex2` on both platforms.
   hex2 ? stage0.hex2,
   # blood-elf, for `--debug-info`: only ELF programs carry the symbol table
   # it adds, and the PE32 chain builds no such thing.  null omits BLOOD_ELF
   # from the environment rather than pointing it at nothing.
-  bloodElf ? stage0.blood_elf_0,
+  bloodElf ? stage0.blood-elf-bootstrap,
   # How many cells Mes may have while compiling tcc.c -- see the identical
-  # parameter on pkgs/bootstrap/mes/libc.nix, which explains why this cannot
+  # parameter on pkgs/by-name/me/mes/shared/libc.nix, which explains why this cannot
   # just be the Linux number everywhere: a 32-bit Windows process only gets
   # so much contiguous address space, less again under wine.
   arenaSize ? "100000000",

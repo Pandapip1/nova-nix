@@ -5,19 +5,19 @@
 # section and relocation handling), not a different one.  mesArchInclude
 # points at the headers this side's Mes C library actually has.
 #
-# hex2-new rather than stage0.hex2: mescc.scm's linker step passes flags
-# (--little-endian, --base-address) that only the C-written hex2 reads: see
-# pkgs/by-name/me/mes/windows/mes-m2.nix for the same substitution.  No
+# stage0.hex2 is the C-written linker: mescc.scm's linker step passes flags
+# (--little-endian, --base-address) that the earlier hand-written hex2 does
+# not read.  See pkgs/by-name/me/mes/windows/mes-m2.nix as well.  No
 # bloodElf: --debug-info builds an ELF symbol table, and there is no such
 # thing to build here.
 #
-# arenaSize matches mes-libc's: see pkgs/bootstrap/mes/libc.nix for where the
+# arenaSize matches mes-libc's: see pkgs/by-name/me/mes/shared/libc.nix for where the
 # figure comes from.  tcc.c compiled in one pass (ONE_SOURCE=1) is a
 # comparable-sized translation unit to libc+tcc.c, so the same ceiling
 # applies for the same reason -- what a 32-bit process can reserve as
 # contiguous address space under wine.
 #
-# boot-mes builds: see pkgs/bootstrap/mes and the mes/M2-Planet forks for
+# boot-mes builds: see pkgs/by-name/me/mes and the mes/M2-Planet forks for
 # the three bugs that were stacked underneath the crash this comment used
 # to describe (an unreported assertion failure, hiding an M2-Planet
 # short-circuit bug, hiding a genuine arena exhaustion).
@@ -70,7 +70,7 @@ callPackage ../shared {
   windowsCrt1Src = "${mes.src}/lib/windows/x86-mes-gcc/crt1.c";
   # mescc's linker defaults to 0x1000000, matching Linux's own ELF header;
   # PE32-i386.hex2 hardcodes ImageBase 0x400000 instead, the same way
-  # mes-m2.nix already tells hex2-new for the round before this one.
+  # mes-m2.nix already tells the same hex2 for the round before this one.
   # boot-mes without this: every absolute address it emits (a string
   # literal's, a global's) lands 0xC00000 too high -- still inside the
   # image's declared (zero-filled) VirtualSize, so nothing refuses to load
@@ -85,7 +85,7 @@ callPackage ../shared {
   # (0x47b6c0, comfortably inside the file), reads zero bytes, matches no
   # export, and returns 0 for __ntcall6 to call through.
   baseAddress = "0x400000";
-  hex2 = stage0.hex2-new;
+  hex2 = stage0.hex2;
   bloodElf = null;
   # 19000000, not mes-libc's 15000000: this round's translation unit
   # (tcc.c, ONE_SOURCE=1, so every file it #includes comes along) needs

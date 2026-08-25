@@ -22,7 +22,6 @@ if platform == "linux" then
     };
   in
   callPackage ./linux {
-    inherit stage0;
     inherit (stage0) system platforms;
     musl = libc;
     tinycc = toolchain;

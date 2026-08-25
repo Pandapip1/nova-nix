@@ -14,7 +14,6 @@
 }:
 if platform == "linux" then
   callPackage ../tinycc/linux {
-    inherit stage0;
     inherit (stage0) system platforms;
     musl = libc-bootstrap;
     tinycc = tinycc-bootstrap.boot // {

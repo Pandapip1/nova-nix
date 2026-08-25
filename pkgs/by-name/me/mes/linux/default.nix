@@ -21,7 +21,7 @@ lib.makeScope newScope (
       (callPackage ./mes-m2.nix {
         inherit (stage0) M1 hex2;
         M2 = stage0.M2;
-        blood-elf = stage0.blood_elf_0;
+        blood-elf = stage0.blood-elf-bootstrap;
       })
       mes-m2
       ;

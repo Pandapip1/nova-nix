@@ -323,7 +323,7 @@
 #   NTLIBC_DELAY_DLL/_STUB macros are "kept for a tcc without that flag...
 #   new code should not reach for them" -- both read at face value, before
 #   checking, as ntlibc assuming a real --delay-all landed in this chain's
-#   tcc. It did: pkgs/bootstrap/tinycc/mainline-sources.nix pins
+#   tcc. It did: pkgs/by-name/ti/tinycc-bootstrap/shared/mainline-sources.nix pins
 #   github.com/Pandapip1/tinycc.git at 69eed4d3, and that revision's
 #   tccpe.c genuinely builds real PE delay-import descriptors (directory
 #   entry 13) for -Wl,--delay-all -- pe_build_delay_imports(), checked

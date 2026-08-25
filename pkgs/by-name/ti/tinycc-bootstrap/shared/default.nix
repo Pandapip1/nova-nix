@@ -28,7 +28,7 @@
   # there.  Defaulted the same way there, so a call site only names them to
   # override.
   hex2 ? stage0.hex2,
-  bloodElf ? stage0.blood_elf_0,
+  bloodElf ? stage0.blood-elf-bootstrap,
   arenaSize ? "100000000",
 }:
 lib.makeScope newScope (
