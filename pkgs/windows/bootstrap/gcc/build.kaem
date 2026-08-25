@@ -1204,23 +1204,32 @@ CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o host-default.o gcc-${
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o cgraph.o gcc-${version}/gcc/cgraph.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o cgraphbuild.o gcc-${version}/gcc/cgraphbuild.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o cgraphunit.o gcc-${version}/gcc/cgraphunit.c
-# CROSS_INCLUDE_DIR: real GCC's own cppdefault.c #undefs LOCAL_INCLUDE_DIR/
-# SYSTEM_INCLUDE_DIR/STANDARD_INCLUDE_DIR whenever CROSS_DIRECTORY_STRUCTURE
-# is set and TARGET_SYSTEM_ROOT is not (checked directly -- this build
-# defines the former on every file, never the latter, matching every other
-# GNU cross-compiler's own "no default sysroot" shape) -- CROSS_INCLUDE_DIR
-# is the one default-search-path slot cppdefault.c leaves live for exactly
-# this configuration. Pointed at ntlibcSrc/include directly (a real,
-# already-existing store path, not the mechanical ${out}-substituted
-# /usr/local-style value every other path here gets) so `gcc.exe foo.c`
-# with no explicit -I can still find stdio.h/unistd.h/etc -- every CC*
-# alias in this file already reaches ntlibc the same way. Covers only
-# ntlibcSrc/include itself, not arch/i386 or arch/generic (this
-# single-slot mechanism has no room for three directories) -- a compile
-# that needs an arch-specific header still needs an explicit -I, same as
-# every real cross-gcc without a full sysroot.
-CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${ntlibcSrc}/include\" -DTOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DBASEVER="\"4.6.4\"" -o cppbuiltin.o gcc-${version}/gcc/cppbuiltin.c
-CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${ntlibcSrc}/include\" -DTOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -o cppdefault.o gcc-${version}/gcc/cppdefault.c
+# CROSS_INCLUDE_DIR / TOOL_INCLUDE_DIR: real GCC's own cppdefault.c
+# #undefs LOCAL_INCLUDE_DIR/SYSTEM_INCLUDE_DIR/STANDARD_INCLUDE_DIR
+# whenever CROSS_DIRECTORY_STRUCTURE is set and TARGET_SYSTEM_ROOT is not
+# (checked directly -- this build defines the former on every file, never
+# the latter, matching every other GNU cross-compiler's own "no default
+# sysroot" shape) -- CROSS_INCLUDE_DIR and TOOL_INCLUDE_DIR are the two
+# default-search-path slots cppdefault.c leaves live for exactly this
+# configuration (TOOL_INCLUDE_DIR is not gated on CROSS_DIRECTORY_STRUCTURE
+# at all, checked directly). Between them they cover the two real
+# directories every CC* alias in this file already needs to reach ntlibc's
+# own headers: CROSS_INCLUDE_DIR -> ntlibcSrc/include (stdio.h, unistd.h,
+# and the rest of ntlibc's own real source headers), TOOL_INCLUDE_DIR ->
+# ntlibc/include (the BUILT output -- only bits/alltypes.h, ntlibc's own
+# musl-derived generated type header, per-arch config baked in at ntlibc's
+# own build time, checked directly against ntlibc/obj/include/bits/
+# alltypes.h). A plain `gcc.exe foo.c` with no -I at all was still failing
+# after the first of these two ("fatal error: bits/alltypes.h: No such
+# file or directory", unistd.h's own #include of it) until both were live
+# together -- ntlibcSrc/include alone was never going to have it, since it
+# is source-tree-generated, not source. Neither slot covers
+# ntlibcSrc/arch/i386 or arch/generic (no third slot exists for this
+# configuration) -- a compile that needs an arch-specific header (errno.h,
+# setjmp.h, float.h, limits.h all live only under arch/) still needs an
+# explicit -I, the normal shape for a cross-compiler with no full sysroot.
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${ntlibcSrc}/include\" -DTOOL_INCLUDE_DIR=\"${ntlibc}/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DBASEVER="\"4.6.4\"" -o cppbuiltin.o gcc-${version}/gcc/cppbuiltin.c
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include\" -DFIXED_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/include-fixed\" -DGPLUSPLUS_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4\" -DGPLUSPLUS_TOOL_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/i686-pc-pe\" -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"${out}/lib/gcc/i686-pc-pe/4.6.4/../../../../i686-pc-pe/include/c++/4.6.4/backward\" -DLOCAL_INCLUDE_DIR=\"${out}/include\" -DCROSS_INCLUDE_DIR=\"${ntlibcSrc}/include\" -DTOOL_INCLUDE_DIR=\"${ntlibc}/include\" -DPREFIX=\"${out}/\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -o cppdefault.o gcc-${version}/gcc/cppdefault.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o incpath.o gcc-${version}/gcc/incpath.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o ipa-cp.o gcc-${version}/gcc/ipa-cp.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o ipa-split.o gcc-${version}/gcc/ipa-split.c
