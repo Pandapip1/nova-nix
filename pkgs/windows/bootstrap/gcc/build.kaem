@@ -1290,7 +1290,20 @@ CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o main.o gcc-${version}
 # not a second compile, matching real GCC's own Makefile (see 5c4abbd).
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -o ggc-none.o gcc-${version}/gcc/ggc-none.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DHAVE_CONFIG_H -DGCC_DRIVER -o gcc-options.o ${genDir}/options.c
-CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gcc.o gcc-${version}/gcc/gcc.c
+# ASM_SPEC="-c": gcc.c's own default_compilers table invokes the found
+# "as" binary as `as %(asm_debug) %(asm_options) input -o output` with no
+# extra flags by default for this target (mingw32.h/cygming.h/i386.h
+# never #define ASM_SPEC, gcc.c's own #ifndef ASM_SPEC / #define
+# ASM_SPEC "" fallback applies) -- real GNU as would treat that as
+# "assemble", but this chain's own tcc (installed above as "as.exe")
+# needs -c to mean the same thing; without it tcc's own default (no -c,
+# an -o target) tries to LINK a standalone executable from one .s file,
+# not produce a relocatable object. Set directly on gcc.c's own compile
+# line (the only file that reads ASM_SPEC, gcc.c:472-475) rather than as
+# a real target-header #define, since it is a property of THIS chain's
+# stand-in assembler, not of the i386-pe/cygming target as GCC itself
+# understands it.
+CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DASM_SPEC=\"-c\" -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gcc.o gcc-${version}/gcc/gcc.c
 CC -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE -DSTANDARD_STARTFILE_PREFIX=\"../../../\" -DSTANDARD_EXEC_PREFIX=\"${out}/lib/gcc/\" -DSTANDARD_LIBEXEC_PREFIX=\"${out}/libexec/gcc/\" -DDEFAULT_TARGET_VERSION=\"4.6.4\" -DDEFAULT_TARGET_MACHINE=\"i686-pc-pe\" -DSTANDARD_BINDIR_PREFIX=\"${out}/bin/\" -DTOOLDIR_BASE_PREFIX=\"../../../../\" -DCONFIGURE_SPECS=\"\" -o gccspec.o gcc-${version}/gcc/gccspec.c
 
 # driver-i386.c: gccspec.c's own -march=native support calls
@@ -1441,24 +1454,47 @@ ${bin_cp} cc1.exe ${out}/libexec/gcc/i686-pc-pe/4.6.4/cc1.exe
 ${bin_mkdir} -p ${out}/lib/gcc/i686-pc-pe/4.6.4
 ${bin_cp} cc1.exe ${out}/lib/gcc/i686-pc-pe/4.6.4/cc1.exe
 
+# gcc.exe's own "assemble" spec step (gcc.c's default_compilers table,
+# the ".s"/"@assembler" rule) spawns a program literally named "as",
+# searched through the same exec_prefixes cc1 was -- see 9518ca7/63d15d7
+# for why this chain's own tcc is AS_FOR_TARGET, not a real GNU as (the
+# ELF/COFF split ../binutils/default.nix documents). This chain's own
+# tcc already accepts a .s file as direct input the exact same way it
+# accepts .c (dispatched by extension in tccpp.c/tccgen.c, no separate
+# "assembler mode" needed -- already proven by this package's own
+# functional test above, `tcc ... hello.s`), so installing this chain's
+# own tcc binary itself, under the name "as.exe", at the same two
+# exec-prefix locations cc1.exe already lives at, is enough -- no
+# wrapper script needed (and none could exist here: this build produces
+# real PE binaries only, no shell interpreter is part of its own output).
+${bin_cp} ${tcc} ${out}/libexec/gcc/i686-pc-pe/4.6.4/as.exe
+${bin_cp} ${tcc} ${out}/lib/gcc/i686-pc-pe/4.6.4/as.exe
+
 # --- prove the DRIVER itself works, not just cc1 invoked directly: a
 # real `gcc.exe hello2.c -o hello2.exe`-shaped invocation has to find and
-# exec cc1 on its own. gcc.exe still cannot invoke a real `as`/`ld`
-# (neither ../binutils's real ones -- the ELF/COFF split -- nor does
-# this bootstrap teach its specs about this chain's own tcc as a
-# stand-in assembler/linker), so this only proves the driver-to-cc1 half
-# (-S, stopping before assembly) -- the as/ld half is already proven
-# above, through cc1 invoked directly. ---
+# exec cc1 on its own. gcc.exe still cannot invoke a real `ld` (neither
+# ../binutils's real one -- the ELF/COFF split -- nor does this
+# bootstrap teach its specs about this chain's own tcc as a stand-in
+# linker, a bigger question than the assembler one: tcc's own -o/link
+# behavior differs enough from real ld's spec-driven invocation, crt1.o/
+# -lc/-lntdll placement and all, that getting LINK_SPEC right is real,
+# separate work, not attempted here -- see "What this package does NOT
+# attempt" in default.nix), so this only proves the driver-to-cc1-to-as
+# half (-S then -c, stopping before link) -- full compile+link is
+# already proven above, through cc1 and tcc invoked directly. ---
 ${bin_cp} ${helloC} hello2.c
 ${out}/bin/gcc.exe -B ${out}/lib/gcc/i686-pc-pe/4.6.4/ -B ${out}/libexec/gcc/i686-pc-pe/4.6.4/ -I ${ntlibcSrc}/include -I ${ntlibcSrc}/arch/i386 -I ${ntlibcSrc}/arch/generic -I ${ntlibc}/include -S hello2.c -o hello2.s
 
 # --- and the real usability bar: `gcc.exe foo.c` with NO -B, NO -I at
 # all, invoked from its own installed ${out}/bin -- both the exec-prefix
 # search (STANDARD_LIBEXEC_PREFIX/STANDARD_EXEC_PREFIX, already installed
-# to above) and the CROSS_INCLUDE_DIR default (this commit's own fix)
-# have to work together with zero flags, the way a caller who has never
-# read this package's own build.kaem would actually invoke it. hello.c's
-# own #include <unistd.h> resolves through CROSS_INCLUDE_DIR alone since
-# unistd.h lives directly in ntlibcSrc/include, not under arch/. ---
+# to above) and the CROSS_INCLUDE_DIR/TOOL_INCLUDE_DIR defaults (this
+# package's own fixes) have to work together with zero flags, the way a
+# caller who has never read this package's own build.kaem would actually
+# invoke it. hello.c's own #include <unistd.h> resolves through
+# CROSS_INCLUDE_DIR/TOOL_INCLUDE_DIR alone since neither it nor
+# bits/alltypes.h lives under arch/. -c, not -S: proves the "as" step
+# (this chain's own tcc, installed above) actually runs and produces a
+# real, loadable relocatable object, not just that cc1 itself works. ---
 ${bin_cp} ${helloC} hello3.c
-${out}/bin/gcc.exe -S hello3.c -o hello3.s
+${out}/bin/gcc.exe -c hello3.c -o hello3.o
