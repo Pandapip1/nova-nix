@@ -1338,8 +1338,12 @@ ${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o gcc.exe gcc.o opts-com
 ${bin_cp} ${helloC} hello.c
 
 # cc1.exe's real job: -o hello.s hello.c, taking a real C source file
-# straight to i386 GNU-syntax assembly.
-./cc1.exe -quiet -o hello.s hello.c
+# straight to i386 GNU-syntax assembly. cc1 invoked directly (not through
+# gcc.exe's own spec-driven -isystem/-I machinery, not exercised by this
+# package's own functional test -- see default.nix's "What this package
+# does NOT attempt") needs ntlibc's own include dirs named explicitly,
+# the same three -I's every CC* alias above already uses.
+./cc1.exe -quiet -nostdinc -I${ntlibcSrc}/include -I${ntlibcSrc}/arch/i386 -I${ntlibcSrc}/arch/generic -I${ntlibc}/include -o hello.s hello.c
 
 # Assemble and link with THIS CHAIN'S OWN tcc, not binutils' real as.exe/
 # ld.exe -- see ../binutils/default.nix's own "ntlibc's crt1.o/libc.a are
