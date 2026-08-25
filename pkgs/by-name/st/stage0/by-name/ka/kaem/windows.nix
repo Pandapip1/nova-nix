@@ -23,6 +23,6 @@
 {
   mescc-tool,
   kaem_hex2,
-  kaem-linked-hex2-bootstrap,
+  kaem-linked-hex2,
 }:
-mescc-tool "kaem" kaem_hex2 kaem-linked-hex2-bootstrap
+mescc-tool "kaem" kaem_hex2 kaem-linked-hex2

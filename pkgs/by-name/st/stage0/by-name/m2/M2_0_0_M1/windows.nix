@@ -16,7 +16,7 @@ stage0-run {
     out
     "${src}/M2libc/x86/x86_defs.M1"
     "${src}/x86/libc-core.M1"
-    "${src}/x86/libc-bootstrap.M1"
+    "${src}/x86/libc-mes.M1"
     M2_0_M1
   ];
   executable = false;

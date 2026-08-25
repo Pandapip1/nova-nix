@@ -1,7 +1,7 @@
 {
   stage0-src,
   stage0-run,
-  blood-elf-bootstrap,
+  blood-elf,
   kaem_M1,
 }:
 let
@@ -10,7 +10,7 @@ let
 in
 stage0-run {
   pname = "kaem-footer.M1";
-  builder = blood-elf-bootstrap;
+  builder = blood-elf;
   args = [
     "-f"
     kaem_M1

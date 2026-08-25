@@ -1,0 +1,27 @@
+{
+  callPackage,
+  platform,
+  stage0,
+  tinycc,
+  stage1,
+  gnused,
+  gnutar,
+  gnumake,
+  gnugrep,
+  gzip,
+  gawk-mes,
+  bash,
+  coreutils-mes,
+  libc,
+}:
+if platform == "linux" then
+  callPackage ./linux/musl.nix {
+    inherit (stage0) system platforms;
+    inherit tinycc gnused gnutar;
+    coreutils = coreutils-mes;
+  }
+else
+  callPackage ./windows {
+    tinycc = stage1.tinycc;
+    ntlibc = libc;
+  }

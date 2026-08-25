@@ -2,7 +2,7 @@
   stage0-src,
   stage0-run,
   M0_hex2,
-  hex2-bootstrap,
+  hex2-0,
 }:
 let
   inherit (stage0-src) src stage0Arch;
@@ -11,7 +11,7 @@ let
 in
 stage0-run {
   pname = "M0";
-  builder = hex2-bootstrap;
+  builder = hex2-0;
   args = [
     M0_hex2
     out

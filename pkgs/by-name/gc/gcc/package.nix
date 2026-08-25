@@ -1,25 +1,14 @@
 {
-  callPackage,
   platform,
   stage0,
-  tinycc,
-  tinycc-bootstrap,
-  libc,
-  gnused,
-  gnutar,
-  coreutils,
+  stage3,
 }:
 if platform == "linux" then
-  callPackage ./linux {
+  stage3.callPackage ../../st/stage3/by-name/gc/gcc46/linux/latest.nix {
     inherit (stage0) system platforms;
-    tinycc = tinycc;
-    musl = libc;
-    gnused = gnused;
-    gnutar = gnutar;
-    coreutils = coreutils;
+    gcc = stage3.gcc15;
+    musl = stage3.libc;
+    gnutar = stage3.gnutar;
   }
 else
-  callPackage ./windows {
-    tinycc = tinycc-bootstrap;
-    ntlibc = libc;
-  }
+  stage3.gcc15

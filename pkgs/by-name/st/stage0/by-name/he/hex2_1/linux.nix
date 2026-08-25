@@ -1,7 +1,7 @@
 {
   stage0-src,
   stage0-run,
-  hex2-bootstrap,
+  hex2-0,
   hex2_linker_0_0_hex2,
 }:
 let
@@ -10,7 +10,7 @@ let
 in
 stage0-run {
   pname = "hex2-1";
-  builder = hex2-bootstrap;
+  builder = hex2-0;
   args = [
     hex2_linker_0_0_hex2
     out

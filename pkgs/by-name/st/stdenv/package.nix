@@ -1,35 +1,30 @@
-args@{
+{
   platform,
   gcc,
-  binutils,
-  bash,
-  coreutils,
-  gnused,
-  gnugrep,
-  gawk5,
-  findutils,
-  diffutils,
-  gnumake,
-  gnupatch,
-  gzip,
-  gnutar,
-  tinycc,
-  tinycc-bootstrap,
-  libc,
   stage0,
+  stage1,
+  stage2,
   callPackage,
 }:
 if platform == "windows" then
-  import ./windows (
-    builtins.removeAttrs args [
-      "platform"
-      "libc"
-      "tinycc-bootstrap"
-    ]
-    // {
-      tinycc = tinycc-bootstrap;
-      ntlibc = libc;
-    }
-  )
+  import ./windows {
+    inherit gcc stage0 callPackage stage2;
+    inherit (stage2)
+      binutils
+      bash
+      coreutils
+      gnused
+      gnugrep
+      gawk5
+      findutils
+      diffutils
+      gnumake
+      gnupatch
+      gzip
+      gnutar
+      ;
+    tinycc = stage1.tinycc;
+    ntlibc = stage2.libc;
+  }
 else
   null

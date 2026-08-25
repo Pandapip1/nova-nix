@@ -1,7 +1,7 @@
 {
   stage0-src,
   stage0-run,
-  blood-elf-bootstrap,
+  blood-elf,
   blood_elf_1_M1,
 }:
 let
@@ -10,7 +10,7 @@ let
 in
 stage0-run {
   pname = "blood-elf-1-footer.M1";
-  builder = blood-elf-bootstrap;
+  builder = blood-elf;
   args = [
     "--little-endian"
     "-f"

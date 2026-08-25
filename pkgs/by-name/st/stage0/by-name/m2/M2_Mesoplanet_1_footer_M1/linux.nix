@@ -2,7 +2,7 @@
   stage0-src,
   stage0-run,
   M2_Mesoplanet_1_M1,
-  blood-elf-bootstrap,
+  blood-elf,
 }:
 let
   inherit (stage0-src) src stage0Arch;
@@ -10,7 +10,7 @@ let
 in
 stage0-run {
   pname = "M2-Mesoplanet-1-footer.M1";
-  builder = blood-elf-bootstrap;
+  builder = blood-elf;
   args = [
     "--little-endian"
     "-f"

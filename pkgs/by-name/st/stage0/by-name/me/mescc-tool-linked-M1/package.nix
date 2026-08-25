@@ -3,7 +3,7 @@
   stage0-src,
   stage0-run,
   catm,
-  blood-elf-bootstrap,
+  blood-elf,
 }:
 name: M1src:
 let
@@ -27,7 +27,7 @@ if platform == "windows" then
 else
   stage0-run {
     pname = "${name}-footer.M1";
-    builder = blood-elf-bootstrap;
+    builder = blood-elf;
     args = [ "--little-endian" "-f" M1src "-o" out ];
     executable = false;
   }

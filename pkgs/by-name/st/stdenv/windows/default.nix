@@ -1,4 +1,4 @@
-# nova-nix stage-1 stdenv, on this chain's own from-scratch toolchain -- no
+# nova-nix stdenv, on this chain's own from-scratch toolchain -- no
 # binary seeds.  bootstrap/gcc's gcc.exe/cc1.exe as the compiler,
 # bootstrap/binutils' ar.exe/ranlib.exe/nm.exe/objcopy.exe as the archiver,
 # bootstrap/bash's bash.exe as the builder, bootstrap/coreutils and its
@@ -61,13 +61,14 @@
   tinycc,
   ntlibc,
   stage0,
+  stage2,
   callPackage,
 }:
 let
   setup = ./setup.sh;
   ccWrapper = ./cc-wrapper.sh;
   tcc = tinycc.boot.tcc;
-  ntlibcSrc = (callPackage ../../../nt/ntlibc/bootstrap-sources.nix { }).src;
+  ntlibcSrc = (stage2.callPackage ../../stage2/by-name/nt/ntlibc/bootstrap-sources.nix { }).src;
   # This package's own gcc/build.kaem installs cc1.exe/gcc.exe/as.exe under
   # this exec-prefix -- libgcc.a (the DImode helper subset build.kaem's own
   # "libgcc" section builds and archives, needed by any consumer whose own
