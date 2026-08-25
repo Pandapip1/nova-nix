@@ -5,9 +5,11 @@
 # builder. stdenv/default.nix passes the package via the environment:
 #   $src           source tarball or directory
 #   $out           install prefix (the output store path)
-#   $gccBin, $binutilsBin, $coreutilsBin, $gnusedBin, $gnugrepBin,
+#   $gccBin, $binutilsBin, $bashBin, $coreutilsBin, $gnusedBin, $gnugrepBin,
 #   $gawk5Bin, $findutilsBin, $diffutilsBin, $gnumakeBin, $gnupatchBin,
 #   $gzipBin, $gnutarBin       this chain's own userland, one bin dir each
+#   $unxzBin                   stage0's own mescc-tools-extra unxz, a single
+#                              binary (not a bin dir) -- .tar.xz sources only
 #   $NN_TCC, $NN_GCC, $NN_GCC_LIBDIR, $NN_NTLIBC_LIB, $NN_NTLIBC_INCLUDE,
 #   $NN_NTLIBC_SRC_INCLUDE, $NN_NTLIBC_ARCH_I386, $NN_NTLIBC_ARCH_GENERIC
 #                              cc-wrapper.sh's own inputs, exported as-is
@@ -185,13 +187,35 @@ else
       gunzip -c "$src" > src.tar
       tar xf src.tar
       ;;
+    *.tar.xz | *.txz)
+      # $unxzBin is stage0's own mescc-tools-extra unxz (stdenv/default.nix's
+      # own comment says why nothing else in this chain's userland can do
+      # this) -- and it carries a real, well-documented bug, worked around
+      # here exactly the way every .tar.xz already vendored by this
+      # bootstrap does (../bootstrap/findutils/build.kaem's own comment is
+      # the fullest writeup; binutils, diffutils and gcc all carry the same
+      # workaround). unxz writes its output a byte at a time with fputc and
+      # returns from main() without fclose()ing or fflush()ing, so the last
+      # partial 4096-byte buffer is silently dropped: output truncated to
+      # floor(N/4096)*4096, exit status 0 regardless. Doubling the input as
+      # two concatenated .xz streams fixes it for any real tarball: unxz
+      # decompresses both and emits 2N bytes, truncated to
+      # floor(2N/4096)*4096, which for any N >= 4096 is strictly greater
+      # than 2N - 4096 >= N, so the whole first copy always survives; tar
+      # reads the first archive and stops at its own end-of-archive marker,
+      # so the (truncated) second copy is never unpacked.
+      cat "$src" "$src" > doubled.tar.xz
+      "$unxzBin" --file doubled.tar.xz --output src.tar
+      tar xf src.tar
+      ;;
     *.tar)
       tar xf "$src"
       ;;
     *)
       echo "unpack: no decompressor for $src -- this chain's own userland" \
-           "only handles .tar and .tar.gz (gzip.exe, gnutar); .xz/.bz2 need" \
-           "a decompressor this stdenv does not yet have" >&2
+           "handles .tar, .tar.gz (gzip.exe, gnutar) and .tar.xz" \
+           "(stage0's own unxz); .bz2 needs a decompressor this stdenv" \
+           "does not yet have" >&2
       exit 1
       ;;
   esac

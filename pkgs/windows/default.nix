@@ -62,6 +62,7 @@ let
         gnutar
         tinycc
         ntlibc
+        stage0
         callPackage
         ;
     };

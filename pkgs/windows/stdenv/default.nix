@@ -60,6 +60,7 @@
   gnutar,
   tinycc,
   ntlibc,
+  stage0,
   callPackage,
 }:
 let
@@ -110,6 +111,16 @@ in
         gnupatchBin = "${gnupatch}/bin";
         gzipBin = "${gzip}/bin";
         gnutarBin = "${gnutar}/bin";
+        # .tar.xz sources (findutils/diffutils/binutils/gcc's own tarballs all
+        # needed one) have no decompressor anywhere in this chain's own
+        # stage-1 userland -- gzip above is this chain's own from-source
+        # build, but nothing built an xz. stage0's own mescc-tools-extra unxz
+        # (bootstrap-only elsewhere in this tree, never before reached from a
+        # stdenv-level mkDerivation) is the only one there is, and it carries
+        # a real bug setup.sh's unpack phase has to work around the same way
+        # every bootstrap .tar.xz already does -- see that phase's own
+        # comment for what the bug is and why doubling the input fixes it.
+        unxzBin = "${stage0.mescc-tools-extra.unxz}";
 
         # cc-wrapper.sh's own inputs: this chain's own tcc, and everything
         # it needs to reproduce the proven-working assemble+link recipe.
