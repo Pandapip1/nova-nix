@@ -28,6 +28,15 @@ in
     sha256 = "e534a5cb05ab839d7cf7b2496fd5df42e76352926c1cf0d94de76184c26a739c";
   };
 
+  # The C++ front end (gcc/cp/*, and the libstdc++-v3 tree) ships in its
+  # own tarball -- gcc-core alone has no gcc/cp at all.  Same version,
+  # same release, same sha256 as ../../../linux/sources.nix's own
+  # cxxTarball; named the same there and here.
+  cxxTarball = fetchurl {
+    url = "https://mirrors.kernel.org/gnu/gcc/gcc-${version}/gcc-g++-${version}.tar.gz";
+    sha256 = "690a5d4f664180640db28079e3461468192c484c37d6f671dde4b53a7f9918bb";
+  };
+
   gmpTarball = fetchurl {
     url = "https://mirrors.kernel.org/gnu/gmp/gmp-${gmpVersion}.tar.gz";
     sha256 = "7be3ad1641b99b17f6a8be6a976f1f954e997c41e919ad7e0c418fe848c13c97";

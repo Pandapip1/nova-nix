@@ -23,6 +23,18 @@ along with GCC; see the file COPYING3.  If not see
 enum gt_types_enum {
  gt_ggc_e_8c_parser,
  gt_ggc_e_7c_token,
+ gt_ggc_e_24lazy_hex_fp_value_struct,
+ gt_ggc_e_15c_inline_static,
+ gt_ggc_e_24VEC_c_goto_bindings_p_gc,
+ gt_ggc_e_26VEC_c_goto_bindings_p_base,
+ gt_ggc_e_15c_goto_bindings,
+ gt_ggc_e_7c_scope,
+ gt_ggc_e_9c_binding,
+ gt_ggc_e_12c_label_vars,
+ gt_ggc_e_15c_spot_bindings,
+ gt_ggc_e_23VEC_ltrans_partition_gc,
+ gt_ggc_e_25VEC_ltrans_partition_base,
+ gt_ggc_e_20ltrans_partition_def,
  gt_ggc_e_9opt_stack,
  gt_ggc_e_27VEC_pending_redefinition_gc,
  gt_ggc_e_29VEC_pending_redefinition_base,
@@ -31,27 +43,97 @@ enum gt_types_enum {
  gt_ggc_e_21VEC_pending_weak_base,
  gt_ggc_e_14pending_weak_d,
  gt_ggc_e_11align_stack,
- gt_ggc_e_24lazy_hex_fp_value_struct,
- gt_ggc_e_19c_language_function,
  gt_ggc_e_18VEC_tree_gc_vec_gc,
  gt_ggc_e_20VEC_tree_gc_vec_base,
  gt_ggc_e_19VEC_const_char_p_gc,
  gt_ggc_e_21VEC_const_char_p_base,
+ gt_ggc_e_21pending_abstract_type,
+ gt_ggc_e_15VEC_tree_int_gc,
+ gt_ggc_e_17VEC_tree_int_base,
+ gt_ggc_e_8tree_int,
+ gt_ggc_e_9cp_parser,
+ gt_ggc_e_34VEC_cp_unparsed_functions_entry_gc,
+ gt_ggc_e_36VEC_cp_unparsed_functions_entry_base,
+ gt_ggc_e_29cp_unparsed_functions_entry_d,
+ gt_ggc_e_27VEC_cp_default_arg_entry_gc,
+ gt_ggc_e_29VEC_cp_default_arg_entry_base,
+ gt_ggc_e_22cp_default_arg_entry_d,
+ gt_ggc_e_17cp_parser_context,
+ gt_ggc_e_8cp_lexer,
+ gt_ggc_e_8cp_token,
+ gt_ggc_e_14cp_token_value,
+ gt_ggc_e_10tree_check,
+ gt_ggc_e_14constexpr_call,
+ gt_ggc_e_16constexpr_fundef,
+ gt_ggc_e_22VEC_deferred_access_gc,
+ gt_ggc_e_24VEC_deferred_access_base,
+ gt_ggc_e_15deferred_access,
+ gt_ggc_e_10spec_entry,
+ gt_ggc_e_16pending_template,
+ gt_ggc_e_21VEC_incomplete_var_gc,
+ gt_ggc_e_23VEC_incomplete_var_base,
+ gt_ggc_e_16incomplete_var_d,
+ gt_ggc_e_21named_label_use_entry,
+ gt_ggc_e_28VEC_deferred_access_check_gc,
+ gt_ggc_e_30VEC_deferred_access_check_base,
+ gt_ggc_e_21deferred_access_check,
+ gt_ggc_e_20operator_name_info_t,
+ gt_ggc_e_11lang_decl_u,
+ gt_ggc_e_14lang_decl_parm,
+ gt_ggc_e_12lang_decl_ns,
+ gt_ggc_e_12lang_decl_fn,
+ gt_ggc_e_12lang_decl_u3,
+ gt_ggc_e_12lang_decl_u5,
+ gt_ggc_e_13lang_decl_min,
+ gt_ggc_e_12lang_decl_u2,
+ gt_ggc_e_14lang_decl_base,
+ gt_ggc_e_11lang_type_u,
+ gt_ggc_e_16lang_type_ptrmem,
+ gt_ggc_e_15lang_type_class,
  gt_ggc_e_18sorted_fields_type,
- gt_ggc_e_15c_inline_static,
- gt_ggc_e_24VEC_c_goto_bindings_p_gc,
- gt_ggc_e_26VEC_c_goto_bindings_p_base,
- gt_ggc_e_15c_goto_bindings,
- gt_ggc_e_7c_scope,
- gt_ggc_e_19c_common_identifier,
- gt_ggc_e_9c_binding,
- gt_ggc_e_12c_label_vars,
+ gt_ggc_e_16lang_type_header,
+ gt_ggc_e_18VEC_tree_pair_s_gc,
+ gt_ggc_e_20VEC_tree_pair_s_base,
+ gt_ggc_e_11tree_pair_s,
+ gt_ggc_e_17named_label_entry,
+ gt_ggc_e_19c_language_function,
  gt_ggc_e_11stmt_tree_s,
- gt_ggc_e_15c_spot_bindings,
- gt_ggc_e_23VEC_ltrans_partition_gc,
- gt_ggc_e_25VEC_ltrans_partition_base,
- gt_ggc_e_20ltrans_partition_def,
+ gt_ggc_e_18tree_template_info,
+ gt_ggc_e_32VEC_qualified_typedef_usage_t_gc,
+ gt_ggc_e_34VEC_qualified_typedef_usage_t_base,
+ gt_ggc_e_25qualified_typedef_usage_s,
+ gt_ggc_e_16tree_lambda_expr,
+ gt_ggc_e_15tree_trait_expr,
+ gt_ggc_e_25tree_argument_pack_select,
+ gt_ggc_e_18tree_static_assert,
+ gt_ggc_e_16tree_default_arg,
+ gt_ggc_e_14cp_token_cache,
+ gt_ggc_e_13tree_baselink,
+ gt_ggc_e_13tree_overload,
+ gt_ggc_e_10ptrmem_cst,
+ gt_ggc_e_21template_parm_index_s,
  gt_ggc_e_15lang_identifier,
+ gt_ggc_e_19c_common_identifier,
+ gt_ggc_e_11saved_scope,
+ gt_ggc_e_16cxx_int_tree_map,
+ gt_ggc_e_23VEC_cp_label_binding_gc,
+ gt_ggc_e_25VEC_cp_label_binding_base,
+ gt_ggc_e_16cp_label_binding,
+ gt_ggc_e_23VEC_cp_class_binding_gc,
+ gt_ggc_e_25VEC_cp_class_binding_base,
+ gt_ggc_e_16cp_class_binding,
+ gt_ggc_e_24VEC_cxx_saved_binding_gc,
+ gt_ggc_e_26VEC_cxx_saved_binding_base,
+ gt_ggc_e_17cxx_saved_binding,
+ gt_ggc_e_16cp_binding_level,
+ gt_ggc_e_11cxx_binding,
+ gt_ggc_e_15binding_entry_s,
+ gt_ggc_e_15binding_table_s,
+ gt_ggc_e_11tinst_level,
+ gt_ggc_e_7globals,
+ gt_ggc_e_14VEC_tinfo_s_gc,
+ gt_ggc_e_16VEC_tinfo_s_base,
+ gt_ggc_e_7tinfo_s,
  gt_ggc_e_11export_list,
  gt_ggc_e_11extern_list,
  gt_ggc_e_18lto_tree_ref_table,
@@ -496,6 +578,12 @@ enum gt_types_enum {
  gt_e_II17splay_tree_node_s,
  gt_e_SP9tree_node17splay_tree_node_s,
  gt_e_P9tree_nodeP9tree_node17splay_tree_node_s,
+ gt_e_P21pending_abstract_type4htab,
+ gt_e_P14constexpr_call4htab,
+ gt_e_P16constexpr_fundef4htab,
+ gt_e_P10spec_entry4htab,
+ gt_e_P16cxx_int_tree_map4htab,
+ gt_e_P17named_label_entry4htab,
  gt_e_P17lto_in_decl_state4htab,
  gt_e_P20lto_symtab_entry_def4htab,
  gt_e_P11heapvar_map4htab,
@@ -553,6 +641,102 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_c_token(z) ((struct c_token *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_token) MEM_STAT_INFO)))
 #define ggc_alloc_zone_vec_c_token(n, z) ((struct c_token *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_token), n MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_c_token(n, z) ((struct c_token *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_token), n MEM_STAT_INFO)))
+#define ggc_alloc_lazy_hex_fp_value_struct() ((struct lazy_hex_fp_value_struct *)(ggc_internal_alloc_stat (sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lazy_hex_fp_value_struct() ((struct lazy_hex_fp_value_struct *)(ggc_internal_cleared_alloc_stat (sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lazy_hex_fp_value_struct(n) ((struct lazy_hex_fp_value_struct *)(ggc_internal_vec_alloc_stat (sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lazy_hex_fp_value_struct(n) ((struct lazy_hex_fp_value_struct *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lazy_hex_fp_value_struct(z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lazy_hex_fp_value_struct(z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lazy_hex_fp_value_struct(n, z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lazy_hex_fp_value_struct(n, z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
+#define ggc_alloc_c_inline_static() ((struct c_inline_static *)(ggc_internal_alloc_stat (sizeof (struct c_inline_static) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_inline_static() ((struct c_inline_static *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_inline_static) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_inline_static(n) ((struct c_inline_static *)(ggc_internal_vec_alloc_stat (sizeof (struct c_inline_static), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_inline_static(n) ((struct c_inline_static *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_inline_static), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_inline_static(z) ((struct c_inline_static *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_inline_static) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_inline_static(z) ((struct c_inline_static *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_inline_static) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_inline_static(n, z) ((struct c_inline_static *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_inline_static), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_inline_static(n, z) ((struct c_inline_static *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_inline_static), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_c_goto_bindings_p_gc() ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_c_goto_bindings_p_gc() ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_c_goto_bindings_p_gc(n) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_c_goto_bindings_p_gc(n) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_c_goto_bindings_p_gc(z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_c_goto_bindings_p_gc(z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_c_goto_bindings_p_gc(n, z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_c_goto_bindings_p_gc(n, z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_c_goto_bindings_p_base() ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_c_goto_bindings_p_base() ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_c_goto_bindings_p_base(n) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_c_goto_bindings_p_base(n) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_c_goto_bindings_p_base(z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_c_goto_bindings_p_base(z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_c_goto_bindings_p_base(n, z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_c_goto_bindings_p_base(n, z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
+#define ggc_alloc_c_goto_bindings() ((struct c_goto_bindings *)(ggc_internal_alloc_stat (sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_goto_bindings() ((struct c_goto_bindings *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_goto_bindings(n) ((struct c_goto_bindings *)(ggc_internal_vec_alloc_stat (sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_goto_bindings(n) ((struct c_goto_bindings *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_goto_bindings(z) ((struct c_goto_bindings *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_goto_bindings(z) ((struct c_goto_bindings *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_goto_bindings(n, z) ((struct c_goto_bindings *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_goto_bindings(n, z) ((struct c_goto_bindings *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_c_scope() ((struct c_scope *)(ggc_internal_alloc_stat (sizeof (struct c_scope) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_scope() ((struct c_scope *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_scope) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_scope(n) ((struct c_scope *)(ggc_internal_vec_alloc_stat (sizeof (struct c_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_scope(n) ((struct c_scope *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_scope(z) ((struct c_scope *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_scope) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_scope(z) ((struct c_scope *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_scope) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_scope(n, z) ((struct c_scope *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_scope(n, z) ((struct c_scope *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_c_binding() ((struct c_binding *)(ggc_internal_alloc_stat (sizeof (struct c_binding) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_binding() ((struct c_binding *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_binding) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_binding(n) ((struct c_binding *)(ggc_internal_vec_alloc_stat (sizeof (struct c_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_binding(n) ((struct c_binding *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_binding(z) ((struct c_binding *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_binding(z) ((struct c_binding *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_binding(n, z) ((struct c_binding *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_binding(n, z) ((struct c_binding *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_c_label_vars() ((struct c_label_vars *)(ggc_internal_alloc_stat (sizeof (struct c_label_vars) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_label_vars() ((struct c_label_vars *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_label_vars) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_label_vars(n) ((struct c_label_vars *)(ggc_internal_vec_alloc_stat (sizeof (struct c_label_vars), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_label_vars(n) ((struct c_label_vars *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_label_vars), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_label_vars(z) ((struct c_label_vars *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_label_vars) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_label_vars(z) ((struct c_label_vars *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_label_vars) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_label_vars(n, z) ((struct c_label_vars *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_label_vars), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_label_vars(n, z) ((struct c_label_vars *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_label_vars), n MEM_STAT_INFO)))
+#define ggc_alloc_c_spot_bindings() ((struct c_spot_bindings *)(ggc_internal_alloc_stat (sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_spot_bindings() ((struct c_spot_bindings *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_spot_bindings(n) ((struct c_spot_bindings *)(ggc_internal_vec_alloc_stat (sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_spot_bindings(n) ((struct c_spot_bindings *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_spot_bindings(z) ((struct c_spot_bindings *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_spot_bindings(z) ((struct c_spot_bindings *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_spot_bindings(n, z) ((struct c_spot_bindings *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_spot_bindings(n, z) ((struct c_spot_bindings *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_ltrans_partition_gc() ((struct VEC_ltrans_partition_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_ltrans_partition_gc() ((struct VEC_ltrans_partition_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_ltrans_partition_gc(n) ((struct VEC_ltrans_partition_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_ltrans_partition_gc(n) ((struct VEC_ltrans_partition_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_ltrans_partition_gc(z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_ltrans_partition_gc(z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_ltrans_partition_gc(n, z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_ltrans_partition_gc(n, z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_ltrans_partition_base() ((struct VEC_ltrans_partition_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_ltrans_partition_base() ((struct VEC_ltrans_partition_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_ltrans_partition_base(n) ((struct VEC_ltrans_partition_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_ltrans_partition_base(n) ((struct VEC_ltrans_partition_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_ltrans_partition_base(z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_ltrans_partition_base(z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_ltrans_partition_base(n, z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_ltrans_partition_base(n, z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
+#define ggc_alloc_ltrans_partition_def() ((struct ltrans_partition_def *)(ggc_internal_alloc_stat (sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_ltrans_partition_def() ((struct ltrans_partition_def *)(ggc_internal_cleared_alloc_stat (sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
+#define ggc_alloc_vec_ltrans_partition_def(n) ((struct ltrans_partition_def *)(ggc_internal_vec_alloc_stat (sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_ltrans_partition_def(n) ((struct ltrans_partition_def *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_ltrans_partition_def(z) ((struct ltrans_partition_def *)(ggc_internal_zone_alloc_stat (z, sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_ltrans_partition_def(z) ((struct ltrans_partition_def *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_ltrans_partition_def(n, z) ((struct ltrans_partition_def *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_ltrans_partition_def(n, z) ((struct ltrans_partition_def *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
 #define ggc_alloc_opt_stack() ((struct opt_stack *)(ggc_internal_alloc_stat (sizeof (struct opt_stack) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_opt_stack() ((struct opt_stack *)(ggc_internal_cleared_alloc_stat (sizeof (struct opt_stack) MEM_STAT_INFO)))
 #define ggc_alloc_vec_opt_stack(n) ((struct opt_stack *)(ggc_internal_vec_alloc_stat (sizeof (struct opt_stack), n MEM_STAT_INFO)))
@@ -617,22 +801,6 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_align_stack(z) ((struct align_stack *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct align_stack) MEM_STAT_INFO)))
 #define ggc_alloc_zone_vec_align_stack(n, z) ((struct align_stack *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct align_stack), n MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_align_stack(n, z) ((struct align_stack *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct align_stack), n MEM_STAT_INFO)))
-#define ggc_alloc_lazy_hex_fp_value_struct() ((struct lazy_hex_fp_value_struct *)(ggc_internal_alloc_stat (sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_lazy_hex_fp_value_struct() ((struct lazy_hex_fp_value_struct *)(ggc_internal_cleared_alloc_stat (sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
-#define ggc_alloc_vec_lazy_hex_fp_value_struct(n) ((struct lazy_hex_fp_value_struct *)(ggc_internal_vec_alloc_stat (sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_lazy_hex_fp_value_struct(n) ((struct lazy_hex_fp_value_struct *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_lazy_hex_fp_value_struct(z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_lazy_hex_fp_value_struct(z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_lazy_hex_fp_value_struct(n, z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_lazy_hex_fp_value_struct(n, z) ((struct lazy_hex_fp_value_struct *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lazy_hex_fp_value_struct), n MEM_STAT_INFO)))
-#define ggc_alloc_c_language_function() ((struct c_language_function *)(ggc_internal_alloc_stat (sizeof (struct c_language_function) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_language_function() ((struct c_language_function *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_language_function) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_language_function(n) ((struct c_language_function *)(ggc_internal_vec_alloc_stat (sizeof (struct c_language_function), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_language_function(n) ((struct c_language_function *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_language_function), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_language_function(z) ((struct c_language_function *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_language_function) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_language_function(z) ((struct c_language_function *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_language_function) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_language_function(n, z) ((struct c_language_function *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_language_function), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_language_function(n, z) ((struct c_language_function *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_language_function), n MEM_STAT_INFO)))
 #define ggc_alloc_VEC_tree_gc_vec_gc() ((struct VEC_tree_gc_vec_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_tree_gc_vec_gc) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_VEC_tree_gc_vec_gc() ((struct VEC_tree_gc_vec_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_tree_gc_vec_gc) MEM_STAT_INFO)))
 #define ggc_alloc_vec_VEC_tree_gc_vec_gc(n) ((struct VEC_tree_gc_vec_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_tree_gc_vec_gc), n MEM_STAT_INFO)))
@@ -665,6 +833,350 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_VEC_const_char_p_base(z) ((struct VEC_const_char_p_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_const_char_p_base) MEM_STAT_INFO)))
 #define ggc_alloc_zone_vec_VEC_const_char_p_base(n, z) ((struct VEC_const_char_p_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_const_char_p_base), n MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_VEC_const_char_p_base(n, z) ((struct VEC_const_char_p_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_const_char_p_base), n MEM_STAT_INFO)))
+#define ggc_alloc_pending_abstract_type() ((struct pending_abstract_type *)(ggc_internal_alloc_stat (sizeof (struct pending_abstract_type) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_pending_abstract_type() ((struct pending_abstract_type *)(ggc_internal_cleared_alloc_stat (sizeof (struct pending_abstract_type) MEM_STAT_INFO)))
+#define ggc_alloc_vec_pending_abstract_type(n) ((struct pending_abstract_type *)(ggc_internal_vec_alloc_stat (sizeof (struct pending_abstract_type), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_pending_abstract_type(n) ((struct pending_abstract_type *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct pending_abstract_type), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_pending_abstract_type(z) ((struct pending_abstract_type *)(ggc_internal_zone_alloc_stat (z, sizeof (struct pending_abstract_type) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_pending_abstract_type(z) ((struct pending_abstract_type *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct pending_abstract_type) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_pending_abstract_type(n, z) ((struct pending_abstract_type *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct pending_abstract_type), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_pending_abstract_type(n, z) ((struct pending_abstract_type *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct pending_abstract_type), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_tree_int_gc() ((struct VEC_tree_int_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_tree_int_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_tree_int_gc() ((struct VEC_tree_int_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_tree_int_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_tree_int_gc(n) ((struct VEC_tree_int_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_tree_int_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_tree_int_gc(n) ((struct VEC_tree_int_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_tree_int_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_tree_int_gc(z) ((struct VEC_tree_int_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_tree_int_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_tree_int_gc(z) ((struct VEC_tree_int_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_tree_int_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_tree_int_gc(n, z) ((struct VEC_tree_int_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_tree_int_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_tree_int_gc(n, z) ((struct VEC_tree_int_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_tree_int_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_tree_int_base() ((struct VEC_tree_int_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_tree_int_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_tree_int_base() ((struct VEC_tree_int_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_tree_int_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_tree_int_base(n) ((struct VEC_tree_int_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_tree_int_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_tree_int_base(n) ((struct VEC_tree_int_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_tree_int_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_tree_int_base(z) ((struct VEC_tree_int_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_tree_int_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_tree_int_base(z) ((struct VEC_tree_int_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_tree_int_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_tree_int_base(n, z) ((struct VEC_tree_int_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_tree_int_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_tree_int_base(n, z) ((struct VEC_tree_int_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_tree_int_base), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_int() ((struct tree_int *)(ggc_internal_alloc_stat (sizeof (struct tree_int) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_int() ((struct tree_int *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_int) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_int(n) ((struct tree_int *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_int), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_int(n) ((struct tree_int *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_int), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_int(z) ((struct tree_int *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_int) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_int(z) ((struct tree_int *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_int) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_int(n, z) ((struct tree_int *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_int), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_int(n, z) ((struct tree_int *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_int), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_parser() ((struct cp_parser *)(ggc_internal_alloc_stat (sizeof (struct cp_parser) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_parser() ((struct cp_parser *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_parser) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_parser(n) ((struct cp_parser *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_parser), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_parser(n) ((struct cp_parser *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_parser), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_parser(z) ((struct cp_parser *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_parser) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_parser(z) ((struct cp_parser *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_parser) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_parser(n, z) ((struct cp_parser *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_parser), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_parser(n, z) ((struct cp_parser *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_parser), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_unparsed_functions_entry_gc() ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_unparsed_functions_entry_gc() ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_unparsed_functions_entry_gc(n) ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_unparsed_functions_entry_gc(n) ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_unparsed_functions_entry_gc(z) ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_unparsed_functions_entry_gc(z) ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_unparsed_functions_entry_gc(n, z) ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_unparsed_functions_entry_gc(n, z) ((struct VEC_cp_unparsed_functions_entry_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_unparsed_functions_entry_base() ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_unparsed_functions_entry_base() ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_unparsed_functions_entry_base(n) ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_unparsed_functions_entry_base(n) ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_unparsed_functions_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_unparsed_functions_entry_base(z) ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_unparsed_functions_entry_base(z) ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_unparsed_functions_entry_base(n, z) ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_unparsed_functions_entry_base(n, z) ((struct VEC_cp_unparsed_functions_entry_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_unparsed_functions_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_unparsed_functions_entry_d() ((struct cp_unparsed_functions_entry_d *)(ggc_internal_alloc_stat (sizeof (struct cp_unparsed_functions_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_unparsed_functions_entry_d() ((struct cp_unparsed_functions_entry_d *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_unparsed_functions_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_unparsed_functions_entry_d(n) ((struct cp_unparsed_functions_entry_d *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_unparsed_functions_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_unparsed_functions_entry_d(n) ((struct cp_unparsed_functions_entry_d *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_unparsed_functions_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_unparsed_functions_entry_d(z) ((struct cp_unparsed_functions_entry_d *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_unparsed_functions_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_unparsed_functions_entry_d(z) ((struct cp_unparsed_functions_entry_d *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_unparsed_functions_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_unparsed_functions_entry_d(n, z) ((struct cp_unparsed_functions_entry_d *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_unparsed_functions_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_unparsed_functions_entry_d(n, z) ((struct cp_unparsed_functions_entry_d *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_unparsed_functions_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_default_arg_entry_gc() ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_default_arg_entry_gc() ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_default_arg_entry_gc(n) ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_default_arg_entry_gc(n) ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_default_arg_entry_gc(z) ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_default_arg_entry_gc(z) ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_default_arg_entry_gc(n, z) ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_default_arg_entry_gc(n, z) ((struct VEC_cp_default_arg_entry_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_default_arg_entry_base() ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_default_arg_entry_base() ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_default_arg_entry_base(n) ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_default_arg_entry_base(n) ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_default_arg_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_default_arg_entry_base(z) ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_default_arg_entry_base(z) ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_default_arg_entry_base(n, z) ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_default_arg_entry_base(n, z) ((struct VEC_cp_default_arg_entry_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_default_arg_entry_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_default_arg_entry_d() ((struct cp_default_arg_entry_d *)(ggc_internal_alloc_stat (sizeof (struct cp_default_arg_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_default_arg_entry_d() ((struct cp_default_arg_entry_d *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_default_arg_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_default_arg_entry_d(n) ((struct cp_default_arg_entry_d *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_default_arg_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_default_arg_entry_d(n) ((struct cp_default_arg_entry_d *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_default_arg_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_default_arg_entry_d(z) ((struct cp_default_arg_entry_d *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_default_arg_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_default_arg_entry_d(z) ((struct cp_default_arg_entry_d *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_default_arg_entry_d) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_default_arg_entry_d(n, z) ((struct cp_default_arg_entry_d *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_default_arg_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_default_arg_entry_d(n, z) ((struct cp_default_arg_entry_d *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_default_arg_entry_d), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_parser_context() ((struct cp_parser_context *)(ggc_internal_alloc_stat (sizeof (struct cp_parser_context) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_parser_context() ((struct cp_parser_context *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_parser_context) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_parser_context(n) ((struct cp_parser_context *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_parser_context), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_parser_context(n) ((struct cp_parser_context *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_parser_context), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_parser_context(z) ((struct cp_parser_context *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_parser_context) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_parser_context(z) ((struct cp_parser_context *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_parser_context) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_parser_context(n, z) ((struct cp_parser_context *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_parser_context), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_parser_context(n, z) ((struct cp_parser_context *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_parser_context), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_lexer() ((struct cp_lexer *)(ggc_internal_alloc_stat (sizeof (struct cp_lexer) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_lexer() ((struct cp_lexer *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_lexer) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_lexer(n) ((struct cp_lexer *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_lexer), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_lexer(n) ((struct cp_lexer *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_lexer), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_lexer(z) ((struct cp_lexer *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_lexer) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_lexer(z) ((struct cp_lexer *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_lexer) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_lexer(n, z) ((struct cp_lexer *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_lexer), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_lexer(n, z) ((struct cp_lexer *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_lexer), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_token() ((struct cp_token *)(ggc_internal_alloc_stat (sizeof (struct cp_token) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_token() ((struct cp_token *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_token) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_token(n) ((struct cp_token *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_token), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_token(n) ((struct cp_token *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_token), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_token(z) ((struct cp_token *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_token) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_token(z) ((struct cp_token *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_token) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_token(n, z) ((struct cp_token *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_token), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_token(n, z) ((struct cp_token *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_token), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_token_value() ((union cp_token_value *)(ggc_internal_alloc_stat (sizeof (union cp_token_value) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_token_value() ((union cp_token_value *)(ggc_internal_cleared_alloc_stat (sizeof (union cp_token_value) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_token_value(n) ((union cp_token_value *)(ggc_internal_vec_alloc_stat (sizeof (union cp_token_value), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_token_value(n) ((union cp_token_value *)(ggc_internal_cleared_vec_alloc_stat (sizeof (union cp_token_value), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_token_value(z) ((union cp_token_value *)(ggc_internal_zone_alloc_stat (z, sizeof (union cp_token_value) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_token_value(z) ((union cp_token_value *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (union cp_token_value) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_token_value(n, z) ((union cp_token_value *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (union cp_token_value), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_token_value(n, z) ((union cp_token_value *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (union cp_token_value), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_check() ((struct tree_check *)(ggc_internal_alloc_stat (sizeof (struct tree_check) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_check() ((struct tree_check *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_check) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_check(n) ((struct tree_check *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_check), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_check(n) ((struct tree_check *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_check), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_check(z) ((struct tree_check *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_check) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_check(z) ((struct tree_check *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_check) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_check(n, z) ((struct tree_check *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_check), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_check(n, z) ((struct tree_check *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_check), n MEM_STAT_INFO)))
+#define ggc_alloc_constexpr_call() ((struct constexpr_call *)(ggc_internal_alloc_stat (sizeof (struct constexpr_call) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_constexpr_call() ((struct constexpr_call *)(ggc_internal_cleared_alloc_stat (sizeof (struct constexpr_call) MEM_STAT_INFO)))
+#define ggc_alloc_vec_constexpr_call(n) ((struct constexpr_call *)(ggc_internal_vec_alloc_stat (sizeof (struct constexpr_call), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_constexpr_call(n) ((struct constexpr_call *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct constexpr_call), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_constexpr_call(z) ((struct constexpr_call *)(ggc_internal_zone_alloc_stat (z, sizeof (struct constexpr_call) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_constexpr_call(z) ((struct constexpr_call *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct constexpr_call) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_constexpr_call(n, z) ((struct constexpr_call *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct constexpr_call), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_constexpr_call(n, z) ((struct constexpr_call *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct constexpr_call), n MEM_STAT_INFO)))
+#define ggc_alloc_constexpr_fundef() ((struct constexpr_fundef *)(ggc_internal_alloc_stat (sizeof (struct constexpr_fundef) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_constexpr_fundef() ((struct constexpr_fundef *)(ggc_internal_cleared_alloc_stat (sizeof (struct constexpr_fundef) MEM_STAT_INFO)))
+#define ggc_alloc_vec_constexpr_fundef(n) ((struct constexpr_fundef *)(ggc_internal_vec_alloc_stat (sizeof (struct constexpr_fundef), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_constexpr_fundef(n) ((struct constexpr_fundef *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct constexpr_fundef), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_constexpr_fundef(z) ((struct constexpr_fundef *)(ggc_internal_zone_alloc_stat (z, sizeof (struct constexpr_fundef) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_constexpr_fundef(z) ((struct constexpr_fundef *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct constexpr_fundef) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_constexpr_fundef(n, z) ((struct constexpr_fundef *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct constexpr_fundef), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_constexpr_fundef(n, z) ((struct constexpr_fundef *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct constexpr_fundef), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_deferred_access_gc() ((struct VEC_deferred_access_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_deferred_access_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_deferred_access_gc() ((struct VEC_deferred_access_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_deferred_access_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_deferred_access_gc(n) ((struct VEC_deferred_access_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_deferred_access_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_deferred_access_gc(n) ((struct VEC_deferred_access_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_deferred_access_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_deferred_access_gc(z) ((struct VEC_deferred_access_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_deferred_access_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_deferred_access_gc(z) ((struct VEC_deferred_access_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_deferred_access_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_deferred_access_gc(n, z) ((struct VEC_deferred_access_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_deferred_access_gc(n, z) ((struct VEC_deferred_access_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_deferred_access_base() ((struct VEC_deferred_access_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_deferred_access_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_deferred_access_base() ((struct VEC_deferred_access_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_deferred_access_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_deferred_access_base(n) ((struct VEC_deferred_access_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_deferred_access_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_deferred_access_base(n) ((struct VEC_deferred_access_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_deferred_access_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_deferred_access_base(z) ((struct VEC_deferred_access_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_deferred_access_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_deferred_access_base(z) ((struct VEC_deferred_access_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_deferred_access_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_deferred_access_base(n, z) ((struct VEC_deferred_access_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_deferred_access_base(n, z) ((struct VEC_deferred_access_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_base), n MEM_STAT_INFO)))
+#define ggc_alloc_deferred_access() ((struct deferred_access *)(ggc_internal_alloc_stat (sizeof (struct deferred_access) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_deferred_access() ((struct deferred_access *)(ggc_internal_cleared_alloc_stat (sizeof (struct deferred_access) MEM_STAT_INFO)))
+#define ggc_alloc_vec_deferred_access(n) ((struct deferred_access *)(ggc_internal_vec_alloc_stat (sizeof (struct deferred_access), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_deferred_access(n) ((struct deferred_access *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct deferred_access), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_deferred_access(z) ((struct deferred_access *)(ggc_internal_zone_alloc_stat (z, sizeof (struct deferred_access) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_deferred_access(z) ((struct deferred_access *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct deferred_access) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_deferred_access(n, z) ((struct deferred_access *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct deferred_access), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_deferred_access(n, z) ((struct deferred_access *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct deferred_access), n MEM_STAT_INFO)))
+#define ggc_alloc_spec_entry() ((struct spec_entry *)(ggc_internal_alloc_stat (sizeof (struct spec_entry) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_spec_entry() ((struct spec_entry *)(ggc_internal_cleared_alloc_stat (sizeof (struct spec_entry) MEM_STAT_INFO)))
+#define ggc_alloc_vec_spec_entry(n) ((struct spec_entry *)(ggc_internal_vec_alloc_stat (sizeof (struct spec_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_spec_entry(n) ((struct spec_entry *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct spec_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_spec_entry(z) ((struct spec_entry *)(ggc_internal_zone_alloc_stat (z, sizeof (struct spec_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_spec_entry(z) ((struct spec_entry *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct spec_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_spec_entry(n, z) ((struct spec_entry *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct spec_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_spec_entry(n, z) ((struct spec_entry *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct spec_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_pending_template() ((struct pending_template *)(ggc_internal_alloc_stat (sizeof (struct pending_template) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_pending_template() ((struct pending_template *)(ggc_internal_cleared_alloc_stat (sizeof (struct pending_template) MEM_STAT_INFO)))
+#define ggc_alloc_vec_pending_template(n) ((struct pending_template *)(ggc_internal_vec_alloc_stat (sizeof (struct pending_template), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_pending_template(n) ((struct pending_template *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct pending_template), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_pending_template(z) ((struct pending_template *)(ggc_internal_zone_alloc_stat (z, sizeof (struct pending_template) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_pending_template(z) ((struct pending_template *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct pending_template) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_pending_template(n, z) ((struct pending_template *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct pending_template), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_pending_template(n, z) ((struct pending_template *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct pending_template), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_incomplete_var_gc() ((struct VEC_incomplete_var_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_incomplete_var_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_incomplete_var_gc() ((struct VEC_incomplete_var_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_incomplete_var_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_incomplete_var_gc(n) ((struct VEC_incomplete_var_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_incomplete_var_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_incomplete_var_gc(n) ((struct VEC_incomplete_var_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_incomplete_var_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_incomplete_var_gc(z) ((struct VEC_incomplete_var_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_incomplete_var_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_incomplete_var_gc(z) ((struct VEC_incomplete_var_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_incomplete_var_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_incomplete_var_gc(n, z) ((struct VEC_incomplete_var_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_incomplete_var_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_incomplete_var_gc(n, z) ((struct VEC_incomplete_var_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_incomplete_var_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_incomplete_var_base() ((struct VEC_incomplete_var_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_incomplete_var_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_incomplete_var_base() ((struct VEC_incomplete_var_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_incomplete_var_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_incomplete_var_base(n) ((struct VEC_incomplete_var_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_incomplete_var_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_incomplete_var_base(n) ((struct VEC_incomplete_var_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_incomplete_var_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_incomplete_var_base(z) ((struct VEC_incomplete_var_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_incomplete_var_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_incomplete_var_base(z) ((struct VEC_incomplete_var_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_incomplete_var_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_incomplete_var_base(n, z) ((struct VEC_incomplete_var_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_incomplete_var_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_incomplete_var_base(n, z) ((struct VEC_incomplete_var_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_incomplete_var_base), n MEM_STAT_INFO)))
+#define ggc_alloc_incomplete_var_d() ((struct incomplete_var_d *)(ggc_internal_alloc_stat (sizeof (struct incomplete_var_d) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_incomplete_var_d() ((struct incomplete_var_d *)(ggc_internal_cleared_alloc_stat (sizeof (struct incomplete_var_d) MEM_STAT_INFO)))
+#define ggc_alloc_vec_incomplete_var_d(n) ((struct incomplete_var_d *)(ggc_internal_vec_alloc_stat (sizeof (struct incomplete_var_d), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_incomplete_var_d(n) ((struct incomplete_var_d *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct incomplete_var_d), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_incomplete_var_d(z) ((struct incomplete_var_d *)(ggc_internal_zone_alloc_stat (z, sizeof (struct incomplete_var_d) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_incomplete_var_d(z) ((struct incomplete_var_d *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct incomplete_var_d) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_incomplete_var_d(n, z) ((struct incomplete_var_d *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct incomplete_var_d), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_incomplete_var_d(n, z) ((struct incomplete_var_d *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct incomplete_var_d), n MEM_STAT_INFO)))
+#define ggc_alloc_named_label_use_entry() ((struct named_label_use_entry *)(ggc_internal_alloc_stat (sizeof (struct named_label_use_entry) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_named_label_use_entry() ((struct named_label_use_entry *)(ggc_internal_cleared_alloc_stat (sizeof (struct named_label_use_entry) MEM_STAT_INFO)))
+#define ggc_alloc_vec_named_label_use_entry(n) ((struct named_label_use_entry *)(ggc_internal_vec_alloc_stat (sizeof (struct named_label_use_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_named_label_use_entry(n) ((struct named_label_use_entry *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct named_label_use_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_named_label_use_entry(z) ((struct named_label_use_entry *)(ggc_internal_zone_alloc_stat (z, sizeof (struct named_label_use_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_named_label_use_entry(z) ((struct named_label_use_entry *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct named_label_use_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_named_label_use_entry(n, z) ((struct named_label_use_entry *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct named_label_use_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_named_label_use_entry(n, z) ((struct named_label_use_entry *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct named_label_use_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_deferred_access_check_gc() ((struct VEC_deferred_access_check_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_deferred_access_check_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_deferred_access_check_gc() ((struct VEC_deferred_access_check_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_deferred_access_check_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_deferred_access_check_gc(n) ((struct VEC_deferred_access_check_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_deferred_access_check_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_deferred_access_check_gc(n) ((struct VEC_deferred_access_check_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_deferred_access_check_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_deferred_access_check_gc(z) ((struct VEC_deferred_access_check_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_deferred_access_check_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_deferred_access_check_gc(z) ((struct VEC_deferred_access_check_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_deferred_access_check_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_deferred_access_check_gc(n, z) ((struct VEC_deferred_access_check_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_check_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_deferred_access_check_gc(n, z) ((struct VEC_deferred_access_check_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_check_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_deferred_access_check_base() ((struct VEC_deferred_access_check_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_deferred_access_check_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_deferred_access_check_base() ((struct VEC_deferred_access_check_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_deferred_access_check_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_deferred_access_check_base(n) ((struct VEC_deferred_access_check_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_deferred_access_check_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_deferred_access_check_base(n) ((struct VEC_deferred_access_check_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_deferred_access_check_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_deferred_access_check_base(z) ((struct VEC_deferred_access_check_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_deferred_access_check_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_deferred_access_check_base(z) ((struct VEC_deferred_access_check_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_deferred_access_check_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_deferred_access_check_base(n, z) ((struct VEC_deferred_access_check_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_check_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_deferred_access_check_base(n, z) ((struct VEC_deferred_access_check_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_deferred_access_check_base), n MEM_STAT_INFO)))
+#define ggc_alloc_deferred_access_check() ((struct deferred_access_check *)(ggc_internal_alloc_stat (sizeof (struct deferred_access_check) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_deferred_access_check() ((struct deferred_access_check *)(ggc_internal_cleared_alloc_stat (sizeof (struct deferred_access_check) MEM_STAT_INFO)))
+#define ggc_alloc_vec_deferred_access_check(n) ((struct deferred_access_check *)(ggc_internal_vec_alloc_stat (sizeof (struct deferred_access_check), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_deferred_access_check(n) ((struct deferred_access_check *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct deferred_access_check), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_deferred_access_check(z) ((struct deferred_access_check *)(ggc_internal_zone_alloc_stat (z, sizeof (struct deferred_access_check) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_deferred_access_check(z) ((struct deferred_access_check *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct deferred_access_check) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_deferred_access_check(n, z) ((struct deferred_access_check *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct deferred_access_check), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_deferred_access_check(n, z) ((struct deferred_access_check *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct deferred_access_check), n MEM_STAT_INFO)))
+#define ggc_alloc_operator_name_info_t() ((struct operator_name_info_t *)(ggc_internal_alloc_stat (sizeof (struct operator_name_info_t) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_operator_name_info_t() ((struct operator_name_info_t *)(ggc_internal_cleared_alloc_stat (sizeof (struct operator_name_info_t) MEM_STAT_INFO)))
+#define ggc_alloc_vec_operator_name_info_t(n) ((struct operator_name_info_t *)(ggc_internal_vec_alloc_stat (sizeof (struct operator_name_info_t), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_operator_name_info_t(n) ((struct operator_name_info_t *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct operator_name_info_t), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_operator_name_info_t(z) ((struct operator_name_info_t *)(ggc_internal_zone_alloc_stat (z, sizeof (struct operator_name_info_t) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_operator_name_info_t(z) ((struct operator_name_info_t *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct operator_name_info_t) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_operator_name_info_t(n, z) ((struct operator_name_info_t *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct operator_name_info_t), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_operator_name_info_t(n, z) ((struct operator_name_info_t *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct operator_name_info_t), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_u() ((union lang_decl_u *)(ggc_internal_alloc_stat (sizeof (union lang_decl_u) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_u() ((union lang_decl_u *)(ggc_internal_cleared_alloc_stat (sizeof (union lang_decl_u) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_u(n) ((union lang_decl_u *)(ggc_internal_vec_alloc_stat (sizeof (union lang_decl_u), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_u(n) ((union lang_decl_u *)(ggc_internal_cleared_vec_alloc_stat (sizeof (union lang_decl_u), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_u(z) ((union lang_decl_u *)(ggc_internal_zone_alloc_stat (z, sizeof (union lang_decl_u) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_u(z) ((union lang_decl_u *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (union lang_decl_u) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_u(n, z) ((union lang_decl_u *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (union lang_decl_u), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_u(n, z) ((union lang_decl_u *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (union lang_decl_u), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_parm() ((struct lang_decl_parm *)(ggc_internal_alloc_stat (sizeof (struct lang_decl_parm) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_parm() ((struct lang_decl_parm *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_decl_parm) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_parm(n) ((struct lang_decl_parm *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_decl_parm), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_parm(n) ((struct lang_decl_parm *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_decl_parm), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_parm(z) ((struct lang_decl_parm *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_decl_parm) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_parm(z) ((struct lang_decl_parm *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_decl_parm) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_parm(n, z) ((struct lang_decl_parm *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_decl_parm), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_parm(n, z) ((struct lang_decl_parm *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_decl_parm), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_ns() ((struct lang_decl_ns *)(ggc_internal_alloc_stat (sizeof (struct lang_decl_ns) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_ns() ((struct lang_decl_ns *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_decl_ns) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_ns(n) ((struct lang_decl_ns *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_decl_ns), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_ns(n) ((struct lang_decl_ns *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_decl_ns), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_ns(z) ((struct lang_decl_ns *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_decl_ns) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_ns(z) ((struct lang_decl_ns *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_decl_ns) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_ns(n, z) ((struct lang_decl_ns *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_decl_ns), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_ns(n, z) ((struct lang_decl_ns *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_decl_ns), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_fn() ((struct lang_decl_fn *)(ggc_internal_alloc_stat (sizeof (struct lang_decl_fn) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_fn() ((struct lang_decl_fn *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_decl_fn) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_fn(n) ((struct lang_decl_fn *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_decl_fn), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_fn(n) ((struct lang_decl_fn *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_decl_fn), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_fn(z) ((struct lang_decl_fn *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_decl_fn) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_fn(z) ((struct lang_decl_fn *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_decl_fn) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_fn(n, z) ((struct lang_decl_fn *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_decl_fn), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_fn(n, z) ((struct lang_decl_fn *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_decl_fn), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_u3() ((union lang_decl_u3 *)(ggc_internal_alloc_stat (sizeof (union lang_decl_u3) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_u3() ((union lang_decl_u3 *)(ggc_internal_cleared_alloc_stat (sizeof (union lang_decl_u3) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_u3(n) ((union lang_decl_u3 *)(ggc_internal_vec_alloc_stat (sizeof (union lang_decl_u3), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_u3(n) ((union lang_decl_u3 *)(ggc_internal_cleared_vec_alloc_stat (sizeof (union lang_decl_u3), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_u3(z) ((union lang_decl_u3 *)(ggc_internal_zone_alloc_stat (z, sizeof (union lang_decl_u3) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_u3(z) ((union lang_decl_u3 *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (union lang_decl_u3) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_u3(n, z) ((union lang_decl_u3 *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (union lang_decl_u3), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_u3(n, z) ((union lang_decl_u3 *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (union lang_decl_u3), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_u5() ((union lang_decl_u5 *)(ggc_internal_alloc_stat (sizeof (union lang_decl_u5) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_u5() ((union lang_decl_u5 *)(ggc_internal_cleared_alloc_stat (sizeof (union lang_decl_u5) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_u5(n) ((union lang_decl_u5 *)(ggc_internal_vec_alloc_stat (sizeof (union lang_decl_u5), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_u5(n) ((union lang_decl_u5 *)(ggc_internal_cleared_vec_alloc_stat (sizeof (union lang_decl_u5), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_u5(z) ((union lang_decl_u5 *)(ggc_internal_zone_alloc_stat (z, sizeof (union lang_decl_u5) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_u5(z) ((union lang_decl_u5 *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (union lang_decl_u5) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_u5(n, z) ((union lang_decl_u5 *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (union lang_decl_u5), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_u5(n, z) ((union lang_decl_u5 *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (union lang_decl_u5), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_min() ((struct lang_decl_min *)(ggc_internal_alloc_stat (sizeof (struct lang_decl_min) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_min() ((struct lang_decl_min *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_decl_min) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_min(n) ((struct lang_decl_min *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_decl_min), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_min(n) ((struct lang_decl_min *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_decl_min), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_min(z) ((struct lang_decl_min *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_decl_min) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_min(z) ((struct lang_decl_min *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_decl_min) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_min(n, z) ((struct lang_decl_min *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_decl_min), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_min(n, z) ((struct lang_decl_min *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_decl_min), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_u2() ((union lang_decl_u2 *)(ggc_internal_alloc_stat (sizeof (union lang_decl_u2) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_u2() ((union lang_decl_u2 *)(ggc_internal_cleared_alloc_stat (sizeof (union lang_decl_u2) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_u2(n) ((union lang_decl_u2 *)(ggc_internal_vec_alloc_stat (sizeof (union lang_decl_u2), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_u2(n) ((union lang_decl_u2 *)(ggc_internal_cleared_vec_alloc_stat (sizeof (union lang_decl_u2), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_u2(z) ((union lang_decl_u2 *)(ggc_internal_zone_alloc_stat (z, sizeof (union lang_decl_u2) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_u2(z) ((union lang_decl_u2 *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (union lang_decl_u2) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_u2(n, z) ((union lang_decl_u2 *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (union lang_decl_u2), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_u2(n, z) ((union lang_decl_u2 *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (union lang_decl_u2), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl_base() ((struct lang_decl_base *)(ggc_internal_alloc_stat (sizeof (struct lang_decl_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl_base() ((struct lang_decl_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_decl_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl_base(n) ((struct lang_decl_base *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_decl_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl_base(n) ((struct lang_decl_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_decl_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl_base(z) ((struct lang_decl_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_decl_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl_base(z) ((struct lang_decl_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_decl_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl_base(n, z) ((struct lang_decl_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_decl_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl_base(n, z) ((struct lang_decl_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_decl_base), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_type_u() ((union lang_type_u *)(ggc_internal_alloc_stat (sizeof (union lang_type_u) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_type_u() ((union lang_type_u *)(ggc_internal_cleared_alloc_stat (sizeof (union lang_type_u) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_type_u(n) ((union lang_type_u *)(ggc_internal_vec_alloc_stat (sizeof (union lang_type_u), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_type_u(n) ((union lang_type_u *)(ggc_internal_cleared_vec_alloc_stat (sizeof (union lang_type_u), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_type_u(z) ((union lang_type_u *)(ggc_internal_zone_alloc_stat (z, sizeof (union lang_type_u) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_type_u(z) ((union lang_type_u *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (union lang_type_u) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_type_u(n, z) ((union lang_type_u *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (union lang_type_u), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_type_u(n, z) ((union lang_type_u *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (union lang_type_u), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_type_ptrmem() ((struct lang_type_ptrmem *)(ggc_internal_alloc_stat (sizeof (struct lang_type_ptrmem) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_type_ptrmem() ((struct lang_type_ptrmem *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_type_ptrmem) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_type_ptrmem(n) ((struct lang_type_ptrmem *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_type_ptrmem), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_type_ptrmem(n) ((struct lang_type_ptrmem *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_type_ptrmem), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_type_ptrmem(z) ((struct lang_type_ptrmem *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_type_ptrmem) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_type_ptrmem(z) ((struct lang_type_ptrmem *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_type_ptrmem) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_type_ptrmem(n, z) ((struct lang_type_ptrmem *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_type_ptrmem), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_type_ptrmem(n, z) ((struct lang_type_ptrmem *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_type_ptrmem), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_type_class() ((struct lang_type_class *)(ggc_internal_alloc_stat (sizeof (struct lang_type_class) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_type_class() ((struct lang_type_class *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_type_class) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_type_class(n) ((struct lang_type_class *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_type_class), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_type_class(n) ((struct lang_type_class *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_type_class), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_type_class(z) ((struct lang_type_class *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_type_class) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_type_class(z) ((struct lang_type_class *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_type_class) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_type_class(n, z) ((struct lang_type_class *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_type_class), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_type_class(n, z) ((struct lang_type_class *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_type_class), n MEM_STAT_INFO)))
 #define ggc_alloc_sorted_fields_type(SIZE) ((struct sorted_fields_type *)(ggc_internal_alloc_stat (SIZE MEM_STAT_INFO)))
 #define ggc_alloc_cleared_sorted_fields_type(SIZE) ((struct sorted_fields_type *)(ggc_internal_cleared_alloc_stat (SIZE MEM_STAT_INFO)))
 #define ggc_alloc_vec_sorted_fields_type(SIZE, n) ((struct sorted_fields_type *)(ggc_internal_vec_alloc_stat (SIZE, n MEM_STAT_INFO)))
@@ -673,70 +1185,54 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_sorted_fields_type(SIZE, z) ((struct sorted_fields_type *)(ggc_internal_zone_cleared_alloc_stat (z, SIZE MEM_STAT_INFO)))
 #define ggc_alloc_zone_vec_sorted_fields_type(SIZE, n, z) ((struct sorted_fields_type *)(ggc_internal_zone_vec_alloc_stat (z, SIZE, n MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_sorted_fields_type(SIZE, n, z) ((struct sorted_fields_type *)(ggc_internal_zone_cleared_vec_alloc_stat (z, SIZE, n MEM_STAT_INFO)))
-#define ggc_alloc_c_inline_static() ((struct c_inline_static *)(ggc_internal_alloc_stat (sizeof (struct c_inline_static) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_inline_static() ((struct c_inline_static *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_inline_static) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_inline_static(n) ((struct c_inline_static *)(ggc_internal_vec_alloc_stat (sizeof (struct c_inline_static), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_inline_static(n) ((struct c_inline_static *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_inline_static), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_inline_static(z) ((struct c_inline_static *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_inline_static) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_inline_static(z) ((struct c_inline_static *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_inline_static) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_inline_static(n, z) ((struct c_inline_static *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_inline_static), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_inline_static(n, z) ((struct c_inline_static *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_inline_static), n MEM_STAT_INFO)))
-#define ggc_alloc_VEC_c_goto_bindings_p_gc() ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_VEC_c_goto_bindings_p_gc() ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
-#define ggc_alloc_vec_VEC_c_goto_bindings_p_gc(n) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_VEC_c_goto_bindings_p_gc(n) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_VEC_c_goto_bindings_p_gc(z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_VEC_c_goto_bindings_p_gc(z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_VEC_c_goto_bindings_p_gc(n, z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_VEC_c_goto_bindings_p_gc(n, z) ((struct VEC_c_goto_bindings_p_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_VEC_c_goto_bindings_p_base() ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_VEC_c_goto_bindings_p_base() ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
-#define ggc_alloc_vec_VEC_c_goto_bindings_p_base(n) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_VEC_c_goto_bindings_p_base(n) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_VEC_c_goto_bindings_p_base(z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_VEC_c_goto_bindings_p_base(z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_VEC_c_goto_bindings_p_base(n, z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_VEC_c_goto_bindings_p_base(n, z) ((struct VEC_c_goto_bindings_p_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_c_goto_bindings_p_base), n MEM_STAT_INFO)))
-#define ggc_alloc_c_goto_bindings() ((struct c_goto_bindings *)(ggc_internal_alloc_stat (sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_goto_bindings() ((struct c_goto_bindings *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_goto_bindings(n) ((struct c_goto_bindings *)(ggc_internal_vec_alloc_stat (sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_goto_bindings(n) ((struct c_goto_bindings *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_goto_bindings(z) ((struct c_goto_bindings *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_goto_bindings(z) ((struct c_goto_bindings *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_goto_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_goto_bindings(n, z) ((struct c_goto_bindings *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_goto_bindings(n, z) ((struct c_goto_bindings *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_goto_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_c_scope() ((struct c_scope *)(ggc_internal_alloc_stat (sizeof (struct c_scope) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_scope() ((struct c_scope *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_scope) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_scope(n) ((struct c_scope *)(ggc_internal_vec_alloc_stat (sizeof (struct c_scope), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_scope(n) ((struct c_scope *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_scope), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_scope(z) ((struct c_scope *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_scope) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_scope(z) ((struct c_scope *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_scope) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_scope(n, z) ((struct c_scope *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_scope), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_scope(n, z) ((struct c_scope *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_scope), n MEM_STAT_INFO)))
-#define ggc_alloc_c_common_identifier() ((struct c_common_identifier *)(ggc_internal_alloc_stat (sizeof (struct c_common_identifier) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_common_identifier() ((struct c_common_identifier *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_common_identifier) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_common_identifier(n) ((struct c_common_identifier *)(ggc_internal_vec_alloc_stat (sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_common_identifier(n) ((struct c_common_identifier *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_common_identifier(z) ((struct c_common_identifier *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_common_identifier) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_common_identifier(z) ((struct c_common_identifier *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_common_identifier) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_common_identifier(n, z) ((struct c_common_identifier *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_common_identifier(n, z) ((struct c_common_identifier *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
-#define ggc_alloc_c_binding() ((struct c_binding *)(ggc_internal_alloc_stat (sizeof (struct c_binding) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_binding() ((struct c_binding *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_binding) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_binding(n) ((struct c_binding *)(ggc_internal_vec_alloc_stat (sizeof (struct c_binding), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_binding(n) ((struct c_binding *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_binding), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_binding(z) ((struct c_binding *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_binding) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_binding(z) ((struct c_binding *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_binding) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_binding(n, z) ((struct c_binding *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_binding), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_binding(n, z) ((struct c_binding *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_binding), n MEM_STAT_INFO)))
-#define ggc_alloc_c_label_vars() ((struct c_label_vars *)(ggc_internal_alloc_stat (sizeof (struct c_label_vars) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_label_vars() ((struct c_label_vars *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_label_vars) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_label_vars(n) ((struct c_label_vars *)(ggc_internal_vec_alloc_stat (sizeof (struct c_label_vars), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_label_vars(n) ((struct c_label_vars *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_label_vars), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_label_vars(z) ((struct c_label_vars *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_label_vars) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_label_vars(z) ((struct c_label_vars *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_label_vars) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_label_vars(n, z) ((struct c_label_vars *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_label_vars), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_label_vars(n, z) ((struct c_label_vars *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_label_vars), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_type_header() ((struct lang_type_header *)(ggc_internal_alloc_stat (sizeof (struct lang_type_header) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_type_header() ((struct lang_type_header *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_type_header) MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_type_header(n) ((struct lang_type_header *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_type_header), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_type_header(n) ((struct lang_type_header *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_type_header), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_type_header(z) ((struct lang_type_header *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_type_header) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_type_header(z) ((struct lang_type_header *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_type_header) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_type_header(n, z) ((struct lang_type_header *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_type_header), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_type_header(n, z) ((struct lang_type_header *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_type_header), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_tree_pair_s_gc() ((struct VEC_tree_pair_s_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_tree_pair_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_tree_pair_s_gc() ((struct VEC_tree_pair_s_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_tree_pair_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_tree_pair_s_gc(n) ((struct VEC_tree_pair_s_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_tree_pair_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_tree_pair_s_gc(n) ((struct VEC_tree_pair_s_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_tree_pair_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_tree_pair_s_gc(z) ((struct VEC_tree_pair_s_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_tree_pair_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_tree_pair_s_gc(z) ((struct VEC_tree_pair_s_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_tree_pair_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_tree_pair_s_gc(n, z) ((struct VEC_tree_pair_s_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_tree_pair_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_tree_pair_s_gc(n, z) ((struct VEC_tree_pair_s_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_tree_pair_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_tree_pair_s_base() ((struct VEC_tree_pair_s_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_tree_pair_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_tree_pair_s_base() ((struct VEC_tree_pair_s_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_tree_pair_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_tree_pair_s_base(n) ((struct VEC_tree_pair_s_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_tree_pair_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_tree_pair_s_base(n) ((struct VEC_tree_pair_s_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_tree_pair_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_tree_pair_s_base(z) ((struct VEC_tree_pair_s_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_tree_pair_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_tree_pair_s_base(z) ((struct VEC_tree_pair_s_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_tree_pair_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_tree_pair_s_base(n, z) ((struct VEC_tree_pair_s_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_tree_pair_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_tree_pair_s_base(n, z) ((struct VEC_tree_pair_s_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_tree_pair_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_pair_s() ((struct tree_pair_s *)(ggc_internal_alloc_stat (sizeof (struct tree_pair_s) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_pair_s() ((struct tree_pair_s *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_pair_s) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_pair_s(n) ((struct tree_pair_s *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_pair_s), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_pair_s(n) ((struct tree_pair_s *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_pair_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_pair_s(z) ((struct tree_pair_s *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_pair_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_pair_s(z) ((struct tree_pair_s *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_pair_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_pair_s(n, z) ((struct tree_pair_s *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_pair_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_pair_s(n, z) ((struct tree_pair_s *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_pair_s), n MEM_STAT_INFO)))
+#define ggc_alloc_named_label_entry() ((struct named_label_entry *)(ggc_internal_alloc_stat (sizeof (struct named_label_entry) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_named_label_entry() ((struct named_label_entry *)(ggc_internal_cleared_alloc_stat (sizeof (struct named_label_entry) MEM_STAT_INFO)))
+#define ggc_alloc_vec_named_label_entry(n) ((struct named_label_entry *)(ggc_internal_vec_alloc_stat (sizeof (struct named_label_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_named_label_entry(n) ((struct named_label_entry *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct named_label_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_named_label_entry(z) ((struct named_label_entry *)(ggc_internal_zone_alloc_stat (z, sizeof (struct named_label_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_named_label_entry(z) ((struct named_label_entry *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct named_label_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_named_label_entry(n, z) ((struct named_label_entry *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct named_label_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_named_label_entry(n, z) ((struct named_label_entry *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct named_label_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_c_language_function() ((struct c_language_function *)(ggc_internal_alloc_stat (sizeof (struct c_language_function) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_language_function() ((struct c_language_function *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_language_function) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_language_function(n) ((struct c_language_function *)(ggc_internal_vec_alloc_stat (sizeof (struct c_language_function), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_language_function(n) ((struct c_language_function *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_language_function), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_language_function(z) ((struct c_language_function *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_language_function) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_language_function(z) ((struct c_language_function *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_language_function) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_language_function(n, z) ((struct c_language_function *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_language_function), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_language_function(n, z) ((struct c_language_function *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_language_function), n MEM_STAT_INFO)))
 #define ggc_alloc_stmt_tree_s() ((struct stmt_tree_s *)(ggc_internal_alloc_stat (sizeof (struct stmt_tree_s) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_stmt_tree_s() ((struct stmt_tree_s *)(ggc_internal_cleared_alloc_stat (sizeof (struct stmt_tree_s) MEM_STAT_INFO)))
 #define ggc_alloc_vec_stmt_tree_s(n) ((struct stmt_tree_s *)(ggc_internal_vec_alloc_stat (sizeof (struct stmt_tree_s), n MEM_STAT_INFO)))
@@ -745,38 +1241,118 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_stmt_tree_s(z) ((struct stmt_tree_s *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct stmt_tree_s) MEM_STAT_INFO)))
 #define ggc_alloc_zone_vec_stmt_tree_s(n, z) ((struct stmt_tree_s *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct stmt_tree_s), n MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_stmt_tree_s(n, z) ((struct stmt_tree_s *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct stmt_tree_s), n MEM_STAT_INFO)))
-#define ggc_alloc_c_spot_bindings() ((struct c_spot_bindings *)(ggc_internal_alloc_stat (sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_spot_bindings() ((struct c_spot_bindings *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_spot_bindings(n) ((struct c_spot_bindings *)(ggc_internal_vec_alloc_stat (sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_spot_bindings(n) ((struct c_spot_bindings *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_spot_bindings(z) ((struct c_spot_bindings *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_spot_bindings(z) ((struct c_spot_bindings *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_spot_bindings) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_c_spot_bindings(n, z) ((struct c_spot_bindings *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_spot_bindings(n, z) ((struct c_spot_bindings *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_spot_bindings), n MEM_STAT_INFO)))
-#define ggc_alloc_VEC_ltrans_partition_gc() ((struct VEC_ltrans_partition_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_VEC_ltrans_partition_gc() ((struct VEC_ltrans_partition_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
-#define ggc_alloc_vec_VEC_ltrans_partition_gc(n) ((struct VEC_ltrans_partition_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_VEC_ltrans_partition_gc(n) ((struct VEC_ltrans_partition_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_VEC_ltrans_partition_gc(z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_VEC_ltrans_partition_gc(z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_VEC_ltrans_partition_gc(n, z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_VEC_ltrans_partition_gc(n, z) ((struct VEC_ltrans_partition_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_gc), n MEM_STAT_INFO)))
-#define ggc_alloc_VEC_ltrans_partition_base() ((struct VEC_ltrans_partition_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_VEC_ltrans_partition_base() ((struct VEC_ltrans_partition_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
-#define ggc_alloc_vec_VEC_ltrans_partition_base(n) ((struct VEC_ltrans_partition_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_VEC_ltrans_partition_base(n) ((struct VEC_ltrans_partition_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_VEC_ltrans_partition_base(z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_VEC_ltrans_partition_base(z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_VEC_ltrans_partition_base(n, z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_VEC_ltrans_partition_base(n, z) ((struct VEC_ltrans_partition_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_ltrans_partition_base), n MEM_STAT_INFO)))
-#define ggc_alloc_ltrans_partition_def() ((struct ltrans_partition_def *)(ggc_internal_alloc_stat (sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_ltrans_partition_def() ((struct ltrans_partition_def *)(ggc_internal_cleared_alloc_stat (sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
-#define ggc_alloc_vec_ltrans_partition_def(n) ((struct ltrans_partition_def *)(ggc_internal_vec_alloc_stat (sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_ltrans_partition_def(n) ((struct ltrans_partition_def *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_ltrans_partition_def(z) ((struct ltrans_partition_def *)(ggc_internal_zone_alloc_stat (z, sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_ltrans_partition_def(z) ((struct ltrans_partition_def *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct ltrans_partition_def) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_ltrans_partition_def(n, z) ((struct ltrans_partition_def *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_ltrans_partition_def(n, z) ((struct ltrans_partition_def *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct ltrans_partition_def), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_template_info() ((struct tree_template_info *)(ggc_internal_alloc_stat (sizeof (struct tree_template_info) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_template_info() ((struct tree_template_info *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_template_info) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_template_info(n) ((struct tree_template_info *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_template_info), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_template_info(n) ((struct tree_template_info *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_template_info), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_template_info(z) ((struct tree_template_info *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_template_info) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_template_info(z) ((struct tree_template_info *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_template_info) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_template_info(n, z) ((struct tree_template_info *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_template_info), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_template_info(n, z) ((struct tree_template_info *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_template_info), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_qualified_typedef_usage_t_gc() ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_qualified_typedef_usage_t_gc() ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_qualified_typedef_usage_t_gc(n) ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_qualified_typedef_usage_t_gc(n) ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_qualified_typedef_usage_t_gc(z) ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_qualified_typedef_usage_t_gc(z) ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_qualified_typedef_usage_t_gc(n, z) ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_qualified_typedef_usage_t_gc(n, z) ((struct VEC_qualified_typedef_usage_t_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_qualified_typedef_usage_t_base() ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_qualified_typedef_usage_t_base() ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_qualified_typedef_usage_t_base(n) ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_qualified_typedef_usage_t_base(n) ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_qualified_typedef_usage_t_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_qualified_typedef_usage_t_base(z) ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_qualified_typedef_usage_t_base(z) ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_qualified_typedef_usage_t_base(n, z) ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_qualified_typedef_usage_t_base(n, z) ((struct VEC_qualified_typedef_usage_t_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_qualified_typedef_usage_t_base), n MEM_STAT_INFO)))
+#define ggc_alloc_qualified_typedef_usage_s() ((struct qualified_typedef_usage_s *)(ggc_internal_alloc_stat (sizeof (struct qualified_typedef_usage_s) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_qualified_typedef_usage_s() ((struct qualified_typedef_usage_s *)(ggc_internal_cleared_alloc_stat (sizeof (struct qualified_typedef_usage_s) MEM_STAT_INFO)))
+#define ggc_alloc_vec_qualified_typedef_usage_s(n) ((struct qualified_typedef_usage_s *)(ggc_internal_vec_alloc_stat (sizeof (struct qualified_typedef_usage_s), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_qualified_typedef_usage_s(n) ((struct qualified_typedef_usage_s *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct qualified_typedef_usage_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_qualified_typedef_usage_s(z) ((struct qualified_typedef_usage_s *)(ggc_internal_zone_alloc_stat (z, sizeof (struct qualified_typedef_usage_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_qualified_typedef_usage_s(z) ((struct qualified_typedef_usage_s *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct qualified_typedef_usage_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_qualified_typedef_usage_s(n, z) ((struct qualified_typedef_usage_s *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct qualified_typedef_usage_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_qualified_typedef_usage_s(n, z) ((struct qualified_typedef_usage_s *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct qualified_typedef_usage_s), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_lambda_expr() ((struct tree_lambda_expr *)(ggc_internal_alloc_stat (sizeof (struct tree_lambda_expr) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_lambda_expr() ((struct tree_lambda_expr *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_lambda_expr) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_lambda_expr(n) ((struct tree_lambda_expr *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_lambda_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_lambda_expr(n) ((struct tree_lambda_expr *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_lambda_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_lambda_expr(z) ((struct tree_lambda_expr *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_lambda_expr) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_lambda_expr(z) ((struct tree_lambda_expr *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_lambda_expr) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_lambda_expr(n, z) ((struct tree_lambda_expr *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_lambda_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_lambda_expr(n, z) ((struct tree_lambda_expr *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_lambda_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_trait_expr() ((struct tree_trait_expr *)(ggc_internal_alloc_stat (sizeof (struct tree_trait_expr) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_trait_expr() ((struct tree_trait_expr *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_trait_expr) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_trait_expr(n) ((struct tree_trait_expr *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_trait_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_trait_expr(n) ((struct tree_trait_expr *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_trait_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_trait_expr(z) ((struct tree_trait_expr *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_trait_expr) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_trait_expr(z) ((struct tree_trait_expr *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_trait_expr) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_trait_expr(n, z) ((struct tree_trait_expr *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_trait_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_trait_expr(n, z) ((struct tree_trait_expr *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_trait_expr), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_argument_pack_select() ((struct tree_argument_pack_select *)(ggc_internal_alloc_stat (sizeof (struct tree_argument_pack_select) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_argument_pack_select() ((struct tree_argument_pack_select *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_argument_pack_select) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_argument_pack_select(n) ((struct tree_argument_pack_select *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_argument_pack_select), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_argument_pack_select(n) ((struct tree_argument_pack_select *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_argument_pack_select), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_argument_pack_select(z) ((struct tree_argument_pack_select *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_argument_pack_select) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_argument_pack_select(z) ((struct tree_argument_pack_select *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_argument_pack_select) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_argument_pack_select(n, z) ((struct tree_argument_pack_select *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_argument_pack_select), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_argument_pack_select(n, z) ((struct tree_argument_pack_select *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_argument_pack_select), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_static_assert() ((struct tree_static_assert *)(ggc_internal_alloc_stat (sizeof (struct tree_static_assert) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_static_assert() ((struct tree_static_assert *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_static_assert) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_static_assert(n) ((struct tree_static_assert *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_static_assert), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_static_assert(n) ((struct tree_static_assert *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_static_assert), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_static_assert(z) ((struct tree_static_assert *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_static_assert) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_static_assert(z) ((struct tree_static_assert *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_static_assert) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_static_assert(n, z) ((struct tree_static_assert *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_static_assert), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_static_assert(n, z) ((struct tree_static_assert *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_static_assert), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_default_arg() ((struct tree_default_arg *)(ggc_internal_alloc_stat (sizeof (struct tree_default_arg) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_default_arg() ((struct tree_default_arg *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_default_arg) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_default_arg(n) ((struct tree_default_arg *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_default_arg), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_default_arg(n) ((struct tree_default_arg *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_default_arg), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_default_arg(z) ((struct tree_default_arg *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_default_arg) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_default_arg(z) ((struct tree_default_arg *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_default_arg) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_default_arg(n, z) ((struct tree_default_arg *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_default_arg), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_default_arg(n, z) ((struct tree_default_arg *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_default_arg), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_token_cache() ((struct cp_token_cache *)(ggc_internal_alloc_stat (sizeof (struct cp_token_cache) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_token_cache() ((struct cp_token_cache *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_token_cache) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_token_cache(n) ((struct cp_token_cache *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_token_cache), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_token_cache(n) ((struct cp_token_cache *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_token_cache), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_token_cache(z) ((struct cp_token_cache *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_token_cache) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_token_cache(z) ((struct cp_token_cache *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_token_cache) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_token_cache(n, z) ((struct cp_token_cache *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_token_cache), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_token_cache(n, z) ((struct cp_token_cache *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_token_cache), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_baselink() ((struct tree_baselink *)(ggc_internal_alloc_stat (sizeof (struct tree_baselink) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_baselink() ((struct tree_baselink *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_baselink) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_baselink(n) ((struct tree_baselink *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_baselink), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_baselink(n) ((struct tree_baselink *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_baselink), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_baselink(z) ((struct tree_baselink *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_baselink) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_baselink(z) ((struct tree_baselink *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_baselink) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_baselink(n, z) ((struct tree_baselink *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_baselink), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_baselink(n, z) ((struct tree_baselink *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_baselink), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_overload() ((struct tree_overload *)(ggc_internal_alloc_stat (sizeof (struct tree_overload) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_overload() ((struct tree_overload *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_overload) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_overload(n) ((struct tree_overload *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_overload), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_overload(n) ((struct tree_overload *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tree_overload), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_overload(z) ((struct tree_overload *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tree_overload) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_overload(z) ((struct tree_overload *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_overload) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tree_overload(n, z) ((struct tree_overload *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_overload), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_overload(n, z) ((struct tree_overload *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_overload), n MEM_STAT_INFO)))
+#define ggc_alloc_ptrmem_cst() ((struct ptrmem_cst *)(ggc_internal_alloc_stat (sizeof (struct ptrmem_cst) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_ptrmem_cst() ((struct ptrmem_cst *)(ggc_internal_cleared_alloc_stat (sizeof (struct ptrmem_cst) MEM_STAT_INFO)))
+#define ggc_alloc_vec_ptrmem_cst(n) ((struct ptrmem_cst *)(ggc_internal_vec_alloc_stat (sizeof (struct ptrmem_cst), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_ptrmem_cst(n) ((struct ptrmem_cst *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct ptrmem_cst), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_ptrmem_cst(z) ((struct ptrmem_cst *)(ggc_internal_zone_alloc_stat (z, sizeof (struct ptrmem_cst) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_ptrmem_cst(z) ((struct ptrmem_cst *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct ptrmem_cst) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_ptrmem_cst(n, z) ((struct ptrmem_cst *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct ptrmem_cst), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_ptrmem_cst(n, z) ((struct ptrmem_cst *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct ptrmem_cst), n MEM_STAT_INFO)))
+#define ggc_alloc_template_parm_index_s() ((struct template_parm_index_s *)(ggc_internal_alloc_stat (sizeof (struct template_parm_index_s) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_template_parm_index_s() ((struct template_parm_index_s *)(ggc_internal_cleared_alloc_stat (sizeof (struct template_parm_index_s) MEM_STAT_INFO)))
+#define ggc_alloc_vec_template_parm_index_s(n) ((struct template_parm_index_s *)(ggc_internal_vec_alloc_stat (sizeof (struct template_parm_index_s), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_template_parm_index_s(n) ((struct template_parm_index_s *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct template_parm_index_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_template_parm_index_s(z) ((struct template_parm_index_s *)(ggc_internal_zone_alloc_stat (z, sizeof (struct template_parm_index_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_template_parm_index_s(z) ((struct template_parm_index_s *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct template_parm_index_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_template_parm_index_s(n, z) ((struct template_parm_index_s *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct template_parm_index_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_template_parm_index_s(n, z) ((struct template_parm_index_s *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct template_parm_index_s), n MEM_STAT_INFO)))
 #define ggc_alloc_lang_identifier() ((struct lang_identifier *)(ggc_internal_alloc_stat (sizeof (struct lang_identifier) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_lang_identifier() ((struct lang_identifier *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_identifier) MEM_STAT_INFO)))
 #define ggc_alloc_vec_lang_identifier(n) ((struct lang_identifier *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_identifier), n MEM_STAT_INFO)))
@@ -785,6 +1361,174 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_lang_identifier(z) ((struct lang_identifier *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_identifier) MEM_STAT_INFO)))
 #define ggc_alloc_zone_vec_lang_identifier(n, z) ((struct lang_identifier *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_identifier), n MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_lang_identifier(n, z) ((struct lang_identifier *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_identifier), n MEM_STAT_INFO)))
+#define ggc_alloc_c_common_identifier() ((struct c_common_identifier *)(ggc_internal_alloc_stat (sizeof (struct c_common_identifier) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_common_identifier() ((struct c_common_identifier *)(ggc_internal_cleared_alloc_stat (sizeof (struct c_common_identifier) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_common_identifier(n) ((struct c_common_identifier *)(ggc_internal_vec_alloc_stat (sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_common_identifier(n) ((struct c_common_identifier *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_common_identifier(z) ((struct c_common_identifier *)(ggc_internal_zone_alloc_stat (z, sizeof (struct c_common_identifier) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_common_identifier(z) ((struct c_common_identifier *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct c_common_identifier) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_c_common_identifier(n, z) ((struct c_common_identifier *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_common_identifier(n, z) ((struct c_common_identifier *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct c_common_identifier), n MEM_STAT_INFO)))
+#define ggc_alloc_saved_scope() ((struct saved_scope *)(ggc_internal_alloc_stat (sizeof (struct saved_scope) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_saved_scope() ((struct saved_scope *)(ggc_internal_cleared_alloc_stat (sizeof (struct saved_scope) MEM_STAT_INFO)))
+#define ggc_alloc_vec_saved_scope(n) ((struct saved_scope *)(ggc_internal_vec_alloc_stat (sizeof (struct saved_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_saved_scope(n) ((struct saved_scope *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct saved_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_saved_scope(z) ((struct saved_scope *)(ggc_internal_zone_alloc_stat (z, sizeof (struct saved_scope) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_saved_scope(z) ((struct saved_scope *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct saved_scope) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_saved_scope(n, z) ((struct saved_scope *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct saved_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_saved_scope(n, z) ((struct saved_scope *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct saved_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_cxx_int_tree_map() ((struct cxx_int_tree_map *)(ggc_internal_alloc_stat (sizeof (struct cxx_int_tree_map) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cxx_int_tree_map() ((struct cxx_int_tree_map *)(ggc_internal_cleared_alloc_stat (sizeof (struct cxx_int_tree_map) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cxx_int_tree_map(n) ((struct cxx_int_tree_map *)(ggc_internal_vec_alloc_stat (sizeof (struct cxx_int_tree_map), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cxx_int_tree_map(n) ((struct cxx_int_tree_map *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cxx_int_tree_map), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cxx_int_tree_map(z) ((struct cxx_int_tree_map *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cxx_int_tree_map) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cxx_int_tree_map(z) ((struct cxx_int_tree_map *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cxx_int_tree_map) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cxx_int_tree_map(n, z) ((struct cxx_int_tree_map *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cxx_int_tree_map), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cxx_int_tree_map(n, z) ((struct cxx_int_tree_map *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cxx_int_tree_map), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_label_binding_gc() ((struct VEC_cp_label_binding_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_label_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_label_binding_gc() ((struct VEC_cp_label_binding_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_label_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_label_binding_gc(n) ((struct VEC_cp_label_binding_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_label_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_label_binding_gc(n) ((struct VEC_cp_label_binding_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_label_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_label_binding_gc(z) ((struct VEC_cp_label_binding_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_label_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_label_binding_gc(z) ((struct VEC_cp_label_binding_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_label_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_label_binding_gc(n, z) ((struct VEC_cp_label_binding_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_label_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_label_binding_gc(n, z) ((struct VEC_cp_label_binding_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_label_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_label_binding_base() ((struct VEC_cp_label_binding_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_label_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_label_binding_base() ((struct VEC_cp_label_binding_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_label_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_label_binding_base(n) ((struct VEC_cp_label_binding_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_label_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_label_binding_base(n) ((struct VEC_cp_label_binding_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_label_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_label_binding_base(z) ((struct VEC_cp_label_binding_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_label_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_label_binding_base(z) ((struct VEC_cp_label_binding_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_label_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_label_binding_base(n, z) ((struct VEC_cp_label_binding_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_label_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_label_binding_base(n, z) ((struct VEC_cp_label_binding_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_label_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_label_binding() ((struct cp_label_binding *)(ggc_internal_alloc_stat (sizeof (struct cp_label_binding) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_label_binding() ((struct cp_label_binding *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_label_binding) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_label_binding(n) ((struct cp_label_binding *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_label_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_label_binding(n) ((struct cp_label_binding *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_label_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_label_binding(z) ((struct cp_label_binding *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_label_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_label_binding(z) ((struct cp_label_binding *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_label_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_label_binding(n, z) ((struct cp_label_binding *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_label_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_label_binding(n, z) ((struct cp_label_binding *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_label_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_class_binding_gc() ((struct VEC_cp_class_binding_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_class_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_class_binding_gc() ((struct VEC_cp_class_binding_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_class_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_class_binding_gc(n) ((struct VEC_cp_class_binding_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_class_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_class_binding_gc(n) ((struct VEC_cp_class_binding_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_class_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_class_binding_gc(z) ((struct VEC_cp_class_binding_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_class_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_class_binding_gc(z) ((struct VEC_cp_class_binding_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_class_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_class_binding_gc(n, z) ((struct VEC_cp_class_binding_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_class_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_class_binding_gc(n, z) ((struct VEC_cp_class_binding_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_class_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cp_class_binding_base() ((struct VEC_cp_class_binding_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_cp_class_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cp_class_binding_base() ((struct VEC_cp_class_binding_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cp_class_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cp_class_binding_base(n) ((struct VEC_cp_class_binding_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cp_class_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cp_class_binding_base(n) ((struct VEC_cp_class_binding_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cp_class_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cp_class_binding_base(z) ((struct VEC_cp_class_binding_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cp_class_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cp_class_binding_base(z) ((struct VEC_cp_class_binding_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cp_class_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cp_class_binding_base(n, z) ((struct VEC_cp_class_binding_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cp_class_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cp_class_binding_base(n, z) ((struct VEC_cp_class_binding_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cp_class_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_class_binding() ((struct cp_class_binding *)(ggc_internal_alloc_stat (sizeof (struct cp_class_binding) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_class_binding() ((struct cp_class_binding *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_class_binding) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_class_binding(n) ((struct cp_class_binding *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_class_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_class_binding(n) ((struct cp_class_binding *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_class_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_class_binding(z) ((struct cp_class_binding *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_class_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_class_binding(z) ((struct cp_class_binding *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_class_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_class_binding(n, z) ((struct cp_class_binding *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_class_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_class_binding(n, z) ((struct cp_class_binding *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_class_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cxx_saved_binding_gc() ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_cxx_saved_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cxx_saved_binding_gc() ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cxx_saved_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cxx_saved_binding_gc(n) ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cxx_saved_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cxx_saved_binding_gc(n) ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cxx_saved_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cxx_saved_binding_gc(z) ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cxx_saved_binding_gc(z) ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cxx_saved_binding_gc(n, z) ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cxx_saved_binding_gc(n, z) ((struct VEC_cxx_saved_binding_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_cxx_saved_binding_base() ((struct VEC_cxx_saved_binding_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_cxx_saved_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_cxx_saved_binding_base() ((struct VEC_cxx_saved_binding_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_cxx_saved_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_cxx_saved_binding_base(n) ((struct VEC_cxx_saved_binding_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_cxx_saved_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_cxx_saved_binding_base(n) ((struct VEC_cxx_saved_binding_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_cxx_saved_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_cxx_saved_binding_base(z) ((struct VEC_cxx_saved_binding_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_cxx_saved_binding_base(z) ((struct VEC_cxx_saved_binding_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_cxx_saved_binding_base(n, z) ((struct VEC_cxx_saved_binding_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_cxx_saved_binding_base(n, z) ((struct VEC_cxx_saved_binding_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_cxx_saved_binding_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cxx_saved_binding() ((struct cxx_saved_binding *)(ggc_internal_alloc_stat (sizeof (struct cxx_saved_binding) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cxx_saved_binding() ((struct cxx_saved_binding *)(ggc_internal_cleared_alloc_stat (sizeof (struct cxx_saved_binding) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cxx_saved_binding(n) ((struct cxx_saved_binding *)(ggc_internal_vec_alloc_stat (sizeof (struct cxx_saved_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cxx_saved_binding(n) ((struct cxx_saved_binding *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cxx_saved_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cxx_saved_binding(z) ((struct cxx_saved_binding *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cxx_saved_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cxx_saved_binding(z) ((struct cxx_saved_binding *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cxx_saved_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cxx_saved_binding(n, z) ((struct cxx_saved_binding *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cxx_saved_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cxx_saved_binding(n, z) ((struct cxx_saved_binding *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cxx_saved_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_binding_level() ((struct cp_binding_level *)(ggc_internal_alloc_stat (sizeof (struct cp_binding_level) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_binding_level() ((struct cp_binding_level *)(ggc_internal_cleared_alloc_stat (sizeof (struct cp_binding_level) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_binding_level(n) ((struct cp_binding_level *)(ggc_internal_vec_alloc_stat (sizeof (struct cp_binding_level), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_binding_level(n) ((struct cp_binding_level *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cp_binding_level), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_binding_level(z) ((struct cp_binding_level *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cp_binding_level) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_binding_level(z) ((struct cp_binding_level *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cp_binding_level) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cp_binding_level(n, z) ((struct cp_binding_level *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cp_binding_level), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_binding_level(n, z) ((struct cp_binding_level *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cp_binding_level), n MEM_STAT_INFO)))
+#define ggc_alloc_cxx_binding() ((struct cxx_binding *)(ggc_internal_alloc_stat (sizeof (struct cxx_binding) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cxx_binding() ((struct cxx_binding *)(ggc_internal_cleared_alloc_stat (sizeof (struct cxx_binding) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cxx_binding(n) ((struct cxx_binding *)(ggc_internal_vec_alloc_stat (sizeof (struct cxx_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cxx_binding(n) ((struct cxx_binding *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct cxx_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cxx_binding(z) ((struct cxx_binding *)(ggc_internal_zone_alloc_stat (z, sizeof (struct cxx_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cxx_binding(z) ((struct cxx_binding *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct cxx_binding) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_cxx_binding(n, z) ((struct cxx_binding *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct cxx_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cxx_binding(n, z) ((struct cxx_binding *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct cxx_binding), n MEM_STAT_INFO)))
+#define ggc_alloc_binding_entry_s() ((struct binding_entry_s *)(ggc_internal_alloc_stat (sizeof (struct binding_entry_s) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_binding_entry_s() ((struct binding_entry_s *)(ggc_internal_cleared_alloc_stat (sizeof (struct binding_entry_s) MEM_STAT_INFO)))
+#define ggc_alloc_vec_binding_entry_s(n) ((struct binding_entry_s *)(ggc_internal_vec_alloc_stat (sizeof (struct binding_entry_s), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_binding_entry_s(n) ((struct binding_entry_s *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct binding_entry_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_binding_entry_s(z) ((struct binding_entry_s *)(ggc_internal_zone_alloc_stat (z, sizeof (struct binding_entry_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_binding_entry_s(z) ((struct binding_entry_s *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct binding_entry_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_binding_entry_s(n, z) ((struct binding_entry_s *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct binding_entry_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_binding_entry_s(n, z) ((struct binding_entry_s *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct binding_entry_s), n MEM_STAT_INFO)))
+#define ggc_alloc_binding_table_s() ((struct binding_table_s *)(ggc_internal_alloc_stat (sizeof (struct binding_table_s) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_binding_table_s() ((struct binding_table_s *)(ggc_internal_cleared_alloc_stat (sizeof (struct binding_table_s) MEM_STAT_INFO)))
+#define ggc_alloc_vec_binding_table_s(n) ((struct binding_table_s *)(ggc_internal_vec_alloc_stat (sizeof (struct binding_table_s), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_binding_table_s(n) ((struct binding_table_s *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct binding_table_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_binding_table_s(z) ((struct binding_table_s *)(ggc_internal_zone_alloc_stat (z, sizeof (struct binding_table_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_binding_table_s(z) ((struct binding_table_s *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct binding_table_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_binding_table_s(n, z) ((struct binding_table_s *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct binding_table_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_binding_table_s(n, z) ((struct binding_table_s *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct binding_table_s), n MEM_STAT_INFO)))
+#define ggc_alloc_tinst_level() ((struct tinst_level *)(ggc_internal_alloc_stat (sizeof (struct tinst_level) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tinst_level() ((struct tinst_level *)(ggc_internal_cleared_alloc_stat (sizeof (struct tinst_level) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tinst_level(n) ((struct tinst_level *)(ggc_internal_vec_alloc_stat (sizeof (struct tinst_level), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tinst_level(n) ((struct tinst_level *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tinst_level), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tinst_level(z) ((struct tinst_level *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tinst_level) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tinst_level(z) ((struct tinst_level *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tinst_level) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tinst_level(n, z) ((struct tinst_level *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tinst_level), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tinst_level(n, z) ((struct tinst_level *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tinst_level), n MEM_STAT_INFO)))
+#define ggc_alloc_globals() ((struct globals *)(ggc_internal_alloc_stat (sizeof (struct globals) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_globals() ((struct globals *)(ggc_internal_cleared_alloc_stat (sizeof (struct globals) MEM_STAT_INFO)))
+#define ggc_alloc_vec_globals(n) ((struct globals *)(ggc_internal_vec_alloc_stat (sizeof (struct globals), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_globals(n) ((struct globals *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct globals), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_globals(z) ((struct globals *)(ggc_internal_zone_alloc_stat (z, sizeof (struct globals) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_globals(z) ((struct globals *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct globals) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_globals(n, z) ((struct globals *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct globals), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_globals(n, z) ((struct globals *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct globals), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_tinfo_s_gc() ((struct VEC_tinfo_s_gc *)(ggc_internal_alloc_stat (sizeof (struct VEC_tinfo_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_tinfo_s_gc() ((struct VEC_tinfo_s_gc *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_tinfo_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_tinfo_s_gc(n) ((struct VEC_tinfo_s_gc *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_tinfo_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_tinfo_s_gc(n) ((struct VEC_tinfo_s_gc *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_tinfo_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_tinfo_s_gc(z) ((struct VEC_tinfo_s_gc *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_tinfo_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_tinfo_s_gc(z) ((struct VEC_tinfo_s_gc *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_tinfo_s_gc) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_tinfo_s_gc(n, z) ((struct VEC_tinfo_s_gc *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_tinfo_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_tinfo_s_gc(n, z) ((struct VEC_tinfo_s_gc *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_tinfo_s_gc), n MEM_STAT_INFO)))
+#define ggc_alloc_VEC_tinfo_s_base() ((struct VEC_tinfo_s_base *)(ggc_internal_alloc_stat (sizeof (struct VEC_tinfo_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_VEC_tinfo_s_base() ((struct VEC_tinfo_s_base *)(ggc_internal_cleared_alloc_stat (sizeof (struct VEC_tinfo_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_vec_VEC_tinfo_s_base(n) ((struct VEC_tinfo_s_base *)(ggc_internal_vec_alloc_stat (sizeof (struct VEC_tinfo_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_VEC_tinfo_s_base(n) ((struct VEC_tinfo_s_base *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct VEC_tinfo_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_VEC_tinfo_s_base(z) ((struct VEC_tinfo_s_base *)(ggc_internal_zone_alloc_stat (z, sizeof (struct VEC_tinfo_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_VEC_tinfo_s_base(z) ((struct VEC_tinfo_s_base *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct VEC_tinfo_s_base) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_VEC_tinfo_s_base(n, z) ((struct VEC_tinfo_s_base *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct VEC_tinfo_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_VEC_tinfo_s_base(n, z) ((struct VEC_tinfo_s_base *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct VEC_tinfo_s_base), n MEM_STAT_INFO)))
+#define ggc_alloc_tinfo_s() ((struct tinfo_s *)(ggc_internal_alloc_stat (sizeof (struct tinfo_s) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tinfo_s() ((struct tinfo_s *)(ggc_internal_cleared_alloc_stat (sizeof (struct tinfo_s) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tinfo_s(n) ((struct tinfo_s *)(ggc_internal_vec_alloc_stat (sizeof (struct tinfo_s), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tinfo_s(n) ((struct tinfo_s *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct tinfo_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tinfo_s(z) ((struct tinfo_s *)(ggc_internal_zone_alloc_stat (z, sizeof (struct tinfo_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tinfo_s(z) ((struct tinfo_s *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tinfo_s) MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_tinfo_s(n, z) ((struct tinfo_s *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tinfo_s), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tinfo_s(n, z) ((struct tinfo_s *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tinfo_s), n MEM_STAT_INFO)))
 #define ggc_alloc_export_list() ((struct export_list *)(ggc_internal_alloc_stat (sizeof (struct export_list) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_export_list() ((struct export_list *)(ggc_internal_cleared_alloc_stat (sizeof (struct export_list) MEM_STAT_INFO)))
 #define ggc_alloc_vec_export_list(n) ((struct export_list *)(ggc_internal_vec_alloc_stat (sizeof (struct export_list), n MEM_STAT_INFO)))
@@ -2489,14 +3233,14 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_tree_decl_common(z) ((struct tree_decl_common *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct tree_decl_common) MEM_STAT_INFO)))
 #define ggc_alloc_zone_vec_tree_decl_common(n, z) ((struct tree_decl_common *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct tree_decl_common), n MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_tree_decl_common(n, z) ((struct tree_decl_common *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct tree_decl_common), n MEM_STAT_INFO)))
-#define ggc_alloc_lang_decl() ((struct lang_decl *)(ggc_internal_alloc_stat (sizeof (struct lang_decl) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_lang_decl() ((struct lang_decl *)(ggc_internal_cleared_alloc_stat (sizeof (struct lang_decl) MEM_STAT_INFO)))
-#define ggc_alloc_vec_lang_decl(n) ((struct lang_decl *)(ggc_internal_vec_alloc_stat (sizeof (struct lang_decl), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_lang_decl(n) ((struct lang_decl *)(ggc_internal_cleared_vec_alloc_stat (sizeof (struct lang_decl), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_lang_decl(z) ((struct lang_decl *)(ggc_internal_zone_alloc_stat (z, sizeof (struct lang_decl) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_lang_decl(z) ((struct lang_decl *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (struct lang_decl) MEM_STAT_INFO)))
-#define ggc_alloc_zone_vec_lang_decl(n, z) ((struct lang_decl *)(ggc_internal_zone_vec_alloc_stat (z, sizeof (struct lang_decl), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_lang_decl(n, z) ((struct lang_decl *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct lang_decl), n MEM_STAT_INFO)))
+#define ggc_alloc_lang_decl(SIZE) ((struct lang_decl *)(ggc_internal_alloc_stat (SIZE MEM_STAT_INFO)))
+#define ggc_alloc_cleared_lang_decl(SIZE) ((struct lang_decl *)(ggc_internal_cleared_alloc_stat (SIZE MEM_STAT_INFO)))
+#define ggc_alloc_vec_lang_decl(SIZE, n) ((struct lang_decl *)(ggc_internal_vec_alloc_stat (SIZE, n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_lang_decl(SIZE, n) ((struct lang_decl *)(ggc_internal_cleared_vec_alloc_stat (SIZE, n MEM_STAT_INFO)))
+#define ggc_alloc_zone_lang_decl(SIZE, z) ((struct lang_decl *)(ggc_internal_zone_alloc_stat (z, SIZE MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_lang_decl(SIZE, z) ((struct lang_decl *)(ggc_internal_zone_cleared_alloc_stat (z, SIZE MEM_STAT_INFO)))
+#define ggc_alloc_zone_vec_lang_decl(SIZE, n, z) ((struct lang_decl *)(ggc_internal_zone_vec_alloc_stat (z, SIZE, n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_lang_decl(SIZE, n, z) ((struct lang_decl *)(ggc_internal_zone_cleared_vec_alloc_stat (z, SIZE, n MEM_STAT_INFO)))
 #define ggc_alloc_tree_decl_minimal() ((struct tree_decl_minimal *)(ggc_internal_alloc_stat (sizeof (struct tree_decl_minimal) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_tree_decl_minimal() ((struct tree_decl_minimal *)(ggc_internal_cleared_alloc_stat (sizeof (struct tree_decl_minimal) MEM_STAT_INFO)))
 #define ggc_alloc_vec_tree_decl_minimal(n) ((struct tree_decl_minimal *)(ggc_internal_vec_alloc_stat (sizeof (struct tree_decl_minimal), n MEM_STAT_INFO)))
@@ -4315,6 +5059,27 @@ enum gt_types_enum {
 #define ggc_alloc_zone_cleared_vec_line_map(n, z) ((struct line_map *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (struct line_map), n MEM_STAT_INFO)))
 
 /* Allocators for known typedefs.  */
+#define ggc_alloc_c_binding_ptr() ((c_binding_ptr *)(ggc_internal_alloc_stat (sizeof (c_binding_ptr) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_binding_ptr() ((c_binding_ptr *)(ggc_internal_cleared_alloc_stat (sizeof (c_binding_ptr) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_binding_ptr(n) ((c_binding_ptr *)(ggc_internal_vec_alloc_stat (sizeof (c_binding_ptr), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_binding_ptr(n) ((c_binding_ptr *)(ggc_internal_cleared_vec_alloc_stat (sizeof (c_binding_ptr), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_binding_ptr(z) ((c_binding_ptr *)(ggc_internal_zone_alloc_stat (z, sizeof (c_binding_ptr) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_binding_ptr(z) ((c_binding_ptr *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (c_binding_ptr) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_binding_ptr(n, z) ((c_binding_ptr *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (c_binding_ptr), n MEM_STAT_INFO)))
+#define ggc_alloc_c_goto_bindings_p() ((c_goto_bindings_p *)(ggc_internal_alloc_stat (sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_c_goto_bindings_p() ((c_goto_bindings_p *)(ggc_internal_cleared_alloc_stat (sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
+#define ggc_alloc_vec_c_goto_bindings_p(n) ((c_goto_bindings_p *)(ggc_internal_vec_alloc_stat (sizeof (c_goto_bindings_p), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_c_goto_bindings_p(n) ((c_goto_bindings_p *)(ggc_internal_cleared_vec_alloc_stat (sizeof (c_goto_bindings_p), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_c_goto_bindings_p(z) ((c_goto_bindings_p *)(ggc_internal_zone_alloc_stat (z, sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_c_goto_bindings_p(z) ((c_goto_bindings_p *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_c_goto_bindings_p(n, z) ((c_goto_bindings_p *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (c_goto_bindings_p), n MEM_STAT_INFO)))
+#define ggc_alloc_ltrans_partition() ((ltrans_partition *)(ggc_internal_alloc_stat (sizeof (ltrans_partition) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_ltrans_partition() ((ltrans_partition *)(ggc_internal_cleared_alloc_stat (sizeof (ltrans_partition) MEM_STAT_INFO)))
+#define ggc_alloc_vec_ltrans_partition(n) ((ltrans_partition *)(ggc_internal_vec_alloc_stat (sizeof (ltrans_partition), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_ltrans_partition(n) ((ltrans_partition *)(ggc_internal_cleared_vec_alloc_stat (sizeof (ltrans_partition), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_ltrans_partition(z) ((ltrans_partition *)(ggc_internal_zone_alloc_stat (z, sizeof (ltrans_partition) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_ltrans_partition(z) ((ltrans_partition *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (ltrans_partition) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_ltrans_partition(n, z) ((ltrans_partition *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (ltrans_partition), n MEM_STAT_INFO)))
 #define ggc_alloc_pending_redefinition() ((pending_redefinition *)(ggc_internal_alloc_stat (sizeof (pending_redefinition) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_pending_redefinition() ((pending_redefinition *)(ggc_internal_cleared_alloc_stat (sizeof (pending_redefinition) MEM_STAT_INFO)))
 #define ggc_alloc_vec_pending_redefinition(n) ((pending_redefinition *)(ggc_internal_vec_alloc_stat (sizeof (pending_redefinition), n MEM_STAT_INFO)))
@@ -4350,27 +5115,83 @@ enum gt_types_enum {
 #define ggc_alloc_zone_const_char_p(z) ((const_char_p *)(ggc_internal_zone_alloc_stat (z, sizeof (const_char_p) MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_const_char_p(z) ((const_char_p *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (const_char_p) MEM_STAT_INFO)))
 #define ggc_alloc_zone_cleared_vec_const_char_p(n, z) ((const_char_p *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (const_char_p), n MEM_STAT_INFO)))
-#define ggc_alloc_c_binding_ptr() ((c_binding_ptr *)(ggc_internal_alloc_stat (sizeof (c_binding_ptr) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_binding_ptr() ((c_binding_ptr *)(ggc_internal_cleared_alloc_stat (sizeof (c_binding_ptr) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_binding_ptr(n) ((c_binding_ptr *)(ggc_internal_vec_alloc_stat (sizeof (c_binding_ptr), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_binding_ptr(n) ((c_binding_ptr *)(ggc_internal_cleared_vec_alloc_stat (sizeof (c_binding_ptr), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_binding_ptr(z) ((c_binding_ptr *)(ggc_internal_zone_alloc_stat (z, sizeof (c_binding_ptr) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_binding_ptr(z) ((c_binding_ptr *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (c_binding_ptr) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_binding_ptr(n, z) ((c_binding_ptr *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (c_binding_ptr), n MEM_STAT_INFO)))
-#define ggc_alloc_c_goto_bindings_p() ((c_goto_bindings_p *)(ggc_internal_alloc_stat (sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_c_goto_bindings_p() ((c_goto_bindings_p *)(ggc_internal_cleared_alloc_stat (sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
-#define ggc_alloc_vec_c_goto_bindings_p(n) ((c_goto_bindings_p *)(ggc_internal_vec_alloc_stat (sizeof (c_goto_bindings_p), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_c_goto_bindings_p(n) ((c_goto_bindings_p *)(ggc_internal_cleared_vec_alloc_stat (sizeof (c_goto_bindings_p), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_c_goto_bindings_p(z) ((c_goto_bindings_p *)(ggc_internal_zone_alloc_stat (z, sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_c_goto_bindings_p(z) ((c_goto_bindings_p *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (c_goto_bindings_p) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_c_goto_bindings_p(n, z) ((c_goto_bindings_p *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (c_goto_bindings_p), n MEM_STAT_INFO)))
-#define ggc_alloc_ltrans_partition() ((ltrans_partition *)(ggc_internal_alloc_stat (sizeof (ltrans_partition) MEM_STAT_INFO)))
-#define ggc_alloc_cleared_ltrans_partition() ((ltrans_partition *)(ggc_internal_cleared_alloc_stat (sizeof (ltrans_partition) MEM_STAT_INFO)))
-#define ggc_alloc_vec_ltrans_partition(n) ((ltrans_partition *)(ggc_internal_vec_alloc_stat (sizeof (ltrans_partition), n MEM_STAT_INFO)))
-#define ggc_alloc_cleared_vec_ltrans_partition(n) ((ltrans_partition *)(ggc_internal_cleared_vec_alloc_stat (sizeof (ltrans_partition), n MEM_STAT_INFO)))
-#define ggc_alloc_zone_ltrans_partition(z) ((ltrans_partition *)(ggc_internal_zone_alloc_stat (z, sizeof (ltrans_partition) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_ltrans_partition(z) ((ltrans_partition *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (ltrans_partition) MEM_STAT_INFO)))
-#define ggc_alloc_zone_cleared_vec_ltrans_partition(n, z) ((ltrans_partition *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (ltrans_partition), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_unparsed_functions_entry() ((cp_unparsed_functions_entry *)(ggc_internal_alloc_stat (sizeof (cp_unparsed_functions_entry) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_unparsed_functions_entry() ((cp_unparsed_functions_entry *)(ggc_internal_cleared_alloc_stat (sizeof (cp_unparsed_functions_entry) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_unparsed_functions_entry(n) ((cp_unparsed_functions_entry *)(ggc_internal_vec_alloc_stat (sizeof (cp_unparsed_functions_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_unparsed_functions_entry(n) ((cp_unparsed_functions_entry *)(ggc_internal_cleared_vec_alloc_stat (sizeof (cp_unparsed_functions_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_unparsed_functions_entry(z) ((cp_unparsed_functions_entry *)(ggc_internal_zone_alloc_stat (z, sizeof (cp_unparsed_functions_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_unparsed_functions_entry(z) ((cp_unparsed_functions_entry *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (cp_unparsed_functions_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_unparsed_functions_entry(n, z) ((cp_unparsed_functions_entry *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (cp_unparsed_functions_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_default_arg_entry() ((cp_default_arg_entry *)(ggc_internal_alloc_stat (sizeof (cp_default_arg_entry) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_default_arg_entry() ((cp_default_arg_entry *)(ggc_internal_cleared_alloc_stat (sizeof (cp_default_arg_entry) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_default_arg_entry(n) ((cp_default_arg_entry *)(ggc_internal_vec_alloc_stat (sizeof (cp_default_arg_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_default_arg_entry(n) ((cp_default_arg_entry *)(ggc_internal_cleared_vec_alloc_stat (sizeof (cp_default_arg_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_default_arg_entry(z) ((cp_default_arg_entry *)(ggc_internal_zone_alloc_stat (z, sizeof (cp_default_arg_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_default_arg_entry(z) ((cp_default_arg_entry *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (cp_default_arg_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_default_arg_entry(n, z) ((cp_default_arg_entry *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (cp_default_arg_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cp_token_position() ((cp_token_position *)(ggc_internal_alloc_stat (sizeof (cp_token_position) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cp_token_position() ((cp_token_position *)(ggc_internal_cleared_alloc_stat (sizeof (cp_token_position) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cp_token_position(n) ((cp_token_position *)(ggc_internal_vec_alloc_stat (sizeof (cp_token_position), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cp_token_position(n) ((cp_token_position *)(ggc_internal_cleared_vec_alloc_stat (sizeof (cp_token_position), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cp_token_position(z) ((cp_token_position *)(ggc_internal_zone_alloc_stat (z, sizeof (cp_token_position) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cp_token_position(z) ((cp_token_position *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (cp_token_position) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cp_token_position(n, z) ((cp_token_position *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (cp_token_position), n MEM_STAT_INFO)))
+#define ggc_alloc_incomplete_var() ((incomplete_var *)(ggc_internal_alloc_stat (sizeof (incomplete_var) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_incomplete_var() ((incomplete_var *)(ggc_internal_cleared_alloc_stat (sizeof (incomplete_var) MEM_STAT_INFO)))
+#define ggc_alloc_vec_incomplete_var(n) ((incomplete_var *)(ggc_internal_vec_alloc_stat (sizeof (incomplete_var), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_incomplete_var(n) ((incomplete_var *)(ggc_internal_cleared_vec_alloc_stat (sizeof (incomplete_var), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_incomplete_var(z) ((incomplete_var *)(ggc_internal_zone_alloc_stat (z, sizeof (incomplete_var) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_incomplete_var(z) ((incomplete_var *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (incomplete_var) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_incomplete_var(n, z) ((incomplete_var *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (incomplete_var), n MEM_STAT_INFO)))
+#define ggc_alloc_tree_pair_p() ((tree_pair_p *)(ggc_internal_alloc_stat (sizeof (tree_pair_p) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_tree_pair_p() ((tree_pair_p *)(ggc_internal_cleared_alloc_stat (sizeof (tree_pair_p) MEM_STAT_INFO)))
+#define ggc_alloc_vec_tree_pair_p(n) ((tree_pair_p *)(ggc_internal_vec_alloc_stat (sizeof (tree_pair_p), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_tree_pair_p(n) ((tree_pair_p *)(ggc_internal_cleared_vec_alloc_stat (sizeof (tree_pair_p), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_tree_pair_p(z) ((tree_pair_p *)(ggc_internal_zone_alloc_stat (z, sizeof (tree_pair_p) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_tree_pair_p(z) ((tree_pair_p *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (tree_pair_p) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_tree_pair_p(n, z) ((tree_pair_p *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (tree_pair_p), n MEM_STAT_INFO)))
+#define ggc_alloc_qualified_typedef_usage_t() ((qualified_typedef_usage_t *)(ggc_internal_alloc_stat (sizeof (qualified_typedef_usage_t) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_qualified_typedef_usage_t() ((qualified_typedef_usage_t *)(ggc_internal_cleared_alloc_stat (sizeof (qualified_typedef_usage_t) MEM_STAT_INFO)))
+#define ggc_alloc_vec_qualified_typedef_usage_t(n) ((qualified_typedef_usage_t *)(ggc_internal_vec_alloc_stat (sizeof (qualified_typedef_usage_t), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_qualified_typedef_usage_t(n) ((qualified_typedef_usage_t *)(ggc_internal_cleared_vec_alloc_stat (sizeof (qualified_typedef_usage_t), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_qualified_typedef_usage_t(z) ((qualified_typedef_usage_t *)(ggc_internal_zone_alloc_stat (z, sizeof (qualified_typedef_usage_t) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_qualified_typedef_usage_t(z) ((qualified_typedef_usage_t *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (qualified_typedef_usage_t) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_qualified_typedef_usage_t(n, z) ((qualified_typedef_usage_t *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (qualified_typedef_usage_t), n MEM_STAT_INFO)))
+#define ggc_alloc_ptrmem_cst_t() ((ptrmem_cst_t *)(ggc_internal_alloc_stat (sizeof (ptrmem_cst_t) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_ptrmem_cst_t() ((ptrmem_cst_t *)(ggc_internal_cleared_alloc_stat (sizeof (ptrmem_cst_t) MEM_STAT_INFO)))
+#define ggc_alloc_vec_ptrmem_cst_t(n) ((ptrmem_cst_t *)(ggc_internal_vec_alloc_stat (sizeof (ptrmem_cst_t), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_ptrmem_cst_t(n) ((ptrmem_cst_t *)(ggc_internal_cleared_vec_alloc_stat (sizeof (ptrmem_cst_t), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_ptrmem_cst_t(z) ((ptrmem_cst_t *)(ggc_internal_zone_alloc_stat (z, sizeof (ptrmem_cst_t) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_ptrmem_cst_t(z) ((ptrmem_cst_t *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (ptrmem_cst_t) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_ptrmem_cst_t(n, z) ((ptrmem_cst_t *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (ptrmem_cst_t), n MEM_STAT_INFO)))
+#define ggc_alloc_template_parm_index() ((template_parm_index *)(ggc_internal_alloc_stat (sizeof (template_parm_index) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_template_parm_index() ((template_parm_index *)(ggc_internal_cleared_alloc_stat (sizeof (template_parm_index) MEM_STAT_INFO)))
+#define ggc_alloc_vec_template_parm_index(n) ((template_parm_index *)(ggc_internal_vec_alloc_stat (sizeof (template_parm_index), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_template_parm_index(n) ((template_parm_index *)(ggc_internal_cleared_vec_alloc_stat (sizeof (template_parm_index), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_template_parm_index(z) ((template_parm_index *)(ggc_internal_zone_alloc_stat (z, sizeof (template_parm_index) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_template_parm_index(z) ((template_parm_index *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (template_parm_index) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_template_parm_index(n, z) ((template_parm_index *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (template_parm_index), n MEM_STAT_INFO)))
+#define ggc_alloc_cxx_scope() ((cxx_scope *)(ggc_internal_alloc_stat (sizeof (cxx_scope) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_cxx_scope() ((cxx_scope *)(ggc_internal_cleared_alloc_stat (sizeof (cxx_scope) MEM_STAT_INFO)))
+#define ggc_alloc_vec_cxx_scope(n) ((cxx_scope *)(ggc_internal_vec_alloc_stat (sizeof (cxx_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_cxx_scope(n) ((cxx_scope *)(ggc_internal_cleared_vec_alloc_stat (sizeof (cxx_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_cxx_scope(z) ((cxx_scope *)(ggc_internal_zone_alloc_stat (z, sizeof (cxx_scope) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_cxx_scope(z) ((cxx_scope *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (cxx_scope) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_cxx_scope(n, z) ((cxx_scope *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (cxx_scope), n MEM_STAT_INFO)))
+#define ggc_alloc_binding_entry() ((binding_entry *)(ggc_internal_alloc_stat (sizeof (binding_entry) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_binding_entry() ((binding_entry *)(ggc_internal_cleared_alloc_stat (sizeof (binding_entry) MEM_STAT_INFO)))
+#define ggc_alloc_vec_binding_entry(n) ((binding_entry *)(ggc_internal_vec_alloc_stat (sizeof (binding_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_binding_entry(n) ((binding_entry *)(ggc_internal_cleared_vec_alloc_stat (sizeof (binding_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_binding_entry(z) ((binding_entry *)(ggc_internal_zone_alloc_stat (z, sizeof (binding_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_binding_entry(z) ((binding_entry *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (binding_entry) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_binding_entry(n, z) ((binding_entry *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (binding_entry), n MEM_STAT_INFO)))
+#define ggc_alloc_binding_table() ((binding_table *)(ggc_internal_alloc_stat (sizeof (binding_table) MEM_STAT_INFO)))
+#define ggc_alloc_cleared_binding_table() ((binding_table *)(ggc_internal_cleared_alloc_stat (sizeof (binding_table) MEM_STAT_INFO)))
+#define ggc_alloc_vec_binding_table(n) ((binding_table *)(ggc_internal_vec_alloc_stat (sizeof (binding_table), n MEM_STAT_INFO)))
+#define ggc_alloc_cleared_vec_binding_table(n) ((binding_table *)(ggc_internal_cleared_vec_alloc_stat (sizeof (binding_table), n MEM_STAT_INFO)))
+#define ggc_alloc_zone_binding_table(z) ((binding_table *)(ggc_internal_zone_alloc_stat (z, sizeof (binding_table) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_binding_table(z) ((binding_table *)(ggc_internal_zone_cleared_alloc_stat (z, sizeof (binding_table) MEM_STAT_INFO)))
+#define ggc_alloc_zone_cleared_vec_binding_table(n, z) ((binding_table *)(ggc_internal_zone_cleared_vec_alloc_stat (z, sizeof (binding_table), n MEM_STAT_INFO)))
 #define ggc_alloc_lto_file_decl_data_ptr() ((lto_file_decl_data_ptr *)(ggc_internal_alloc_stat (sizeof (lto_file_decl_data_ptr) MEM_STAT_INFO)))
 #define ggc_alloc_cleared_lto_file_decl_data_ptr() ((lto_file_decl_data_ptr *)(ggc_internal_cleared_alloc_stat (sizeof (lto_file_decl_data_ptr) MEM_STAT_INFO)))
 #define ggc_alloc_vec_lto_file_decl_data_ptr(n) ((lto_file_decl_data_ptr *)(ggc_internal_vec_alloc_stat (sizeof (lto_file_decl_data_ptr), n MEM_STAT_INFO)))
@@ -5036,34 +5857,6 @@ enum gt_types_enum {
   if (X != NULL) gt_ggc_mx_c_parser (X);\
   } while (0)
 extern void gt_ggc_mx_c_parser (void *);
-#define gt_ggc_m_9opt_stack(X) do { \
-  if (X != NULL) gt_ggc_mx_opt_stack (X);\
-  } while (0)
-extern void gt_ggc_mx_opt_stack (void *);
-#define gt_ggc_m_27VEC_pending_redefinition_gc(X) do { \
-  if (X != NULL) gt_ggc_mx_VEC_pending_redefinition_gc (X);\
-  } while (0)
-extern void gt_ggc_mx_VEC_pending_redefinition_gc (void *);
-#define gt_ggc_m_19VEC_pending_weak_gc(X) do { \
-  if (X != NULL) gt_ggc_mx_VEC_pending_weak_gc (X);\
-  } while (0)
-extern void gt_ggc_mx_VEC_pending_weak_gc (void *);
-#define gt_ggc_m_11align_stack(X) do { \
-  if (X != NULL) gt_ggc_mx_align_stack (X);\
-  } while (0)
-extern void gt_ggc_mx_align_stack (void *);
-#define gt_ggc_m_18VEC_tree_gc_vec_gc(X) do { \
-  if (X != NULL) gt_ggc_mx_VEC_tree_gc_vec_gc (X);\
-  } while (0)
-extern void gt_ggc_mx_VEC_tree_gc_vec_gc (void *);
-#define gt_ggc_m_19VEC_const_char_p_gc(X) do { \
-  if (X != NULL) gt_ggc_mx_VEC_const_char_p_gc (X);\
-  } while (0)
-extern void gt_ggc_mx_VEC_const_char_p_gc (void *);
-#define gt_ggc_m_18sorted_fields_type(X) do { \
-  if (X != NULL) gt_ggc_mx_sorted_fields_type (X);\
-  } while (0)
-extern void gt_ggc_mx_sorted_fields_type (void *);
 #define gt_ggc_m_15c_inline_static(X) do { \
   if (X != NULL) gt_ggc_mx_c_inline_static (X);\
   } while (0)
@@ -5096,6 +5889,158 @@ extern void gt_ggc_mx_VEC_ltrans_partition_gc (void *);
   if (X != NULL) gt_ggc_mx_ltrans_partition_def (X);\
   } while (0)
 extern void gt_ggc_mx_ltrans_partition_def (void *);
+#define gt_ggc_m_9opt_stack(X) do { \
+  if (X != NULL) gt_ggc_mx_opt_stack (X);\
+  } while (0)
+extern void gt_ggc_mx_opt_stack (void *);
+#define gt_ggc_m_27VEC_pending_redefinition_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_pending_redefinition_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_pending_redefinition_gc (void *);
+#define gt_ggc_m_19VEC_pending_weak_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_pending_weak_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_pending_weak_gc (void *);
+#define gt_ggc_m_11align_stack(X) do { \
+  if (X != NULL) gt_ggc_mx_align_stack (X);\
+  } while (0)
+extern void gt_ggc_mx_align_stack (void *);
+#define gt_ggc_m_18VEC_tree_gc_vec_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_tree_gc_vec_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_tree_gc_vec_gc (void *);
+#define gt_ggc_m_19VEC_const_char_p_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_const_char_p_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_const_char_p_gc (void *);
+#define gt_ggc_m_21pending_abstract_type(X) do { \
+  if (X != NULL) gt_ggc_mx_pending_abstract_type (X);\
+  } while (0)
+extern void gt_ggc_mx_pending_abstract_type (void *);
+#define gt_ggc_m_15VEC_tree_int_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_tree_int_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_tree_int_gc (void *);
+#define gt_ggc_m_9cp_parser(X) do { \
+  if (X != NULL) gt_ggc_mx_cp_parser (X);\
+  } while (0)
+extern void gt_ggc_mx_cp_parser (void *);
+#define gt_ggc_m_34VEC_cp_unparsed_functions_entry_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_cp_unparsed_functions_entry_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_cp_unparsed_functions_entry_gc (void *);
+#define gt_ggc_m_27VEC_cp_default_arg_entry_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_cp_default_arg_entry_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_cp_default_arg_entry_gc (void *);
+#define gt_ggc_m_17cp_parser_context(X) do { \
+  if (X != NULL) gt_ggc_mx_cp_parser_context (X);\
+  } while (0)
+extern void gt_ggc_mx_cp_parser_context (void *);
+#define gt_ggc_m_8cp_lexer(X) do { \
+  if (X != NULL) gt_ggc_mx_cp_lexer (X);\
+  } while (0)
+extern void gt_ggc_mx_cp_lexer (void *);
+#define gt_ggc_m_10tree_check(X) do { \
+  if (X != NULL) gt_ggc_mx_tree_check (X);\
+  } while (0)
+extern void gt_ggc_mx_tree_check (void *);
+#define gt_ggc_m_14constexpr_call(X) do { \
+  if (X != NULL) gt_ggc_mx_constexpr_call (X);\
+  } while (0)
+extern void gt_ggc_mx_constexpr_call (void *);
+#define gt_ggc_m_16constexpr_fundef(X) do { \
+  if (X != NULL) gt_ggc_mx_constexpr_fundef (X);\
+  } while (0)
+extern void gt_ggc_mx_constexpr_fundef (void *);
+#define gt_ggc_m_22VEC_deferred_access_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_deferred_access_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_deferred_access_gc (void *);
+#define gt_ggc_m_10spec_entry(X) do { \
+  if (X != NULL) gt_ggc_mx_spec_entry (X);\
+  } while (0)
+extern void gt_ggc_mx_spec_entry (void *);
+#define gt_ggc_m_16pending_template(X) do { \
+  if (X != NULL) gt_ggc_mx_pending_template (X);\
+  } while (0)
+extern void gt_ggc_mx_pending_template (void *);
+#define gt_ggc_m_21VEC_incomplete_var_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_incomplete_var_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_incomplete_var_gc (void *);
+#define gt_ggc_m_21named_label_use_entry(X) do { \
+  if (X != NULL) gt_ggc_mx_named_label_use_entry (X);\
+  } while (0)
+extern void gt_ggc_mx_named_label_use_entry (void *);
+#define gt_ggc_m_28VEC_deferred_access_check_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_deferred_access_check_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_deferred_access_check_gc (void *);
+#define gt_ggc_m_18sorted_fields_type(X) do { \
+  if (X != NULL) gt_ggc_mx_sorted_fields_type (X);\
+  } while (0)
+extern void gt_ggc_mx_sorted_fields_type (void *);
+#define gt_ggc_m_18VEC_tree_pair_s_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_tree_pair_s_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_tree_pair_s_gc (void *);
+#define gt_ggc_m_17named_label_entry(X) do { \
+  if (X != NULL) gt_ggc_mx_named_label_entry (X);\
+  } while (0)
+extern void gt_ggc_mx_named_label_entry (void *);
+#define gt_ggc_m_32VEC_qualified_typedef_usage_t_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_qualified_typedef_usage_t_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_qualified_typedef_usage_t_gc (void *);
+#define gt_ggc_m_14cp_token_cache(X) do { \
+  if (X != NULL) gt_ggc_mx_cp_token_cache (X);\
+  } while (0)
+extern void gt_ggc_mx_cp_token_cache (void *);
+#define gt_ggc_m_11saved_scope(X) do { \
+  if (X != NULL) gt_ggc_mx_saved_scope (X);\
+  } while (0)
+extern void gt_ggc_mx_saved_scope (void *);
+#define gt_ggc_m_16cxx_int_tree_map(X) do { \
+  if (X != NULL) gt_ggc_mx_cxx_int_tree_map (X);\
+  } while (0)
+extern void gt_ggc_mx_cxx_int_tree_map (void *);
+#define gt_ggc_m_23VEC_cp_label_binding_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_cp_label_binding_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_cp_label_binding_gc (void *);
+#define gt_ggc_m_23VEC_cp_class_binding_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_cp_class_binding_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_cp_class_binding_gc (void *);
+#define gt_ggc_m_24VEC_cxx_saved_binding_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_cxx_saved_binding_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_cxx_saved_binding_gc (void *);
+#define gt_ggc_m_16cp_binding_level(X) do { \
+  if (X != NULL) gt_ggc_mx_cp_binding_level (X);\
+  } while (0)
+extern void gt_ggc_mx_cp_binding_level (void *);
+#define gt_ggc_m_11cxx_binding(X) do { \
+  if (X != NULL) gt_ggc_mx_cxx_binding (X);\
+  } while (0)
+extern void gt_ggc_mx_cxx_binding (void *);
+#define gt_ggc_m_15binding_entry_s(X) do { \
+  if (X != NULL) gt_ggc_mx_binding_entry_s (X);\
+  } while (0)
+extern void gt_ggc_mx_binding_entry_s (void *);
+#define gt_ggc_m_15binding_table_s(X) do { \
+  if (X != NULL) gt_ggc_mx_binding_table_s (X);\
+  } while (0)
+extern void gt_ggc_mx_binding_table_s (void *);
+#define gt_ggc_m_11tinst_level(X) do { \
+  if (X != NULL) gt_ggc_mx_tinst_level (X);\
+  } while (0)
+extern void gt_ggc_mx_tinst_level (void *);
+#define gt_ggc_m_14VEC_tinfo_s_gc(X) do { \
+  if (X != NULL) gt_ggc_mx_VEC_tinfo_s_gc (X);\
+  } while (0)
+extern void gt_ggc_mx_VEC_tinfo_s_gc (void *);
 #define gt_ggc_m_11export_list(X) do { \
   if (X != NULL) gt_ggc_mx_export_list (X);\
   } while (0)
@@ -5611,6 +6556,12 @@ extern void gt_ggc_mx_line_maps (void *);
 extern void gt_ggc_m_II17splay_tree_node_s (void *);
 extern void gt_ggc_m_SP9tree_node17splay_tree_node_s (void *);
 extern void gt_ggc_m_P9tree_nodeP9tree_node17splay_tree_node_s (void *);
+extern void gt_ggc_m_P21pending_abstract_type4htab (void *);
+extern void gt_ggc_m_P14constexpr_call4htab (void *);
+extern void gt_ggc_m_P16constexpr_fundef4htab (void *);
+extern void gt_ggc_m_P10spec_entry4htab (void *);
+extern void gt_ggc_m_P16cxx_int_tree_map4htab (void *);
+extern void gt_ggc_m_P17named_label_entry4htab (void *);
 extern void gt_ggc_m_P17lto_in_decl_state4htab (void *);
 extern void gt_ggc_m_P20lto_symtab_entry_def4htab (void *);
 extern void gt_ggc_m_P11heapvar_map4htab (void *);
@@ -5656,34 +6607,6 @@ extern void gt_ggc_m_P13libfunc_entry4htab (void *);
   if (X != NULL) gt_pch_nx_c_parser (X);\
   } while (0)
 extern void gt_pch_nx_c_parser (void *);
-#define gt_pch_n_9opt_stack(X) do { \
-  if (X != NULL) gt_pch_nx_opt_stack (X);\
-  } while (0)
-extern void gt_pch_nx_opt_stack (void *);
-#define gt_pch_n_27VEC_pending_redefinition_gc(X) do { \
-  if (X != NULL) gt_pch_nx_VEC_pending_redefinition_gc (X);\
-  } while (0)
-extern void gt_pch_nx_VEC_pending_redefinition_gc (void *);
-#define gt_pch_n_19VEC_pending_weak_gc(X) do { \
-  if (X != NULL) gt_pch_nx_VEC_pending_weak_gc (X);\
-  } while (0)
-extern void gt_pch_nx_VEC_pending_weak_gc (void *);
-#define gt_pch_n_11align_stack(X) do { \
-  if (X != NULL) gt_pch_nx_align_stack (X);\
-  } while (0)
-extern void gt_pch_nx_align_stack (void *);
-#define gt_pch_n_18VEC_tree_gc_vec_gc(X) do { \
-  if (X != NULL) gt_pch_nx_VEC_tree_gc_vec_gc (X);\
-  } while (0)
-extern void gt_pch_nx_VEC_tree_gc_vec_gc (void *);
-#define gt_pch_n_19VEC_const_char_p_gc(X) do { \
-  if (X != NULL) gt_pch_nx_VEC_const_char_p_gc (X);\
-  } while (0)
-extern void gt_pch_nx_VEC_const_char_p_gc (void *);
-#define gt_pch_n_18sorted_fields_type(X) do { \
-  if (X != NULL) gt_pch_nx_sorted_fields_type (X);\
-  } while (0)
-extern void gt_pch_nx_sorted_fields_type (void *);
 #define gt_pch_n_15c_inline_static(X) do { \
   if (X != NULL) gt_pch_nx_c_inline_static (X);\
   } while (0)
@@ -5716,6 +6639,158 @@ extern void gt_pch_nx_VEC_ltrans_partition_gc (void *);
   if (X != NULL) gt_pch_nx_ltrans_partition_def (X);\
   } while (0)
 extern void gt_pch_nx_ltrans_partition_def (void *);
+#define gt_pch_n_9opt_stack(X) do { \
+  if (X != NULL) gt_pch_nx_opt_stack (X);\
+  } while (0)
+extern void gt_pch_nx_opt_stack (void *);
+#define gt_pch_n_27VEC_pending_redefinition_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_pending_redefinition_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_pending_redefinition_gc (void *);
+#define gt_pch_n_19VEC_pending_weak_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_pending_weak_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_pending_weak_gc (void *);
+#define gt_pch_n_11align_stack(X) do { \
+  if (X != NULL) gt_pch_nx_align_stack (X);\
+  } while (0)
+extern void gt_pch_nx_align_stack (void *);
+#define gt_pch_n_18VEC_tree_gc_vec_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_tree_gc_vec_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_tree_gc_vec_gc (void *);
+#define gt_pch_n_19VEC_const_char_p_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_const_char_p_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_const_char_p_gc (void *);
+#define gt_pch_n_21pending_abstract_type(X) do { \
+  if (X != NULL) gt_pch_nx_pending_abstract_type (X);\
+  } while (0)
+extern void gt_pch_nx_pending_abstract_type (void *);
+#define gt_pch_n_15VEC_tree_int_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_tree_int_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_tree_int_gc (void *);
+#define gt_pch_n_9cp_parser(X) do { \
+  if (X != NULL) gt_pch_nx_cp_parser (X);\
+  } while (0)
+extern void gt_pch_nx_cp_parser (void *);
+#define gt_pch_n_34VEC_cp_unparsed_functions_entry_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_cp_unparsed_functions_entry_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_cp_unparsed_functions_entry_gc (void *);
+#define gt_pch_n_27VEC_cp_default_arg_entry_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_cp_default_arg_entry_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_cp_default_arg_entry_gc (void *);
+#define gt_pch_n_17cp_parser_context(X) do { \
+  if (X != NULL) gt_pch_nx_cp_parser_context (X);\
+  } while (0)
+extern void gt_pch_nx_cp_parser_context (void *);
+#define gt_pch_n_8cp_lexer(X) do { \
+  if (X != NULL) gt_pch_nx_cp_lexer (X);\
+  } while (0)
+extern void gt_pch_nx_cp_lexer (void *);
+#define gt_pch_n_10tree_check(X) do { \
+  if (X != NULL) gt_pch_nx_tree_check (X);\
+  } while (0)
+extern void gt_pch_nx_tree_check (void *);
+#define gt_pch_n_14constexpr_call(X) do { \
+  if (X != NULL) gt_pch_nx_constexpr_call (X);\
+  } while (0)
+extern void gt_pch_nx_constexpr_call (void *);
+#define gt_pch_n_16constexpr_fundef(X) do { \
+  if (X != NULL) gt_pch_nx_constexpr_fundef (X);\
+  } while (0)
+extern void gt_pch_nx_constexpr_fundef (void *);
+#define gt_pch_n_22VEC_deferred_access_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_deferred_access_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_deferred_access_gc (void *);
+#define gt_pch_n_10spec_entry(X) do { \
+  if (X != NULL) gt_pch_nx_spec_entry (X);\
+  } while (0)
+extern void gt_pch_nx_spec_entry (void *);
+#define gt_pch_n_16pending_template(X) do { \
+  if (X != NULL) gt_pch_nx_pending_template (X);\
+  } while (0)
+extern void gt_pch_nx_pending_template (void *);
+#define gt_pch_n_21VEC_incomplete_var_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_incomplete_var_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_incomplete_var_gc (void *);
+#define gt_pch_n_21named_label_use_entry(X) do { \
+  if (X != NULL) gt_pch_nx_named_label_use_entry (X);\
+  } while (0)
+extern void gt_pch_nx_named_label_use_entry (void *);
+#define gt_pch_n_28VEC_deferred_access_check_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_deferred_access_check_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_deferred_access_check_gc (void *);
+#define gt_pch_n_18sorted_fields_type(X) do { \
+  if (X != NULL) gt_pch_nx_sorted_fields_type (X);\
+  } while (0)
+extern void gt_pch_nx_sorted_fields_type (void *);
+#define gt_pch_n_18VEC_tree_pair_s_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_tree_pair_s_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_tree_pair_s_gc (void *);
+#define gt_pch_n_17named_label_entry(X) do { \
+  if (X != NULL) gt_pch_nx_named_label_entry (X);\
+  } while (0)
+extern void gt_pch_nx_named_label_entry (void *);
+#define gt_pch_n_32VEC_qualified_typedef_usage_t_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_qualified_typedef_usage_t_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_qualified_typedef_usage_t_gc (void *);
+#define gt_pch_n_14cp_token_cache(X) do { \
+  if (X != NULL) gt_pch_nx_cp_token_cache (X);\
+  } while (0)
+extern void gt_pch_nx_cp_token_cache (void *);
+#define gt_pch_n_11saved_scope(X) do { \
+  if (X != NULL) gt_pch_nx_saved_scope (X);\
+  } while (0)
+extern void gt_pch_nx_saved_scope (void *);
+#define gt_pch_n_16cxx_int_tree_map(X) do { \
+  if (X != NULL) gt_pch_nx_cxx_int_tree_map (X);\
+  } while (0)
+extern void gt_pch_nx_cxx_int_tree_map (void *);
+#define gt_pch_n_23VEC_cp_label_binding_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_cp_label_binding_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_cp_label_binding_gc (void *);
+#define gt_pch_n_23VEC_cp_class_binding_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_cp_class_binding_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_cp_class_binding_gc (void *);
+#define gt_pch_n_24VEC_cxx_saved_binding_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_cxx_saved_binding_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_cxx_saved_binding_gc (void *);
+#define gt_pch_n_16cp_binding_level(X) do { \
+  if (X != NULL) gt_pch_nx_cp_binding_level (X);\
+  } while (0)
+extern void gt_pch_nx_cp_binding_level (void *);
+#define gt_pch_n_11cxx_binding(X) do { \
+  if (X != NULL) gt_pch_nx_cxx_binding (X);\
+  } while (0)
+extern void gt_pch_nx_cxx_binding (void *);
+#define gt_pch_n_15binding_entry_s(X) do { \
+  if (X != NULL) gt_pch_nx_binding_entry_s (X);\
+  } while (0)
+extern void gt_pch_nx_binding_entry_s (void *);
+#define gt_pch_n_15binding_table_s(X) do { \
+  if (X != NULL) gt_pch_nx_binding_table_s (X);\
+  } while (0)
+extern void gt_pch_nx_binding_table_s (void *);
+#define gt_pch_n_11tinst_level(X) do { \
+  if (X != NULL) gt_pch_nx_tinst_level (X);\
+  } while (0)
+extern void gt_pch_nx_tinst_level (void *);
+#define gt_pch_n_14VEC_tinfo_s_gc(X) do { \
+  if (X != NULL) gt_pch_nx_VEC_tinfo_s_gc (X);\
+  } while (0)
+extern void gt_pch_nx_VEC_tinfo_s_gc (void *);
 #define gt_pch_n_11export_list(X) do { \
   if (X != NULL) gt_pch_nx_export_list (X);\
   } while (0)
@@ -6231,6 +7306,12 @@ extern void gt_pch_nx_line_maps (void *);
 extern void gt_pch_n_II17splay_tree_node_s (void *);
 extern void gt_pch_n_SP9tree_node17splay_tree_node_s (void *);
 extern void gt_pch_n_P9tree_nodeP9tree_node17splay_tree_node_s (void *);
+extern void gt_pch_n_P21pending_abstract_type4htab (void *);
+extern void gt_pch_n_P14constexpr_call4htab (void *);
+extern void gt_pch_n_P16constexpr_fundef4htab (void *);
+extern void gt_pch_n_P10spec_entry4htab (void *);
+extern void gt_pch_n_P16cxx_int_tree_map4htab (void *);
+extern void gt_pch_n_P17named_label_entry4htab (void *);
 extern void gt_pch_n_P17lto_in_decl_state4htab (void *);
 extern void gt_pch_n_P20lto_symtab_entry_def4htab (void *);
 extern void gt_pch_n_P11heapvar_map4htab (void *);
@@ -6273,20 +7354,6 @@ extern void gt_pch_n_P13libfunc_entry4htab (void *);
 /* Local pointer-walking routines.  */
 extern void gt_pch_p_8c_parser
     (void *, void *, gt_pointer_operator, void *);
-extern void gt_pch_p_9opt_stack
-    (void *, void *, gt_pointer_operator, void *);
-extern void gt_pch_p_27VEC_pending_redefinition_gc
-    (void *, void *, gt_pointer_operator, void *);
-extern void gt_pch_p_19VEC_pending_weak_gc
-    (void *, void *, gt_pointer_operator, void *);
-extern void gt_pch_p_11align_stack
-    (void *, void *, gt_pointer_operator, void *);
-extern void gt_pch_p_18VEC_tree_gc_vec_gc
-    (void *, void *, gt_pointer_operator, void *);
-extern void gt_pch_p_19VEC_const_char_p_gc
-    (void *, void *, gt_pointer_operator, void *);
-extern void gt_pch_p_18sorted_fields_type
-    (void *, void *, gt_pointer_operator, void *);
 extern void gt_pch_p_15c_inline_static
     (void *, void *, gt_pointer_operator, void *);
 extern void gt_pch_p_24VEC_c_goto_bindings_p_gc
@@ -6302,6 +7369,82 @@ extern void gt_pch_p_12c_label_vars
 extern void gt_pch_p_23VEC_ltrans_partition_gc
     (void *, void *, gt_pointer_operator, void *);
 extern void gt_pch_p_20ltrans_partition_def
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_9opt_stack
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_27VEC_pending_redefinition_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_19VEC_pending_weak_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_11align_stack
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_18VEC_tree_gc_vec_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_19VEC_const_char_p_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_21pending_abstract_type
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_15VEC_tree_int_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_9cp_parser
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_34VEC_cp_unparsed_functions_entry_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_27VEC_cp_default_arg_entry_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_17cp_parser_context
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_8cp_lexer
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_10tree_check
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_14constexpr_call
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_16constexpr_fundef
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_22VEC_deferred_access_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_10spec_entry
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_16pending_template
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_21VEC_incomplete_var_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_21named_label_use_entry
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_28VEC_deferred_access_check_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_18sorted_fields_type
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_18VEC_tree_pair_s_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_17named_label_entry
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_32VEC_qualified_typedef_usage_t_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_14cp_token_cache
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_11saved_scope
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_16cxx_int_tree_map
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_23VEC_cp_label_binding_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_23VEC_cp_class_binding_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_24VEC_cxx_saved_binding_gc
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_16cp_binding_level
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_11cxx_binding
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_15binding_entry_s
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_15binding_table_s
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_11tinst_level
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_14VEC_tinfo_s_gc
     (void *, void *, gt_pointer_operator, void *);
 extern void gt_pch_p_11export_list
     (void *, void *, gt_pointer_operator, void *);
@@ -6564,6 +7707,18 @@ extern void gt_pch_p_SP9tree_node17splay_tree_node_s
     (void *, void *, gt_pointer_operator, void *);
 extern void gt_pch_p_P9tree_nodeP9tree_node17splay_tree_node_s
     (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_P21pending_abstract_type4htab
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_P14constexpr_call4htab
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_P16constexpr_fundef4htab
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_P10spec_entry4htab
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_P16cxx_int_tree_map4htab
+    (void *, void *, gt_pointer_operator, void *);
+extern void gt_pch_p_P17named_label_entry4htab
+    (void *, void *, gt_pointer_operator, void *);
 extern void gt_pch_p_P17lto_in_decl_state4htab
     (void *, void *, gt_pointer_operator, void *);
 extern void gt_pch_p_P20lto_symtab_entry_def4htab
@@ -6641,6 +7796,12 @@ extern void gt_pch_p_P13libfunc_entry4htab
 extern void * ggc_alloc_splay_tree_scalar_scalar_splay_tree_node_s (int, void *);
 extern void * ggc_alloc_splay_tree_str_tree_node_splay_tree_node_s (int, void *);
 extern void * ggc_alloc_splay_tree_tree_node_tree_node_splay_tree_node_s (int, void *);
+extern void * ggc_alloc_splay_tree_pending_abstract_type_htab (int, void *);
+extern void * ggc_alloc_splay_tree_constexpr_call_htab (int, void *);
+extern void * ggc_alloc_splay_tree_constexpr_fundef_htab (int, void *);
+extern void * ggc_alloc_splay_tree_spec_entry_htab (int, void *);
+extern void * ggc_alloc_splay_tree_cxx_int_tree_map_htab (int, void *);
+extern void * ggc_alloc_splay_tree_named_label_entry_htab (int, void *);
 extern void * ggc_alloc_splay_tree_lto_in_decl_state_htab (int, void *);
 extern void * ggc_alloc_splay_tree_lto_symtab_entry_def_htab (int, void *);
 extern void * ggc_alloc_splay_tree_heapvar_map_htab (int, void *);

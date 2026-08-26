@@ -201,6 +201,7 @@
   ntlibc,
   binutils,
   gnupatch,
+  gnutar,
   gzip,
   callPackage,
 }:
@@ -213,6 +214,7 @@ let
     mpfrVersion
     mpcVersion
     coreTarball
+    cxxTarball
     gmpTarball
     mpfrTarball
     mpcTarball
@@ -225,6 +227,7 @@ stdenv.mkDerivation {
     version
     system
     coreTarball
+    cxxTarball
     gmpTarball
     mpfrTarball
     mpcTarball
@@ -244,6 +247,16 @@ stdenv.mkDerivation {
   # mode (see ../gzip/build.kaem's own "Mode from argv[0]" comment).
   gunzip = "${gzip}/bin/gunzip.exe";
 
+  # This chain's own real GNU tar.exe (../gnutar), not stage0's minimal
+  # untar, for the gcc-g++ tarball alone -- see build.kaem's own comment:
+  # 440 of its members have paths longer than the 100 bytes a plain ustar
+  # header can hold (all of them under libstdc++-v3/testsuite/), so they
+  # are stored using GNU tar's own LongName extension, which the seed
+  # untar rejects outright ("unable to create long symlink", measured
+  # directly).  gcc-core's own tarball has no such member and keeps
+  # using untar, unchanged.
+  tar = "${gnutar}/bin/tar.exe";
+
   inherit ntlibc;
   ntlibcSrc = ntlibcSources.src;
 
@@ -256,6 +269,7 @@ stdenv.mkDerivation {
   ntRpathC = ./nt-rpath.c;
   mainStubC = ./main-stub.c;
   helloC = ./hello.c;
+  helloCxx = ./hello.cc;
 
   bin_untar = stage0.mescc-tools-extra.untar;
   bin_cp = stage0.mescc-tools-extra.cp;
@@ -270,7 +284,7 @@ stdenv.mkDerivation {
   ];
 
   meta = {
-    description = "GNU Compiler Collection (cc1, gcc) -- C only, for Windows/ntlibc, self-hosted by this chain's own tcc";
+    description = "GNU Compiler Collection (cc1, cc1plus, gcc, g++) -- C and C++ front ends, for Windows/ntlibc, built entirely by this chain's own tcc";
     homepage = "https://www.gnu.org/software/gcc";
     license = "gpl3Plus";
     inherit platforms;

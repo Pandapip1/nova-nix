@@ -8194,6 +8194,36 @@ void * ggc_alloc_splay_tree_tree_node_tree_node_splay_tree_node_s (int sz, void 
   return ggc_splay_alloc (gt_e_P9tree_nodeP9tree_node17splay_tree_node_s, sz, nl);
 }
 
+void * ggc_alloc_splay_tree_pending_abstract_type_htab (int sz, void * nl)
+{
+  return ggc_splay_alloc (gt_e_P21pending_abstract_type4htab, sz, nl);
+}
+
+void * ggc_alloc_splay_tree_constexpr_call_htab (int sz, void * nl)
+{
+  return ggc_splay_alloc (gt_e_P14constexpr_call4htab, sz, nl);
+}
+
+void * ggc_alloc_splay_tree_constexpr_fundef_htab (int sz, void * nl)
+{
+  return ggc_splay_alloc (gt_e_P16constexpr_fundef4htab, sz, nl);
+}
+
+void * ggc_alloc_splay_tree_spec_entry_htab (int sz, void * nl)
+{
+  return ggc_splay_alloc (gt_e_P10spec_entry4htab, sz, nl);
+}
+
+void * ggc_alloc_splay_tree_cxx_int_tree_map_htab (int sz, void * nl)
+{
+  return ggc_splay_alloc (gt_e_P16cxx_int_tree_map4htab, sz, nl);
+}
+
+void * ggc_alloc_splay_tree_named_label_entry_htab (int sz, void * nl)
+{
+  return ggc_splay_alloc (gt_e_P17named_label_entry4htab, sz, nl);
+}
+
 void * ggc_alloc_splay_tree_lto_in_decl_state_htab (int sz, void * nl)
 {
   return ggc_splay_alloc (gt_e_P17lto_in_decl_state4htab, sz, nl);
