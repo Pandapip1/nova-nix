@@ -16,7 +16,7 @@ stage0-run {
     out
     "${src}/M2libc/x86/x86_defs.M1"
     "${src}/x86/libc-core.M1"
-    "${src}/x86/libc-mes.M1"
+    "${src}/x86/libc-bootstrap.M1"
     M1-macro_M1
     "${src}/x86/pe-end-shim.M1"
   ];
