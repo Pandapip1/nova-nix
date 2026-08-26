@@ -425,8 +425,11 @@ in
 stdenv.mkDerivation {
   inherit pname version system;
 
+  # From mirrors.kernel.org, not ftp.gnu.org: the latter is AAAA-only from
+  # here and never answers (4/4 connection timeouts, measured).  Same
+  # tarball, same sha256 -- the mirror is verified by the hash, not trusted.
   tarball = (import <nix/fetchurl.nix>) {
-    url = "https://ftp.gnu.org/gnu/binutils/binutils-${version}.tar.xz";
+    url = "https://mirrors.kernel.org/gnu/binutils/binutils-${version}.tar.xz";
     sha256 = "d75a94f4d73e7a4086f7513e67e439e8fcdcbb726ffe63f4661744e6256b2cf2";
   };
 
