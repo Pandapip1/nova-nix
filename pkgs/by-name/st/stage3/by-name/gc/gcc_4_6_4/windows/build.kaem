@@ -1574,7 +1574,14 @@ ${tcc} -B ${ntlibc}/lib -nostdlib ${ntlibc}/lib/crt1.o -o hello.exe hello.s -L .
 # C++ exceptions here. What IS still missing is the runtime half:
 # libgcc's unwind-sjlj.c/unwind-c.c are not among the 19 L_* DImode
 # compile units this package's libgcc builds, and libsupc++ (__cxa_throw
-# and friends) is not built at all. A `throw` compiled here would
+# and friends) is not built at all.  When unwind-c.c IS eventually built
+# here it MUST be compiled with -D__USING_SJLJ_EXCEPTIONS__: unwind-c.c:93
+# selects the personality's SYMBOL NAME from that macro
+# (__gcc_personality_sj0 vs the DWARF __gcc_personality_v0) and also
+# macros __builtin_eh_return_data_regno(x) away to x.  Without the define
+# you silently build the DWARF personality for an SJLJ target, and the
+# resulting undefined __builtin_eh_return_data_regno reads as a missing
+# tcc builtin when it is really a missing -D. A `throw` compiled here would
 # therefore fail to LINK with a real, informative undefined-reference
 # error -- correct, diagnosable behavior for a deliberately narrowed
 # runtime, and the honest next rung of work, not something to paper over
@@ -1586,8 +1593,8 @@ ${bin_cp} ${helloCxx} hellocxx.cc
 # --- what hellocxx.cc deliberately does NOT contain, and why: a real,
 # open, NOT-worked-around defect in the cc1plus.exe this file builds.
 #
-# Constructing an object of a class DERIVED from one with a virtual
-# function makes this cc1plus.exe die.  Three lines are enough:
+# A compiler-SYNTHESIZED constructor, plus a STACK local of that type,
+# makes this cc1plus.exe die.  Three lines are enough:
 #
 #     struct B { virtual int v() const { return 1; } };
 #     struct D : B { };
@@ -1596,6 +1603,26 @@ ${bin_cp} ${helloCxx} hellocxx.cc
 #   -> internal compiler error: in ?, at cfgexpand.c:4063
 #      (that line is gcc_assert (SA.partition_to_pseudo[i]))
 #
+# The trigger is NARROWER than "derived from a class with a virtual
+# function", and two earlier readings of it were wrong.  Measured ladder,
+# run directly against this cc1plus.exe:
+#
+#   two plain free fns, 2nd takes &local              -> OK
+#   member fn (HAS this), then free fn taking &local  -> OK
+#   synthesized ctor + stack local                    -> ICE
+#   synthesized ctor, but `new D()' not a stack local -> OK
+#   NON-virtual base, synthesized ctor, stack local   -> ICE
+#   virtual base, stack local, address NOT taken      -> ICE
+#
+# So `virtual' is NOT required (row 5), taking the address is NOT
+# required (row 6), and it is NOT a general stale-state-across-two-
+# functions bug (rows 1-2: a real member function followed by a free
+# function taking &local is clean).  What IS required is a synthesized
+# constructor whose body contains a call, followed by a function with a
+# STACK local of that type -- row 4 is the sharp one, since the same
+# synthesized ctor with `new D()' compiles clean.
+#
+
 # Control on the same axis, run directly: the SAME gcc-4.6.4 source with
 # the SAME --target=i686-pc-mingw32 --enable-languages=c,c++
 # configuration, built instead by an ordinary host gcc, compiles that
