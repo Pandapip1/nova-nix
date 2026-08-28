@@ -43,6 +43,10 @@ stdenv.mkDerivation {
   CC = "${tinycc}/bin/tcc";
   inherit targetArch;
   libtcc1 = "${tinycc.libs or tinycc}/lib/libtcc1.a";
+  chkstkMsSrc = ./chkstk-ms.S;
+  ioCompatSrc = ./compat/io.h;
+  directCompatSrc = ./compat/direct.h;
+  processCompatSrc = ./compat/process.h;
 
   bin_kaem = stage0.kaem;
   bin_mkdir = stage0.mescc-tools-extra.mkdir;

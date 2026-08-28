@@ -1,0 +1,91 @@
+diff --git a/configure b/configure
+index 85eb581..561d1ad 100755
+--- a/configure
++++ b/configure
+@@ -2222,2 +2222,4 @@
+ if test "$cross_compiling" != yes; then
++  cross_compiling=no
++elif false; then
+   if { ac_try='./$ac_file'
+@@ -41232,5 +41232,7 @@ if test -n "\$CONFIG_FILES"; then
+   sed 's/,@/@@/; s/@,/@@/; s/,;t t\$/@;t t/; /@;t t\$/s/[\\\\&,]/\\\\&/g;
+    s/@@/,@/; s/@@/@,/; s/@;t t\$/,;t t/' >\$tmp/subs.sed <<\\CEOF
++:t
++/@[a-zA-Z_][a-zA-Z_0-9]*@/!b
+ s,@SHELL@,$SHELL,;t t
+ s,@PATH_SEPARATOR@,$PATH_SEPARATOR,;t t
+ s,@PACKAGE_NAME@,$PACKAGE_NAME,;t t
+@@ -41358,6 +41360,10 @@ CEOF
+   ac_end=$ac_max_sed_lines # Line after last line for current file.
+   ac_more_lines=:
+   ac_sed_cmds=
++  # nova-nix: subs.sed already contains the fast-path label above.  Running
++  # it directly avoids both this fragmenter's subprocesses and its eventual
++  # multi-sed pipeline on the Wine/ntlibc executor.
++  ac_sed_cmds="sed -f $tmp/subs.sed"; ac_more_lines=false
+   while $ac_more_lines; do
+     if test $ac_beg -gt 1; then
+       sed "1,${ac_beg}d; ${ac_end}q" $tmp/subs.sed >$tmp/subs.frag
+@@ -41468,9 +41474,23 @@ esac
+ # Don't blindly perform a `cd "$ac_dir"/$ac_foo && pwd` since $ac_foo can be
+ # absolute.
+-ac_abs_builddir=`cd "$ac_dir" && cd $ac_builddir && pwd`
+-ac_abs_top_builddir=`cd "$ac_dir" && cd ${ac_top_builddir}. && pwd`
+-ac_abs_srcdir=`cd "$ac_dir" && cd $ac_srcdir && pwd`
+-ac_abs_top_srcdir=`cd "$ac_dir" && cd $ac_top_srcdir && pwd`
++# nova-nix: command substitution connects pwd to a Win32 pipe.  Wine cannot
++# carry that pipe through this old shell's fork path reliably, while bash
++# already maintains the exact absolute directory in PWD after every cd.
++# Record it without a subprocess or pipe, restoring the config.status working
++# directory between the four calculations.
++ac_saved_pwd=$PWD
++cd "$ac_dir" && cd $ac_builddir || exit 1
++ac_abs_builddir=$PWD
++cd "$ac_saved_pwd" || exit 1
++cd "$ac_dir" && cd ${ac_top_builddir}. || exit 1
++ac_abs_top_builddir=$PWD
++cd "$ac_saved_pwd" || exit 1
++cd "$ac_dir" && cd $ac_srcdir || exit 1
++ac_abs_srcdir=$PWD
++cd "$ac_saved_pwd" || exit 1
++cd "$ac_dir" && cd $ac_top_srcdir || exit 1
++ac_abs_top_srcdir=$PWD
++cd "$ac_saved_pwd" || exit 1
+ 
+ 
+   case $INSTALL in
+@@ -41537,8 +41540,10 @@ s,@builddir@,$ac_builddir,;t t
+ s,@abs_builddir@,$ac_abs_builddir,;t t
+ s,@top_builddir@,$ac_top_builddir,;t t
+ s,@abs_top_builddir@,$ac_abs_top_builddir,;t t
+ s,@INSTALL@,$ac_INSTALL,;t t
+-" $ac_file_inputs | (eval "$ac_sed_cmds") >$tmp/out
++" $ac_file_inputs >$tmp/in
++  eval "$ac_sed_cmds" <$tmp/in >$tmp/out
++  rm -f $tmp/in
+   rm -f $tmp/stdin
+   if test x"$ac_file" != x-; then
+     mv $tmp/out $ac_file
+@@ -42147,6 +42152,6 @@ done
+ cat >>$CONFIG_STATUS <<\_ACEOF
+ 
+-{ (exit 0); exit 0; }
++exit 0
+ _ACEOF
+ chmod +x $CONFIG_STATUS
+ ac_clean_files=$ac_clean_files_save
+@@ -42163,12 +42168,9 @@ if test "$no_create" != yes; then
+   ac_cs_success=:
+   ac_config_status_args=
+   test "$silent" = yes &&
+     ac_config_status_args="$ac_config_status_args --quiet"
+   exec 5>/dev/null
+-  $SHELL $CONFIG_STATUS $ac_config_status_args || ac_cs_success=false
+-  exec 5>>config.log
+-  # Use ||, not &&, to avoid exiting from the if with $? = 1, which
+-  # would make configure fail if this is the last instruction.
+-  $ac_cs_success || { (exit 1); exit 1; }
++  set -- $ac_config_status_args
++  . "$CONFIG_STATUS"
+ fi
+ 

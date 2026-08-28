@@ -1,0 +1,39 @@
+--- a/src/stat.c
++++ b/src/stat.c
+@@ -55,15 +55,16 @@
+ 
+ #define NAMEMAX_FORMAT PRIuMAX
+ 
+-#if HAVE_STRUCT_STATVFS_F_BASETYPE
++#if HAVE_SYS_STATVFS_H
+ # define STRUCT_STATVFS struct statvfs
+-# define HAVE_STRUCT_STATXFS_F_TYPE HAVE_STRUCT_STATVFS
++# define statfs statvfs
++# define HAVE_STRUCT_STATXFS_F_TYPE HAVE_STRUCT_STATVFS_F_TYPE
+ # if HAVE_STRUCT_STATVFS_F_NAMEMAX
+ #  define SB_F_NAMEMAX(S) ((uintmax_t) ((S)->f_namemax))
+ # endif
+ #else
+ # define STRUCT_STATVFS struct statfs
+-# define HAVE_STRUCT_STATXFS_F_TYPE HAVE_STRUCT_STATFS
++# define HAVE_STRUCT_STATXFS_F_TYPE HAVE_STRUCT_STATFS_F_TYPE
+ # if HAVE_STRUCT_STATFS_F_NAMELEN
+ #  define SB_F_NAMEMAX(S) ((uintmax_t) ((S)->f_namelen))
+ # endif
+@@ -114,7 +115,7 @@
+ #ifdef STATXFS_FILE_SYSTEM_TYPE_MEMBER_NAME
+   /* Cast away the `const' attribute.  */
+   return (char *) statfsbuf->STATXFS_FILE_SYSTEM_TYPE_MEMBER_NAME;
+-#else
++#elif HAVE_STRUCT_STATXFS_F_TYPE
+   char const *type;
+   switch (statfsbuf->f_type)
+     {
+@@ -303,5 +304,7 @@
+     sprintf (buf, "UNKNOWN (0x%x)", statfsbuf->f_type);
+     return buf;
+   }
++#else
++  return "UNKNOWN";
+ #endif
+ }

@@ -577,7 +577,14 @@ unpackPhase() {
 patchPhase() {
     runHook prePatch
     for patch in ${patches-}; do
-        patch ${patchFlags--p1} < "$patch"
+        if test -n "${windowsStdenv-}"; then
+            # Avoid handing a redirected stdin descriptor through Wine.  The
+            # ntlibc process stack can intermittently lose that descriptor;
+            # GNU patch's input-file option keeps the file open in patch.exe.
+            patch ${patchFlags--p1} -i "$patch"
+        else
+            patch ${patchFlags--p1} < "$patch"
+        fi
     done
     runHook postPatch
 }
@@ -605,6 +612,34 @@ configurePhase() {
 # every subprocess through the shell it is handed.  Split out of
 # configurePhase so a package overriding that phase can still call it.
 windowsConfigureSetup() {
+    # Autoconf's end-of-run cache serializer and exit-trap diagnostic dump are
+    # nests of command substitutions and pipelines.  Under this chain's
+    # bash/ntlibc process stack, every pipeline reader retains its own write
+    # handle, so each nest waits forever for EOF after configure has completed
+    # all of its actual feature checks.  GNU hello 2.12.3 reaches the first at
+    # the `cat >confcache' block immediately after deciding whether to use NLS
+    # and the second after config.status has generated every output: in each
+    # case several sh.exe processes sleep in read(2) while holding both ends
+    # of their input pipe open.
+    #
+    # The generic builder does not request a config cache, so serializing one
+    # has no value here; the trap's variable dump is diagnostic-only.  Remove
+    # both generated blocks when the script has Autoconf's standard cache
+    # marker.  Keep this conditional: hand-written configure scripts, and
+    # generated versions with a different cache implementation, pass through
+    # byte-for-byte instead of being guessed at.  The trap remains installed,
+    # still records the exit status, and still performs its cleanup.
+    if grep -q '^cat >confcache <<\\_ACEOF$' ./configure; then
+        configureNoCache="$scratch/configure-no-cache"
+        sed '
+/^  # Save into config.log some information that might help in debugging\.$/,/^  } >&5$/c\
+  echo "$as_me: exit $exit_status" >&5
+/^cat >confcache <<\\_ACEOF$/,/^rm -f confcache$/c\
+: # nova-nix: cache serialization disabled for the Windows process stack
+' ./configure > "$configureNoCache"
+        cp "$configureNoCache" ./configure
+    fi
+
     # ac_executable_extensions: the general answer to the synthesized-exec-bit
     # wall described at the tool shims above, for every AC_PATH_PROG /
     # AC_CHECK_PROG in the script.  Each probe accepts a candidate only
@@ -671,19 +706,44 @@ windowsConfigureSetup() {
     done
 }
 
+runMake() {
+    # A makefile assignment overrides an exported SHELL.  Coreutils 5.0's
+    # shipped GNUmakefile does exactly that with `SHELL = /bin/sh', before it
+    # includes the configure-generated Makefile, so its first $(shell ...)
+    # and every recipe otherwise try a nonexistent host path.  A command-line
+    # variable has higher precedence than the makefile and still names the
+    # same PE shell selected above.  Linux keeps make's ordinary semantics.
+    if test -n "${windowsStdenv-}"; then
+        make "SHELL=$SHELL" "$@"
+    else
+        make "$@"
+    fi
+}
+
 buildPhase() {
     runHook preBuild
     if test -n "${buildScript-}"; then
         "$SHELL" -e "$buildScript"
+    elif test -n "${buildRetries-}"; then
+        # Opt-in recovery for large bootstrap builds whose young native
+        # process/compiler stack can sporadically lose one child.  Keep-going
+        # passes retain every successful object; the final ordinary make is
+        # mandatory and is the only pass allowed to decide success.
+        buildAttempt=1
+        while test "$buildAttempt" -lt "$buildRetries"; do
+            runMake -k ${makeFlags-} && break
+            buildAttempt=$((buildAttempt + 1))
+        done
+        runMake ${makeFlags-}
     else
-        make ${makeFlags-}
+        runMake ${makeFlags-}
     fi
     runHook postBuild
 }
 
 checkPhase() {
     runHook preCheck
-    make ${checkTarget-check} ${checkFlags-}
+    runMake ${checkTarget-check} ${checkFlags-}
     runHook postCheck
 }
 
@@ -694,7 +754,7 @@ installPhase() {
     # have told it where $out is, and spells `prefix ?= /usr/local'.  An
     # autotools Makefile is handed the same value it already computed from
     # --prefix, so this is a no-op there.
-    make install prefix="$out" ${installFlags-}
+    runMake install prefix="$out" ${installFlags-}
     runHook postInstall
 }
 
@@ -711,13 +771,13 @@ fixupPhase() {
 
 installCheckPhase() {
     runHook preInstallCheck
-    make ${installCheckTarget-installcheck} ${installCheckFlags-}
+    runMake ${installCheckTarget-installcheck} ${installCheckFlags-}
     runHook postInstallCheck
 }
 
 distPhase() {
     runHook preDist
-    make ${distTarget-dist} ${distFlags-}
+    runMake ${distTarget-dist} ${distFlags-}
     runHook postDist
 }
 

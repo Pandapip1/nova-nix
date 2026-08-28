@@ -1,0 +1,47 @@
+--- a/src/stty.c
++++ b/src/stty.c
+@@ -430,8 +430,10 @@
+ 			      struct termios *mode);
+ static void set_speed (enum speed_setting type, const char *arg,
+ 		       struct termios *mode);
++#ifdef TIOCSWINSZ
+ static void set_window_size (int rows, int cols, int fd,
+ 			     const char *device_name);
++#endif
+ 
+ /* The width of the screen, for output wrapping. */
+ static int max_col;
+@@ -1002,7 +1004,7 @@
+ 	      speed_was_set = 1;
+ 	      require_set_attr = 1;
+ 	    }
+-#ifdef TIOCGWINSZ
++#ifdef TIOCSWINSZ
+ 	  else if (STREQ (argv[k], "rows"))
+ 	    {
+ 	      if (k == argc - 1)
+@@ -1026,6 +1028,8 @@
+ 	      set_window_size (-1, (int) integer_arg (argv[k]),
+ 			       fd, device_name);
+ 	    }
++#endif
++#ifdef TIOCGWINSZ
+ 	  else if (STREQ (argv[k], "size"))
+ 	    {
+ 	      max_col = screen_columns ();
+@@ -1386,6 +1390,7 @@
+   return err;
+ }
+ 
++#ifdef TIOCSWINSZ
+ static void
+ set_window_size (int rows, int cols, int fd, const char *device_name)
+ {
+@@ -1447,6 +1452,7 @@
+   if (ioctl (fd, TIOCSWINSZ, (char *) &win))
+     error (EXIT_FAILURE, errno, "%s", device_name);
+ }
++#endif
+ 
+ static void
+ display_window_size (int fancy, int fd, const char *device_name)

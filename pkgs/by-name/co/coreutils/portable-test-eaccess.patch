@@ -1,0 +1,11 @@
+--- a/src/test.c
++++ b/src/test.c
+@@ -135,7 +135,7 @@
+ /* Do the same thing access(2) does, but use the effective uid and gid.
+    POSIX doesn't require this, so we have to fake it. */
+ 
+-#if HAVE_SETREUID && HAVE_SETREGID
++#if HAVE_SETREUID && HAVE_SETREGID && !HAVE_DECL_EUIDACCESS
+ /* Do the same thing access(2) does, but use the effective uid and gid.  */
+ 
+ static int

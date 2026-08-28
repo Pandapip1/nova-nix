@@ -1,0 +1,16 @@
+diff --git a/lib/physmem.c b/lib/physmem.c
+index 30b9a75..35a0ee9 100644
+--- a/lib/physmem.c
++++ b/lib/physmem.c
+@@ -21,6 +21,11 @@
+ # include <config.h>
+ #endif
+ 
++/* This bootstrap target provides POSIX interfaces on PE but no Win32 SDK.
++   Use the sysconf and conservative fallback paths instead of windows.h and
++   the GlobalMemoryStatus APIs, which are not part of ntlibc.  */
++#undef _WIN32
++
+ #if HAVE_UNISTD_H
+ # include <unistd.h>
+ #endif

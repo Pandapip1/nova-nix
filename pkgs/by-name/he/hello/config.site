@@ -1,0 +1,17 @@
+# ntlibc wide-character facts.  GNU Hello's gnulib configure probes execute
+# through a young PE bootstrap and can misclassify these as absent/broken,
+# which makes its generated wctype.h emit overlapping replacement bodies.
+ac_cv_header_wctype_h=yes
+ac_cv_func_iswcntrl=yes
+gl_cv_func_iswcntrl_works=yes
+gt_cv_c_wint_t=yes
+gl_cv_type_wint_t_large_enough=yes
+ac_cv_func_towlower=yes
+ac_cv_func_towupper=yes
+ac_cv_func_dup2=yes
+gl_cv_func_dup2_works=yes
+ac_cv_func_fcntl=yes
+gl_cv_func_fcntl_f_dupfd_works=yes
+gl_cv_func_fcntl_f_dupfd_cloexec=yes
+ac_cv_have_decl_program_invocation_name=no
+ac_cv_have_decl_program_invocation_short_name=no

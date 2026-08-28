@@ -1,0 +1,51 @@
+--- a/src/printf.c
++++ b/src/printf.c
+@@ -164,7 +164,22 @@
+     }
+ }
+ 
+-#define STRTOX(TYPE, FUNC_NAME, LIB_FUNC_EXPR)				 \
++/* Avoid a direct integer-to-double conversion here.  This bootstrap GCC
++   emits an x87 fild instruction for it, which the bootstrap assembler does
++   not support.  ntlibc's strtod already provides the required conversion. */
++static double
++char_to_double (unsigned char c)
++{
++  char number[4];
++  char *end;
++  number[0] = '0' + c / 100;
++  number[1] = '0' + c / 10 % 10;
++  number[2] = '0' + c % 10;
++  number[3] = 0;
++  return strtod (number, &end);
++}
++
++#define STRTOX(TYPE, FUNC_NAME, LIB_FUNC_EXPR, CHAR_VALUE)		 \
+ static TYPE								 \
+ FUNC_NAME (s)								 \
+      const char *s;							 \
+@@ -174,7 +189,7 @@
+ 									 \
+   if (*s == '\"' || *s == '\'')						 \
+     {									 \
+-      val = *(unsigned char *) ++s;					 \
++      val = (CHAR_VALUE);						 \
+       /* If POSIXLY_CORRECT is not set, then give a warning that there	 \
+ 	 are characters following the character constant and that GNU	 \
+ 	 printf is ignoring those characters.  If POSIXLY_CORRECT *is*	 \
+@@ -191,9 +206,12 @@
+   return val;								 \
+ }									 
+ 
+-STRTOX (unsigned long int, xstrtoul, (strtoul (s, &end, 0)))
+-STRTOX (long int,          xstrtol,  (strtol  (s, &end, 0)))
+-STRTOX (double,            xstrtod,  (strtod  (s, &end)))
++STRTOX (unsigned long int, xstrtoul, (strtoul (s, &end, 0)),
++	*(unsigned char *) ++s)
++STRTOX (long int, xstrtol, (strtol (s, &end, 0)),
++	*(unsigned char *) ++s)
++STRTOX (double, xstrtod, (strtod (s, &end)),
++	char_to_double (*(unsigned char *) ++s))
+ 
+ /* Output a single-character \ escape.  */
+ 

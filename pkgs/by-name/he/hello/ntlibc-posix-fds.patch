@@ -1,0 +1,102 @@
+ntlibc is a POSIX libc on NT.  Gnulib's native-Windows error module assumes
+the Microsoft CRT and tests descriptor validity through Win32 HANDLEs, but
+ntlibc has a working fcntl(F_GETFL) implementation.  Gnulib also maps the
+POSIX fileno name to the Microsoft CRT's _fileno on native Windows; keep
+ntlibc's POSIX spelling.
+
+--- a/lib/error.c
++++ b/lib/error.c
+@@ -99,7 +99,7 @@
+ # include <fcntl.h>
+ # include <unistd.h>
+ 
+-# if defined _WIN32 && ! defined __CYGWIN__
++# if defined _WIN32 && ! defined __CYGWIN__ && ! defined __NTLIBC__
+ /* Get declarations of the native Windows API functions.  */
+ #  define WIN32_LEAN_AND_MEAN
+ #  include <windows.h>
+@@ -144,7 +144,7 @@
+ static int
+ is_open (int fd)
+ {
+-# if defined _WIN32 && ! defined __CYGWIN__
++# if defined _WIN32 && ! defined __CYGWIN__ && ! defined __NTLIBC__
+   /* On native Windows: The initial state of unassigned standard file
+      descriptors is that they are open but point to an INVALID_HANDLE_VALUE.
+      There is no fcntl, and the gnulib replacement fcntl does not support
+
+--- a/lib/stdio.in.h
++++ b/lib/stdio.in.h
+@@ -589,7 +589,7 @@
+ /* On native Windows, map 'fileno' to '_fileno', so that -loldnames is not
+    required.  In C++ with GNULIB_NAMESPACE, avoid differences between
+    platforms by defining GNULIB_NAMESPACE::fileno always.  */
+-# if defined _WIN32 && !defined __CYGWIN__
++# if defined _WIN32 && !defined __CYGWIN__ && !defined __NTLIBC__
+ #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+ #   undef fileno
+ #   define fileno _fileno
+
+ntlibc keeps FILE opaque and does not expose its buffered-byte count.  Hello
+uses __fpending only through gnulib's close-stream error check.  Returning
+zero preserves write and fclose errors; it only cannot distinguish an EBADF
+fclose with bytes still buffered, which Hello never creates by closing a file
+descriptor behind its FILE stream.
+
+--- a/lib/fpending.c
++++ b/lib/fpending.c
+@@ -49,6 +49,9 @@
+   return (fp->_Mode & 0x2000 /*_MWRITE*/ ? fp->_Next - fp->_Buf : 0);
+ #elif defined EPLAN9                 /* Plan9 */
+   return fp->wp - fp->buf;
++#elif defined __NTLIBC__
++  (void) fp;
++  return 0;
+ #else
+ # error "Please port gnulib fpending.c to your platform!"
+   return 1;
+
+Hello's gnulib also builds fseterr for its inactive MinGW console-safe
+printf backend.  ntlibc does not expose a public operation for setting a
+FILE error bit; the backend is excluded because ntlibc does not define
+__USE_MINGW_ANSI_STDIO, so this object has no live caller in Hello.
+
+--- a/lib/fseterr.c
++++ b/lib/fseterr.c
+@@ -73,6 +73,8 @@
+     }
+   errno = saved_errno;
++#elif defined __NTLIBC__
++  (void) fp;
+ #else
+  #error "Please port gnulib fseterr.c to your platform! Look at the definitions of ferror and clearerr on your system, then report this to bug-gnulib."
+ #endif
+
+ntlibc has neither glibc's program_invocation globals nor the Microsoft
+CRT's __argv.  Hello already calls set_program_name(argv[0]); use gnulib's
+corresponding program_name value.
+
+--- a/lib/getprogname.c
++++ b/lib/getprogname.c
+@@ -32,6 +32,10 @@
+ # include <string.h>
+ #endif
+ 
++#ifdef __NTLIBC__
++# include "progname.h"
++#endif
++
+ #if defined __SCO_VERSION__ || defined __sysv5__
+ # include <fcntl.h>
+ # include <string.h>
+@@ -49,7 +53,9 @@
+ char const *
+ getprogname (void)
+ {
+-# if HAVE_DECL_PROGRAM_INVOCATION_SHORT_NAME                /* glibc, BeOS */
++# if defined __NTLIBC__
++  return program_name != NULL ? program_name : "?";
++# elif HAVE_DECL_PROGRAM_INVOCATION_SHORT_NAME              /* glibc, BeOS */
+   /* https://www.gnu.org/software/libc/manual/html_node/Error-Messages.html */
+   return program_invocation_short_name;
+ # elif HAVE_DECL_PROGRAM_INVOCATION_NAME                    /* glibc, BeOS */

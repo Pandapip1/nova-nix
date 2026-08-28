@@ -31,9 +31,17 @@ cd ${NIX_BUILD_TOP}
 
 ${bin_kaem} --verbose --strict --file ${srcdir}/boot/kaem/build-${targetArch}.kaem
 
+# GCC and TCC use different i386 stack-probe ABIs.  ntlibc provides TCC's
+# frame-building __chkstk; also build GCC's probe-only ___chkstk_ms.  TCC's
+# tiny archiver always creates an archive from scratch, even for `rcs', so
+# this object must stay separate rather than accidentally replacing libc.a.
+# The final stdenv's cc-wrapper names it explicitly on every link line.
+${CC} -c -o chkstk-ms.o ${chkstkMsSrc}
+
 ${bin_mkdir} -p ${out}/lib
 ${bin_cp} lib/libc.a ${out}/lib/libc.a
 ${bin_cp} lib/crt1.o ${out}/lib/crt1.o
+${bin_cp} chkstk-ms.o ${out}/lib/chkstk-ms.o
 ${bin_cp} ${libtcc1} ${out}/lib/libtcc1.a
 
 # bits/alltypes.h is the one header the build generates rather than ships
@@ -42,6 +50,14 @@ ${bin_cp} ${libtcc1} ${out}/lib/libtcc1.a
 # somewhere to point -I at for it.
 ${bin_mkdir} -p ${out}/include/bits
 ${bin_cp} obj/include/bits/alltypes.h ${out}/include/bits/alltypes.h
+
+# Gnulib treats _WIN32 as synonymous with the Microsoft CRT and includes
+# these three compatibility names.  ntlibc follows POSIX for the underlying
+# declarations; install forwarding headers so portable packages can use
+# their ordinary Windows branches without carrying package-local patches.
+${bin_cp} ${ioCompatSrc} ${out}/include/io.h
+${bin_cp} ${directCompatSrc} ${out}/include/direct.h
+${bin_cp} ${processCompatSrc} ${out}/include/process.h
 
 # The import library for ntdll, which every ntlibc program links against:
 # ntlibc reaches the kernel through named ntdll exports rather than through

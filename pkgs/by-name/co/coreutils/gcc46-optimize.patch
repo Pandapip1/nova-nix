@@ -1,0 +1,42 @@
+--- a/lib/Makefile.in
++++ b/lib/Makefile.in
+@@ -51,6 +51,10 @@
+ CC = @CC@
+ CCDEPMODE = @CCDEPMODE@
+ CFLAGS = @CFLAGS@
++# GCC 4.6's i386 optimizer ICEs on these files even at -O1.  Keep the rest
++# of coreutils at -O2 and disable optimization only for these objects.
++sig2str.o modechange.o: CFLAGS = -O0
++
+ CPP = @CPP@
+ CPPFLAGS = @CPPFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+--- a/src/shred.c
++++ b/src/shred.c
+@@ -519,7 +519,12 @@
+ #define ISAAC_SEED(s,x) isaac_seed_data (s, &(x), sizeof (x))
+ 
+ 
+-#if __GNUC__ >= 2 && (__i386__ || __alpha__)
++/* This GCC bootstrap crashes on the inline machine timer instruction even at
++   -O0.  The timer is only an extra entropy source: isaac_seed also includes
++   process IDs, IDs, gettimeofday, and /dev/{u,}random immediately below.  */
++#define COREUTILS_HAVE_MACHINE_TIMER 0
++
++#if COREUTILS_HAVE_MACHINE_TIMER && __GNUC__ >= 2 && (__i386__ || __alpha__)
+ /*
+  * Many processors have very-high-resolution timer registers,
+  * The timer registers can be made inaccessible, so we have to deal with the
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -51,6 +51,10 @@
+ CC = @CC@
+ CCDEPMODE = @CCDEPMODE@
+ CFLAGS = @CFLAGS@
++# GCC 4.6's i386 optimizer segfaults on these sources at -O2.  Keep only
++# these programs unoptimized rather than lowering the package default.
++shred.o printf.o: CFLAGS = -O0
++
+ CPP = @CPP@
+ CPPFLAGS = @CPPFLAGS@
+ CYGPATH_W = @CYGPATH_W@

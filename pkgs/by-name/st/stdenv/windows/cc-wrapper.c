@@ -137,6 +137,7 @@ int main(int argc, char **argv)
   const char *arch_generic;
   char *real_gcc;
   char *crt1;
+  char *stack_probe;
   char *inc_flags[4];
   char **sources = xmalloc((size_t)argc * sizeof(*sources));
   char **other = xmalloc((size_t)argc * sizeof(*other));
@@ -161,6 +162,7 @@ int main(int argc, char **argv)
   arch_generic = required_env("NN_NTLIBC_ARCH_GENERIC");
   real_gcc = join2(gcc_dir, "/gcc.exe");
   crt1 = join2(libc_lib, "/crt1.o");
+  stack_probe = join2(libc_lib, "/chkstk-ms.o");
   if (!tmp || !*tmp)
     tmp = ".";
 
@@ -274,12 +276,15 @@ int main(int argc, char **argv)
     for (i = 0; i < other_count; ++i)
       if (!is_c_source(other[i]))
         command[n++] = other[i];
+    command[n++] = stack_probe;
+    command[n++] = "-L";
+    command[n++] = (char *)libc_lib;
+    command[n++] = "-lc";
     command[n++] = "-L";
     command[n++] = (char *)gcc_libdir;
     command[n++] = "-lgcc";
     command[n++] = "-L";
     command[n++] = (char *)libc_lib;
-    command[n++] = "-lc";
     command[n++] = "-lntdll";
     command[n] = 0;
     status = run(tcc, command);

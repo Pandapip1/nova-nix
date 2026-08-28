@@ -1,0 +1,18 @@
+diff --git a/lib/localcharset.c b/lib/localcharset.c
+index 4c7089e..84200e1 100644
+--- a/lib/localcharset.c
++++ b/lib/localcharset.c
+@@ -37,9 +37,9 @@
+ # include <stdlib.h>
+ #endif
+ 
+-#if defined _WIN32 || defined __WIN32__
+-# undef WIN32   /* avoid warning on mingw32 */
+-# define WIN32
+-#endif
++/* This bootstrap target provides a POSIX libc on PE without the Win32 SDK.
++   Use the environment-based portable fallback rather than windows.h and
++   GetACP; the latter are not part of ntlibc.  */
++#undef WIN32
+ 
+ #if defined __EMX__

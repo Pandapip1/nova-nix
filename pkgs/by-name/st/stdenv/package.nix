@@ -20,6 +20,7 @@
   stage2,
   stage3,
   gcc,
+  coreutils,
   updateAutotoolsGnuConfigScriptsHook,
 }:
 let
@@ -89,16 +90,14 @@ mkStdenv {
   # whole first act is
   #   UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
   #   ... UNAME_RELEASE / UNAME_SYSTEM / UNAME_VERSION, the same way
-  # and this chain's coreutils 5.0 builds no `uname' AT ALL -- nor `date'.
-  # Measured, not assumed: its bin/ has 62 entries and neither name is among
-  # them, because live-bootstrap's own main.mk, which coreutils/windows's
-  # build.kaem drives instead of a ./configure, does not build them.  All
-  # four probes come back "unknown", no case matches, and config.guess falls
-  # into a diagnostic dump that shells out to the HARDCODED HOST ABSOLUTE
-  # PATHS /bin/uname -X and /usr/bin/arch -k -- which is exactly where the
-  # build log's "/bin/uname: invalid option -- 'X'" came from.  --build (see
-  # mkStdenv's own configurePlatforms) is the honest answer instead: this
-  # stdenv builds for exactly one platform.
+  # and the bootstrap construction of this same recipe deliberately uses the
+  # reduced stage2 coreutils, which builds neither `uname' nor `date'.  All
+  # four probes then come back "unknown", no case matches, and config.guess
+  # falls into a diagnostic dump that shells out to hardcoded host paths.
+  # --build (see mkStdenv's configurePlatforms) is the honest answer instead:
+  # this stdenv builds for exactly one platform.  Keep the recipe identical
+  # for bootstrap and final instances; the final one replaces its coreutils
+  # input below, but does not need config.guess to rediscover a known triple.
   updateAutotoolsGnuConfigScriptsHook =
     if isWindows then null else updateAutotoolsGnuConfigScriptsHook;
 
@@ -108,7 +107,7 @@ mkStdenv {
     stage1.bash
     gcc
     stage2.binutils
-    stage2.coreutils
+    coreutils
     stage2.diffutils
     stage2.findutils
     stage2.gawk5

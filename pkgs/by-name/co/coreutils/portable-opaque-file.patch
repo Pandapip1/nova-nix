@@ -1,0 +1,20 @@
+--- a/src/paste.c
++++ b/src/paste.c
+@@ -52,13 +52,13 @@
+ /* Indicates that no delimiter should be added in the current position. */
+ #define EMPTY_DELIM '\0'
+ 
+-static FILE dummy_closed;
++static char dummy_closed;
+ /* Element marking a file that has reached EOF and been closed. */
+-#define CLOSED (&dummy_closed)
++#define CLOSED ((FILE *) &dummy_closed)
+ 
+-static FILE dummy_endlist;
++static char dummy_endlist;
+ /* Element marking end of list of open files. */
+-#define ENDLIST (&dummy_endlist)
++#define ENDLIST ((FILE *) &dummy_endlist)
+ 
+ /* Name this program was run with. */
+ char *program_name;
