@@ -15,12 +15,12 @@
 # pin's own `rev`/`narHash`, there is nothing to prefetch by hand.
 { }:
 rec {
-  version = "0-unstable-2026-08-27";
+  version = "0-unstable-2026-08-28";
 
   # Includes the execve() _exit() fix required by the GCC driver, plus the
   # subsequent header, filesystem, stdio, time, signal, and pthread work that
   # the final stdenv and its full coreutils exercise.
-  rev = "442e97f6c12d4ea05ba3c5489d8b763539d7e509";
+  rev = "fe31f628f04b4d0ce995978e6f1515ac9a5a29b5";
   ref = "main";
 
   src = builtins.fetchGit {
