@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -- | Derivation builder - executes build recipes.
@@ -47,6 +48,7 @@ module Nix.Builder
     buildPath,
     execWrapperConfig,
     execWrapperFor,
+    fetchUserAgent,
     rewriteEnv,
     rewritePlaceholders,
     scrubAmbient,
@@ -164,11 +166,19 @@ envOut = "out"
 httpStatusOk :: Int
 httpStatusOk = 200
 
--- | User-Agent sent by @builtin:fetchurl@.  Some upstream servers (e.g.
--- ftp.gnu.org) reject requests with no User-Agent as bot traffic with a 403,
--- so the fetcher identifies itself like any other download client.
+-- | User-Agent sent by @builtin:fetchurl@.  Name the HTTP implementation
+-- first, then this application, following upstream Nix's
+-- @curl/VERSION Nix/VERSION@ shape.  The versions come from Cabal's generated
+-- macros, so the header describes the components that were actually linked
+-- rather than a spelling that can drift at release time.
 fetchUserAgent :: BS.ByteString
-fetchUserAgent = "nova-nix (+https://github.com/Novavero-AI/nova-nix)"
+fetchUserAgent =
+  BS.concat
+    [ "http-client/",
+      VERSION_http_client,
+      " nova-nix/",
+      VERSION_nova_nix
+    ]
 
 -- | Environment variable for the reproducible-builds.org build timestamp.
 envSourceDateEpoch :: Text

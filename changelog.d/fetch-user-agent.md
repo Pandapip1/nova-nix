@@ -1,0 +1,1 @@
+- **Source downloads identify both nova-nix and its HTTP implementation.** `builtin:fetchurl` now sends `http-client/VERSION nova-nix/VERSION`, with both versions taken from the components Cabal actually linked. This follows upstream Nix's two-product User-Agent shape while accurately naming nova-nix's Haskell HTTP stack.

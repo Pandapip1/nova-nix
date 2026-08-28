@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -26,7 +27,7 @@ import qualified Data.Text.IO as TIO
 import qualified Database.SQLite.Simple as SQL
 import Foreign.Ptr (castPtr)
 import Foreign.StablePtr (StablePtr, castPtrToStablePtr, castStablePtrToPtr, deRefStablePtr, freeStablePtr, newStablePtr)
-import Nix.Builder (BuildConfig (..), BuildResult (..), BuilderSpawn (..), buildDerivation, buildPath, buildWithDeps, defaultBuildConfig, execWrapperConfig, execWrapperFor, rewriteEnv, rewritePlaceholders, scrubAmbient, unionEnvs, verifyFetchHash)
+import Nix.Builder (BuildConfig (..), BuildResult (..), BuilderSpawn (..), buildDerivation, buildPath, buildWithDeps, defaultBuildConfig, execWrapperConfig, execWrapperFor, fetchUserAgent, rewriteEnv, rewritePlaceholders, scrubAmbient, unionEnvs, verifyFetchHash)
 import Nix.Builder.Unpack (UnpackLimits (..), builtinUnpackBuilder, entryComponents, envSrcs, resolveLinkTarget)
 import Nix.Builtins (builtinEnv, parseNixPath, splitNixPath)
 import Nix.Config (NixConfig (..))
@@ -4484,6 +4485,17 @@ testBuildOrchestrator = do
     [ -- BuildConfig has caches field
       runTest "defaultBuildConfig has empty caches" $
         assertEqual "empty-caches" [] (bcCaches (defaultBuildConfig defaultStoreDir)),
+      runTest "fetchurl User-Agent names its implementation and application versions" $
+        assertEqual
+          "fetch-user-agent"
+          ( BS.concat
+              [ "http-client/",
+                VERSION_http_client,
+                " nova-nix/",
+                VERSION_nova_nix
+              ]
+          )
+          fetchUserAgent,
       -- The build PATH must never open with the build working directory:
       -- a bare-name builder has no directory to derive.
       runTest "bare-name builder derives no PATH entry" $
